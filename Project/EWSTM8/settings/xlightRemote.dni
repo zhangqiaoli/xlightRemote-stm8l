@@ -1,0 +1,74 @@
+[Stack]
+FillEnabled=0
+OverflowWarningsEnabled=1
+WarningThreshold=90
+SpWarningsEnabled=1
+WarnLogOnly=1
+UseTrigger=1
+TriggerName=main
+LimitSize=0
+ByteLimit=50
+[InterruptLog]
+LogEnabled=0
+SumEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+SumSortOrder=0
+[DataLog]
+LogEnabled=0
+SumEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+[Breakpoints2]
+Count=0
+[Interrupts]
+Enabled=1
+[MemoryMap]
+Enabled=0
+Base=0
+UseAuto=0
+TypeViolation=1
+UnspecRange=1
+ActionState=1
+[Trace1]
+Enabled=0
+ShowSource=1
+[DebugChecksum]
+Checksum=151282849
+[CallStack]
+ShowArgs=0
+[Disassembly]
+MixedMode=1
+[watch_formats]
+Fmt0={W}1:button_first_detect_status	4	0
+Fmt1={W}1:button_status	4	0
+Fmt2={W}1:changed_button	4	0
+Fmt3={W}1:current_button	4	0
+Fmt4={W}1:valid_button	4	0
+[DataSample]
+LogEnabled=0
+GraphEnabled=0
+ShowTimeLog=1
+ShowTimeSum=1
+[Breakpoints]
+Bp0=_ "STD_CODE" "{$PROJ_DIR$\main.c}.230.5" 0 0 0 0 "" 0 ""
+Bp1=_ "STD_CODE" "{$PROJ_DIR$\ProtocolParser.c}.21.3" 0 0 0 0 "" 0 ""
+Bp2=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.509.5" 1 0 0 0 "" 0 ""
+Bp3=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.514.5" 1 0 0 0 "" 0 ""
+Bp4=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.468.5" 1 0 0 0 "" 0 ""
+Bp5=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.472.5" 1 0 0 0 "" 0 ""
+Count=6
+[Log file]
+LoggingEnabled=_ 0
+LogFile=_ ""
+Category=_ 0
+[TermIOLog]
+LoggingEnabled=_ 0
+LogFile=_ ""
+[Aliases]
+Count=0
+SuppressDialog=0
+[DebuggerSettings]
+DisableInterruptsWhenStepping=0

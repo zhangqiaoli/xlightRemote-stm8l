@@ -1,0 +1,152 @@
+#ifndef __GLOBAL_H
+#define __GLOBAL_H
+
+#include <stm8l15x.h> //Required for the stdint typedefs
+#include "stdio.h"
+#include "string.h"
+#include "stm8l15x_conf.h"
+
+/* Exported types ------------------------------------------------------------*/
+// Common Data Type
+#define UC                        uint8_t
+#define US                        uint16_t
+#define UL                        uint32_t
+#define SHORT                     int16_t
+#define LONG                      int32_t
+
+// Node type
+#define NODE_TYP_GW               'g'
+#define NODE_TYP_LAMP             'l'
+#define NODE_TYP_REMOTE           'r'
+#define NODE_TYP_SYSTEM           's'
+#define NODE_TYP_THIRDPARTY       't'
+
+// NodeID Convention
+#define NODEID_GATEWAY          0
+#define NODEID_MAINDEVICE       1
+#define NODEID_MIN_DEVCIE       8
+#define NODEID_MAX_DEVCIE       63
+#define NODEID_MIN_REMOTE       64
+#define NODEID_MAX_REMOTE       127
+#define NODEID_DUMMY            255
+#define BASESERVICE_ADDRESS     0xFE
+#define BROADCAST_ADDRESS       0xFF
+
+#define BR_MIN_VALUE            1
+#define CT_MIN_VALUE            2700
+#define CT_MAX_VALUE            6500
+#define CT_SCOPE                38    
+#define CT_STEP                 ((CT_MAX_VALUE-CT_MIN_VALUE)/10)
+
+#define UNIQUE_ID_LEN           8
+#define NUM_DEVICES             4
+
+// Device (lamp) type
+typedef enum
+{
+  devtypUnknown = 0,
+  devtypCRing3,     // Color ring - Rainbow
+  devtypCRing2,
+  devtypCRing1,
+  devtypWRing3,     // White ring - Sunny
+  devtypWRing2,
+  devtypWRing1,
+  devtypMRing3 = 8, // Color & Motion ring - Mirage
+  devtypMRing2,
+  devtypMRing1,
+  devtypDummy = 255
+} devicetype_t;
+
+
+// Remote type
+typedef enum
+{
+  remotetypUnknown = 0,
+  remotetypRFSimply,
+  remotetypRFStandard,
+  remotetypRFEnhanced,
+  remotetypDummy
+} remotetype_t;
+
+typedef struct
+{
+  UC State                    :1;           // Component state
+  UC BR                       :7;           // Brightness of white [0..100]
+  US CCT                      :16;          // CCT (warm or cold) [2700..6500]
+  UC R                        :8;           // Brightness of red
+  UC G                        :8;           // Brightness of green
+  UC B                        :8;           // Brightness of blue
+  UC L1                       :8;           // Length of thread 1
+  UC L2                       :8;           // Length of thread 2
+  UC L3                       :8;           // Length of thread 3
+} Hue_t;
+
+typedef struct
+{
+  UC nodeID;                                // Node ID for Remote on specific controller
+  UC NetworkID[6];
+  UC devcieID;                              // Device Node ID
+  UC type;                                  // Type of Device
+} DeviceInfo_t;
+
+typedef struct
+{
+  UC present                  :1;           // 0 - not present; 1 - present
+  UC reserved                 :7;
+  Hue_t ring;
+} DeviceStatus_t;
+
+typedef struct
+{
+  UC version                  :8;           // Data version, other than 0xFF
+  UC indDevice                :3;           // Current Device Index: [0..3]
+  UC present                  :1;           // 0 - not present; 1 - present
+  UC reserved                 :4;
+  UC type;                                  // Type of Remote
+  US token;                                 // Current token
+  char Organization[24];                    // Organization name
+  char ProductName[24];                     // Product name
+  UC rfPowerLevel             :2;           // RF Power Level 0..3
+  UC Reserved1                :6;           // Reserved bits
+  DeviceInfo_t devItem[NUM_DEVICES];
+} Config_t;
+
+extern Config_t gConfig;
+extern DeviceStatus_t gDevStatus[NUM_DEVICES];
+extern bool gIsChanged;
+extern uint8_t _uniqueID[UNIQUE_ID_LEN];
+
+#define IS_SUNNY(DevType)           ((DevType) >= devtypWRing3 && (DevType) <= devtypWRing1)
+#define IS_RAINBOW(DevType)         ((DevType) >= devtypCRing3 && (DevType) <= devtypCRing1)
+#define IS_MIRAGE(DevType)          ((DevType) >= devtypMRing3 && (DevType) <= devtypMRing1)
+#define IS_VALID_REMOTE(DevType)    ((DevType) >= remotetypRFSimply && (DevType) <= remotetypRFEnhanced)
+
+#define IS_NOT_DEVICE_NODEID(nID)  ((nID < NODEID_MIN_DEVCIE || nID > NODEID_MAX_DEVCIE) && nID != NODEID_MAINDEVICE)
+#define IS_NOT_REMOTE_NODEID(nID)  (nID < NODEID_MIN_REMOTE || nID > NODEID_MAX_REMOTE)
+
+#define NodeID(x)                  gConfig.devItem[x].nodeID
+#define NetworkID(x)               gConfig.devItem[x].NetworkID
+#define DeviceID(x)                gConfig.devItem[x].devcieID
+#define DeviceType(x)              gConfig.devItem[x].type
+#define DEVST_Present(x)           gDevStatus[x].present
+#define DEVST_OnOff(x)             gDevStatus[x].ring.State
+#define DEVST_Bright(x)            gDevStatus[x].ring.BR
+#define DEVST_WarmCold(x)          gDevStatus[x].ring.CCT
+
+#define CurrentNodeID              NodeID(gConfig.indDevice)
+#define CurrentNetworkID           NetworkID(gConfig.indDevice)
+#define CurrentDeviceID            DeviceID(gConfig.indDevice)
+#define CurrentDeviceType          DeviceType(gConfig.indDevice)
+#define CurrentDevicePresent       DEVST_Present(gConfig.indDevice)
+#define CurrentDeviceOnOff         DEVST_OnOff(gConfig.indDevice)
+#define CurrentDeviceBright        DEVST_Bright(gConfig.indDevice)
+#define CurrentDeviceCCT           DEVST_WarmCold(gConfig.indDevice)
+
+void UpdateNodeAddress(void);
+void RF24L01_IRQ_Handler();
+uint8_t ChangeCurrentDevice(uint8_t _newDev);
+void UpdateNodeAddress();
+bool SendMyMessage();
+void EraseCurrentDeviceInfo();
+
+#endif /* __GLOBAL_H */

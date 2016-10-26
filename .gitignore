@@ -1,0 +1,9 @@
+tags
+cscope.*
+*~
+*.bak
+*.swp
+*.orig
+*.pyc
+Project/EWSTM8/Debug/*
+Project/EWSTM8/Release/*
