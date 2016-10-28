@@ -168,7 +168,7 @@ void UpdateNodeAddress() {
   rx_addr[0] = CurrentNodeID;
   memcpy(tx_addr, CurrentNetworkID, ADDRESS_WIDTH);
   tx_addr[0] = (CurrentNodeID >= BASESERVICE_ADDRESS ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
-  RF24L01_setup(tx_addr, rx_addr, RF24_CHANNEL);
+  RF24L01_setup(tx_addr, rx_addr, RF24_CHANNEL, BROADCAST_ADDRESS);     // With openning the boardcast pipe
 }
 
 void EraseCurrentDeviceInfo() {
