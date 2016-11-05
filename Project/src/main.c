@@ -144,6 +144,7 @@ void LoadConfig()
       gConfig.version = XLA_VERSION;
       gConfig.indDevice = 0;
       gConfig.present = 0;
+      gConfig.inPresentation = 0;
       gConfig.type = remotetypRFStandard;
       gConfig.rfPowerLevel = RF24_PA_MAX;
       memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);

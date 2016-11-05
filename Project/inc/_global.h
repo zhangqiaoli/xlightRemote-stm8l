@@ -101,7 +101,8 @@ typedef struct
   UC version                  :8;           // Data version, other than 0xFF
   UC indDevice                :3;           // Current Device Index: [0..3]
   UC present                  :1;           // 0 - not present; 1 - present
-  UC reserved                 :4;
+  UC inPresentation           :1;           // whether in presentation
+  UC reserved                 :3;
   UC type;                                  // Type of Remote
   US token;                                 // Current token
   char Organization[24];                    // Organization name

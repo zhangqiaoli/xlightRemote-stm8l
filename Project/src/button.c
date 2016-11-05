@@ -82,6 +82,7 @@ LEDs
 #define BUTTON_DOUBLE_BTN_TRACK_DURATION        300     // The unit is 10 ms, so the duration is 3 s.
 
 // Button behavior
+#define BTN_STEP_PAGES          5
 #define BTN_STEP_SHORT_BR       10
 #define BTN_STEP_SHORT_CCT      300
 #define BTN_STEP_LONG_BR        25
@@ -287,175 +288,54 @@ void btn_short_button_press(uint8_t _btn)
   uint16_t _cct;
   switch( _btn ) {
   case keylstLeft:
-    // Reduce CCT and get warmmer white
-    _cct = (CurrentDeviceCCT - BTN_STEP_SHORT_CCT > CT_MIN_VALUE ? CurrentDeviceCCT - BTN_STEP_SHORT_CCT : CT_MIN_VALUE);
-    Msg_DevCCT(_cct);    
+    if( gConfig.inPresentation ) {
+      // Page up
+    } else {
+      // Reduce CCT and get warmmer white
+      _cct = (CurrentDeviceCCT - BTN_STEP_SHORT_CCT > CT_MIN_VALUE ? CurrentDeviceCCT - BTN_STEP_SHORT_CCT : CT_MIN_VALUE);
+      Msg_DevCCT(_cct);
+    }
     break;
     
   case keylstRight:
-    // Increase CCT and get colder white
-    _cct = CurrentDeviceCCT + BTN_STEP_SHORT_CCT;
-    if( _cct > CT_MAX_VALUE ) _cct = CT_MAX_VALUE;
-    Msg_DevCCT(_cct);
-    break;
-
-  case keylstUp:
-    // more bright
-    _br = CurrentDeviceBright + BTN_STEP_SHORT_BR;
-    if( _br > 100 ) _br = 100;
-    Msg_DevBrightness(_br);
-    break;
-
-  case keylstDown:
-    // less bright
-    _br = (CurrentDeviceBright > BTN_STEP_SHORT_BR ? CurrentDeviceBright - BTN_STEP_SHORT_BR : 0);
-    Msg_DevBrightness(_br);
-    break;
-
-  case keylstCenter:
-    // Toggle lights on/off
-    Msg_DevOnOff(CurrentDeviceOnOff == 0);
-    break;
-
-  case keylstFn1:
-    //Msg_DevBR_CCT(BTN_FN1_BR, BTN_FN1_CCT);
-    // Toggle lights on/off, in stead of keylstCenter for testing
-    Msg_DevOnOff(CurrentDeviceOnOff == 0);
-    break;
-
-  case keylstFn2:
-    Msg_DevBR_CCT(BTN_FN2_BR, BTN_FN2_CCT);
-    break;
-
-  case keylstFn3:
-    Msg_DevBR_CCT(BTN_FN3_BR, BTN_FN3_CCT);
-    break;
-
-  //case keylstFn4:
-  //  break;
-    
-  default:
-    break;
-  }
-}
-
-void btn_double_button_press(uint8_t _btn)
-{
-  // Assert button
-  if( !IS_VALID_BUTTON(_btn) ) return;
-  
-  switch( _btn ) {
-  case keylstLeft:
-    Msg_DevCCT(CT_MIN_VALUE);
-    break;
-    
-  case keylstRight:
-    Msg_DevCCT(CT_MAX_VALUE);
-    break;
-
-  case keylstUp:
-    Msg_DevBrightness(100);
-    break;
-
-  case keylstDown:
-    Msg_DevBrightness(BTN_BR_LOW);
-    break;
-
-  case keylstCenter:
-    break;
-
-  case keylstFn1:
-    break;
-
-  case keylstFn2:
-    break;
-
-  case keylstFn3:
-    break;
-
-  //case keylstFn4:
-  //  break;
-    
-  default:
-    break;
-  }  
-}
-
-void btn_long_hold_button_press(uint8_t _btn)
-{
-  // Assert button
-  if( !IS_VALID_BUTTON(_btn) ) return;
-  
-  switch( _btn ) {
-  case keylstLeft:
-    break;
-    
-  case keylstRight:
-    break;
-
-  case keylstUp:
-    break;
-
-  case keylstDown:
-    break;
-
-  case keylstCenter:
-    break;
-
-  case keylstFn1:
-    break;
-
-  case keylstFn2:
-    break;
-
-  case keylstFn3:
-    break;
-
-  //case keylstFn4:
-  //  break;
-    
-  default:
-    break;
-  }  
-}
-
-void btn_long_button_press(uint8_t _btn)
-{
-  // Assert button
-  if( !IS_VALID_BUTTON(_btn) ) return;
-  
-  uint8_t _br;
-  uint16_t _cct;
-  switch( _btn ) {
-  case keylstLeft:
-    // Reduce CCT and get warmmer white
-    _cct = (CurrentDeviceCCT - BTN_STEP_LONG_CCT > CT_MIN_VALUE ? CurrentDeviceCCT - BTN_STEP_LONG_CCT : CT_MIN_VALUE);
-    Msg_DevCCT(_cct); 
-    break;
-    
-  case keylstRight:
-    // Increase CCT and get colder white
-    _cct = CurrentDeviceCCT + BTN_STEP_LONG_CCT;
-    if( _cct > CT_MAX_VALUE ) _cct = CT_MAX_VALUE;
-    Msg_DevCCT(_cct);
+    if( gConfig.inPresentation ) {
+      // Page down
+    } else {
+      // Increase CCT and get colder white
+      _cct = CurrentDeviceCCT + BTN_STEP_SHORT_CCT;
+      if( _cct > CT_MAX_VALUE ) _cct = CT_MAX_VALUE;
+      Msg_DevCCT(_cct);
+    }
     break;
     
   case keylstUp:
-    // more bright
-    _br = CurrentDeviceBright + BTN_STEP_LONG_BR;
-    if( _br > 100 ) _br = 100;
-    Msg_DevBrightness(_br);
-    break;
+    if( gConfig.inPresentation ) {
+      // First page
+    } else {
+      // more bright
+      _br = CurrentDeviceBright + BTN_STEP_SHORT_BR;
+      if( _br > 100 ) _br = 100;
+      Msg_DevBrightness(_br);
+      break;
+    }
     
   case keylstDown:
-    // less bright
-    _br = (CurrentDeviceBright > BTN_STEP_LONG_BR ? CurrentDeviceBright - BTN_STEP_LONG_BR : 0);
-    Msg_DevBrightness(_br);
+    if( gConfig.inPresentation ) {
+      // Last page
+    } else {
+      // less bright
+      _br = (CurrentDeviceBright > BTN_STEP_SHORT_BR ? CurrentDeviceBright - BTN_STEP_SHORT_BR : 0);
+      Msg_DevBrightness(_br);
+    }
     break;
     
   case keylstCenter:
-    // Toggle lights on/off
-    Msg_DevOnOff(CurrentDeviceOnOff == 0);
+    if( gConfig.inPresentation ) {
+      // Page down
+    } else {
+      // Toggle lights on/off
+      Msg_DevOnOff(CurrentDeviceOnOff == 0);
+    }
     break;
     
   case keylstFn1:
@@ -480,6 +360,163 @@ void btn_long_button_press(uint8_t _btn)
   }
 }
 
+void btn_double_button_press(uint8_t _btn)
+{
+  // Assert button
+  if( !IS_VALID_BUTTON(_btn) ) return;
+  
+  switch( _btn ) {
+  case keylstLeft:
+    Msg_DevCCT(CT_MIN_VALUE);
+    break;
+    
+  case keylstRight:
+    Msg_DevCCT(CT_MAX_VALUE);
+    break;
+    
+  case keylstUp:
+    Msg_DevBrightness(100);
+    break;
+    
+  case keylstDown:
+    Msg_DevBrightness(BTN_BR_LOW);
+    break;
+    
+  case keylstCenter:
+    // Toggle the flash light
+    break;
+    
+  case keylstFn1:
+    // Toggle In-presentation flag
+    gConfig.inPresentation = !gConfig.inPresentation;
+    break;
+    
+  case keylstFn2:
+    break;
+    
+  case keylstFn3:
+    break;
+    
+    //case keylstFn4:
+    //  break;
+    
+  default:
+    break;
+  }  
+}
+
+void btn_long_hold_button_press(uint8_t _btn)
+{
+  // Assert button
+  if( !IS_VALID_BUTTON(_btn) ) return;
+  
+  switch( _btn ) {
+  case keylstLeft:
+    break;
+    
+  case keylstRight:
+    break;
+    
+  case keylstUp:
+    break;
+    
+  case keylstDown:
+    break;
+    
+  case keylstCenter:
+    // Turn on the laser
+    break;
+    
+  case keylstFn1:
+    break;
+    
+  case keylstFn2:
+    break;
+    
+  case keylstFn3:
+    break;
+    
+    //case keylstFn4:
+    //  break;
+    
+  default:
+    break;
+  }  
+}
+
+void btn_long_button_press(uint8_t _btn)
+{
+  // Assert button
+  if( !IS_VALID_BUTTON(_btn) ) return;
+  
+  uint8_t _br;
+  uint16_t _cct;
+  switch( _btn ) {
+  case keylstLeft:
+    if( gConfig.inPresentation ) {
+      // n pages up
+    } else {
+      // Reduce CCT and get warmmer white
+      _cct = (CurrentDeviceCCT - BTN_STEP_LONG_CCT > CT_MIN_VALUE ? CurrentDeviceCCT - BTN_STEP_LONG_CCT : CT_MIN_VALUE);
+      Msg_DevCCT(_cct); 
+    }
+    break;
+    
+  case keylstRight:
+    if( gConfig.inPresentation ) {
+      // n pages down
+    } else {
+      // Increase CCT and get colder white
+      _cct = CurrentDeviceCCT + BTN_STEP_LONG_CCT;
+      if( _cct > CT_MAX_VALUE ) _cct = CT_MAX_VALUE;
+      Msg_DevCCT(_cct);
+    }
+    break;
+    
+  case keylstUp:
+    if( gConfig.inPresentation ) {
+      // First Page
+    } else {
+      // more bright
+      _br = CurrentDeviceBright + BTN_STEP_LONG_BR;
+      if( _br > 100 ) _br = 100;
+      Msg_DevBrightness(_br);
+    }
+    break;
+    
+  case keylstDown:
+    if( gConfig.inPresentation ) {
+      // Last page
+    } else {
+      // less bright
+      _br = (CurrentDeviceBright > BTN_STEP_LONG_BR ? CurrentDeviceBright - BTN_STEP_LONG_BR : 0);
+      Msg_DevBrightness(_br);
+    }
+    break;
+    
+  case keylstCenter:
+    // Turn off the laser
+    break;
+    
+  case keylstFn1:
+    // Toggle In-presentation flag
+    gConfig.inPresentation = !gConfig.inPresentation;
+    break;
+    
+  case keylstFn2:
+    break;
+    
+  case keylstFn3:
+    break;
+    
+    //case keylstFn4:
+    //  break;
+    
+  default:
+    break;
+  }
+}
+
 void btn_very_long_hold_button_press(uint8_t _btn)
 {
   // Assert button
@@ -491,32 +528,32 @@ void btn_very_long_hold_button_press(uint8_t _btn)
     
   case keylstRight:
     break;
-
+    
   case keylstUp:
     break;
-
+    
   case keylstDown:
     break;
-
+    
   case keylstCenter:
     break;
-
+    
   case keylstFn1:
     break;
-
+    
   case keylstFn2:
     // Soft reset
     WWDG->CR = 0x80;
     break;
-
+    
   case keylstFn3:
     // Erase current device infomation
     EraseCurrentDeviceInfo();
     SayHelloToDevice(FALSE);
     break;
-
-  //case keylstFn4:
-  //  break;
+    
+    //case keylstFn4:
+    //  break;
     
   default:
     break;
@@ -534,27 +571,27 @@ void btn_very_long_button_press(uint8_t _btn)
     
   case keylstRight:
     break;
-
+    
   case keylstUp:
     break;
-
+    
   case keylstDown:
     break;
-
+    
   case keylstCenter:
     break;
-
+    
   case keylstFn1:
     break;
-
+    
   case keylstFn2:
     break;
-
+    
   case keylstFn3:
     break;
-
-  //case keylstFn4:
-  //  break;
+    
+    //case keylstFn4:
+    //  break;
     
   default:
     break;
@@ -577,37 +614,37 @@ void app_button_event_handler(uint8_t _btn, button_event_t button_event)
   switch (button_event)
   {
   case BUTTON_INVALID:
-      break;
-      
+    break;
+    
   case BUTTON_SHORT_PRESS:
-      btn_short_button_press(_btn);
-      break;
-
+    btn_short_button_press(_btn);
+    break;
+    
   case BUTTON_DOUBLE_PRESS:
-      btn_double_button_press(_btn);
-      break;
-
+    btn_double_button_press(_btn);
+    break;
+    
   case BUTTON_LONG_HOLD:
-      btn_long_hold_button_press(_btn);
-      break;
-
+    btn_long_hold_button_press(_btn);
+    break;
+    
   case BUTTON_LONG_PRESS:
-      btn_long_button_press(_btn);
-      break;
-
+    btn_long_button_press(_btn);
+    break;
+    
   case BUTTON_VERY_LONG_HOLD:
-      btn_very_long_hold_button_press(_btn);
-      break;
-
+    btn_very_long_hold_button_press(_btn);
+    break;
+    
   case BUTTON_VERY_LONG_PRESS:
-      btn_very_long_button_press(_btn);
-      break;
-
+    btn_very_long_button_press(_btn);
+    break;
+    
   case DOUBLE_BTN_TRACK:
-      btn_double_long_hold_press(_btn, keylstRight);
-
+    btn_double_long_hold_press(_btn, keylstRight);
+    
   default:
-      break;
+    break;
   }
 }
 
@@ -618,22 +655,22 @@ void check_track_double_button(void)
   /*
   if ((btn_is_pushed[keylstCenter] == TRUE) && (btn_is_pushed[keylstRight] == TRUE))
   {
-    timer_stop(m_timer_id_btn_detet[keylstRight]);  // Disable btn2_timer when tracking double hold.
-    m_btn_timer_status[keylstCenter] = BUTTON_STATUS_DOUBLE_TRACK;
-    m_btn_timer_status[keylstRight] = BUTTON_STATUS_INIT;
-    double_button_track = TRUE;
-    timer_start(m_timer_id_btn_detet[keylstRight], BUTTON_DOUBLE_BTN_TRACK_DURATION);  //3 s
-  }
+  timer_stop(m_timer_id_btn_detet[keylstRight]);  // Disable btn2_timer when tracking double hold.
+  m_btn_timer_status[keylstCenter] = BUTTON_STATUS_DOUBLE_TRACK;
+  m_btn_timer_status[keylstRight] = BUTTON_STATUS_INIT;
+  double_button_track = TRUE;
+  timer_start(m_timer_id_btn_detet[keylstRight], BUTTON_DOUBLE_BTN_TRACK_DURATION);  //3 s
+}
   else
   {
-    if (double_button_track == TRUE)
-    {
-      m_btn_timer_status[keylstCenter] = BUTTON_STATUS_INIT;
-      m_btn_timer_status[keylstRight] = BUTTON_STATUS_INIT;
-      double_button_track = FALSE;
-      timer_stop(m_timer_id_btn_detet[keylstRight]);
-    }
-  }
+  if (double_button_track == TRUE)
+  {
+  m_btn_timer_status[keylstCenter] = BUTTON_STATUS_INIT;
+  m_btn_timer_status[keylstRight] = BUTTON_STATUS_INIT;
+  double_button_track = FALSE;
+  timer_stop(m_timer_id_btn_detet[keylstRight]);
+}
+}
   */
 }
 
@@ -641,7 +678,7 @@ void button_push(uint8_t _btn)
 {
   // Assert button
   if( !IS_VALID_BUTTON(_btn) ) return;
-
+  
   btn_is_pushed[_btn] = TRUE;
   check_track_double_button();
   

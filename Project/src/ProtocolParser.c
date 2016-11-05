@@ -18,6 +18,15 @@ void build(uint8_t _destination, uint8_t _sensor, uint8_t _command, uint8_t _typ
     miSetAck(_isAck);
 }
 
+void UpdateCurrentDeviceOnOff(bool _OnOff) {
+  CurrentDeviceOnOff = _OnOff;
+  /*
+  if( _OnOff ) {
+    // Automatically clear the flag, so that the remote resumes controlling the lights
+    gConfig.inPresentation = 0;
+  }*/
+}
+
 uint8_t ParseProtocol(){
   if( msg.header.destination != CurrentNodeID && msg.header.destination != BROADCAST_ADDRESS ) return 0;
   
@@ -70,14 +79,14 @@ uint8_t ParseProtocol(){
       if( _type == V_STATUS ) {
         bool _OnOff = msg.payload.bValue;
         if( _OnOff != CurrentDeviceOnOff ) {
-          CurrentDeviceOnOff = _OnOff;
+          UpdateCurrentDeviceOnOff(_OnOff);
           gIsChanged = TRUE;
           // ToDo: change On/Off LED
         }
       } else if( _type == V_PERCENTAGE ) {
         if( msg.payload.data[1] != CurrentDeviceBright || msg.payload.data[0] != CurrentDeviceOnOff) {
           CurrentDeviceBright = msg.payload.data[1];
-          CurrentDeviceOnOff = msg.payload.data[0];
+          UpdateCurrentDeviceOnOff(msg.payload.data[0]);
           gIsChanged = TRUE;
           // ToDo: change On/Off LED
         }        
