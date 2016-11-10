@@ -289,7 +289,7 @@ void btn_short_button_press(uint8_t _btn)
   switch( _btn ) {
   case keylstLeft:
     if( gConfig.inPresentation ) {
-      // Page up
+      // Turn screen black or restore
     } else {
       // Reduce CCT and get warmmer white
       _cct = (CurrentDeviceCCT - BTN_STEP_SHORT_CCT > CT_MIN_VALUE ? CurrentDeviceCCT - BTN_STEP_SHORT_CCT : CT_MIN_VALUE);
@@ -299,7 +299,7 @@ void btn_short_button_press(uint8_t _btn)
     
   case keylstRight:
     if( gConfig.inPresentation ) {
-      // Page down
+      // Start play or stop play
     } else {
       // Increase CCT and get colder white
       _cct = CurrentDeviceCCT + BTN_STEP_SHORT_CCT;
@@ -310,7 +310,7 @@ void btn_short_button_press(uint8_t _btn)
     
   case keylstUp:
     if( gConfig.inPresentation ) {
-      // First page
+      // Page Up
     } else {
       // more bright
       _br = CurrentDeviceBright + BTN_STEP_SHORT_BR;
@@ -321,7 +321,7 @@ void btn_short_button_press(uint8_t _btn)
     
   case keylstDown:
     if( gConfig.inPresentation ) {
-      // Last page
+      // Page Down
     } else {
       // less bright
       _br = (CurrentDeviceBright > BTN_STEP_SHORT_BR ? CurrentDeviceBright - BTN_STEP_SHORT_BR : 0);
@@ -331,7 +331,7 @@ void btn_short_button_press(uint8_t _btn)
     
   case keylstCenter:
     if( gConfig.inPresentation ) {
-      // Page down
+      // Next Page
     } else {
       // Toggle lights on/off
       Msg_DevOnOff(CurrentDeviceOnOff == 0);
@@ -367,19 +367,35 @@ void btn_double_button_press(uint8_t _btn)
   
   switch( _btn ) {
   case keylstLeft:
-    Msg_DevCCT(CT_MIN_VALUE);
+    if( gConfig.inPresentation ) {
+      // Replay media
+    } else {
+      Msg_DevCCT(CT_MIN_VALUE);
+    }
     break;
     
   case keylstRight:
-    Msg_DevCCT(CT_MAX_VALUE);
+    if( gConfig.inPresentation ) {
+      // Play media or stop play
+    } else {
+      Msg_DevCCT(CT_MAX_VALUE);
+    }
     break;
     
   case keylstUp:
-    Msg_DevBrightness(100);
+    if( gConfig.inPresentation ) {
+      // Last Page
+    } else {
+      Msg_DevBrightness(100);
+    }
     break;
     
   case keylstDown:
-    Msg_DevBrightness(BTN_BR_LOW);
+    if( gConfig.inPresentation ) {
+      // First Page
+    } else {
+      Msg_DevBrightness(BTN_BR_LOW);
+    }
     break;
     
   case keylstCenter:
@@ -454,7 +470,7 @@ void btn_long_button_press(uint8_t _btn)
   switch( _btn ) {
   case keylstLeft:
     if( gConfig.inPresentation ) {
-      // n pages up
+      // Media FB (Fast Backward)
     } else {
       // Reduce CCT and get warmmer white
       _cct = (CurrentDeviceCCT - BTN_STEP_LONG_CCT > CT_MIN_VALUE ? CurrentDeviceCCT - BTN_STEP_LONG_CCT : CT_MIN_VALUE);
@@ -464,7 +480,7 @@ void btn_long_button_press(uint8_t _btn)
     
   case keylstRight:
     if( gConfig.inPresentation ) {
-      // n pages down
+      // Media FF (Fast Forward)
     } else {
       // Increase CCT and get colder white
       _cct = CurrentDeviceCCT + BTN_STEP_LONG_CCT;
@@ -475,7 +491,7 @@ void btn_long_button_press(uint8_t _btn)
     
   case keylstUp:
     if( gConfig.inPresentation ) {
-      // First Page
+      // n Pages Up
     } else {
       // more bright
       _br = CurrentDeviceBright + BTN_STEP_LONG_BR;
@@ -486,7 +502,7 @@ void btn_long_button_press(uint8_t _btn)
     
   case keylstDown:
     if( gConfig.inPresentation ) {
-      // Last page
+      // n Pages Down
     } else {
       // less bright
       _br = (CurrentDeviceBright > BTN_STEP_LONG_BR ? CurrentDeviceBright - BTN_STEP_LONG_BR : 0);
