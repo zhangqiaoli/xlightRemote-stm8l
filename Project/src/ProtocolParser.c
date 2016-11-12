@@ -100,11 +100,18 @@ uint8_t ParseProtocol(){
         if( msg.payload.data[0] ) { // Success
           CurrentDeviceType = msg.payload.data[1];
           CurrentDevicePresent = msg.payload.data[2];
-          CurrentDeviceOnOff = msg.payload.data[3];
-          CurrentDeviceBright = msg.payload.data[4];
+          // uint8_t _RingID = msg.payload.data[3];     // No use for now
+          CurrentDeviceOnOff = msg.payload.data[4];
+          CurrentDeviceBright = msg.payload.data[5];
           if( IS_SUNNY(CurrentDeviceType) ) {
-            uint16_t _CCTValue = msg.payload.data[6] * 256 + msg.payload.data[5];
+            uint16_t _CCTValue = msg.payload.data[7] * 256 + msg.payload.data[6];
             CurrentDeviceCCT = _CCTValue;
+          } else if( IS_RAINBOW(gConfig.type) || IS_MIRAGE(gConfig.type) ) {
+            // Set RGBW
+            CurrentDeviceCCT = msg.payload.data[6];
+            CurrentDevice_R = msg.payload.data[7];
+            CurrentDevice_G = msg.payload.data[8];
+            CurrentDevice_B = msg.payload.data[9];
           }
           gIsChanged = TRUE;
           // ToDo: change On/Off LED
@@ -138,6 +145,9 @@ void Msg_Presentation() {
 // Enquiry Device Status
 void Msg_RequestDeviceStatus(UC _nodeID) {
   build(_nodeID, CurrentNodeID, C_REQ, V_RGBW, 1, 0);
+  miSetLength(1);
+  miSetPayloadType(P_BYTE);
+  msg.payload.bValue = RING_ID_ALL;
   bMsgReady = 1;
 }
 
@@ -175,9 +185,10 @@ void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_RGBW, 1, 0);
   miSetLength(4);
   miSetPayloadType(P_CUSTOM);
-  msg.payload.data[0] = 1;
-  msg.payload.data[1] = _br;
-  msg.payload.data[2] = _cct % 256;
-  msg.payload.data[3] = _cct / 256;
+  msg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
+  msg.payload.data[1] = 1;                // State: On
+  msg.payload.data[2] = _br;
+  msg.payload.data[3] = _cct % 256;
+  msg.payload.data[4] = _cct / 256;
   bMsgReady = 1;
 }

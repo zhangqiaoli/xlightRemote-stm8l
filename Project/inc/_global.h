@@ -117,6 +117,11 @@ extern DeviceStatus_t gDevStatus[NUM_DEVICES];
 extern bool gIsChanged;
 extern uint8_t _uniqueID[UNIQUE_ID_LEN];
 
+#define RING_ID_ALL             0
+#define RING_ID_1               1
+#define RING_ID_2               2
+#define RING_ID_3               3
+
 #define IS_SUNNY(DevType)           ((DevType) >= devtypWRing3 && (DevType) <= devtypWRing1)
 #define IS_RAINBOW(DevType)         ((DevType) >= devtypCRing3 && (DevType) <= devtypCRing1)
 #define IS_MIRAGE(DevType)          ((DevType) >= devtypMRing3 && (DevType) <= devtypMRing1)
@@ -133,6 +138,9 @@ extern uint8_t _uniqueID[UNIQUE_ID_LEN];
 #define DEVST_OnOff(x)             gDevStatus[x].ring.State
 #define DEVST_Bright(x)            gDevStatus[x].ring.BR
 #define DEVST_WarmCold(x)          gDevStatus[x].ring.CCT
+#define DEVST_R(x)                 gDevStatus[x].ring.R
+#define DEVST_G(x)                 gDevStatus[x].ring.G
+#define DEVST_B(x)                 gDevStatus[x].ring.B
 
 #define CurrentNodeID              NodeID(gConfig.indDevice)
 #define CurrentNetworkID           NetworkID(gConfig.indDevice)
@@ -142,6 +150,9 @@ extern uint8_t _uniqueID[UNIQUE_ID_LEN];
 #define CurrentDeviceOnOff         DEVST_OnOff(gConfig.indDevice)
 #define CurrentDeviceBright        DEVST_Bright(gConfig.indDevice)
 #define CurrentDeviceCCT           DEVST_WarmCold(gConfig.indDevice)
+#define CurrentDevice_R            DEVST_R(gConfig.indDevice)
+#define CurrentDevice_G            DEVST_G(gConfig.indDevice)
+#define CurrentDevice_B            DEVST_B(gConfig.indDevice)
 
 void UpdateNodeAddress(void);
 void RF24L01_IRQ_Handler();
