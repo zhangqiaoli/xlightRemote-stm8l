@@ -23,8 +23,8 @@ static s32 system_past_tick = 0;
 void timer_init(void)
 {
   TIM4_DeInit();
-  TIM4_TimeBaseInit(TIM4_Prescaler_128, 250); // (1/16MHz)*128*125 = 1mS
-  TIM4_SetCounter(0); // T = n * 1mS
+  TIM4_TimeBaseInit(TIM4_Prescaler_128, 250); // (1/16MHz)*128*250 = 2mS
+  TIM4_SetCounter(0); // T = n * 2mS
   TIM4_ITConfig(TIM4_IT_Update, ENABLE); //Enable TIM4 IT UPDATE
   TIM4_Cmd(ENABLE);
 }
