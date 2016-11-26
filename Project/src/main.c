@@ -63,7 +63,7 @@ static void clock_init(void)
 {
   CLK_DeInit();
   CLK_HSICmd(ENABLE);
-  CLK_SYSCLKDivConfig(CLK_SYSCLKDiv_1);
+  CLK_SYSCLKDivConfig(SYS_CLOCK_DIVIDER);
   CLK_PeripheralClockConfig(CLK_Peripheral_TIM4, ENABLE);
 }
 
@@ -302,9 +302,6 @@ int main( void ) {
     
     // Save Config if Changed
     SaveConfig();
-    
-    // Delay for while
-    //delay_ms(100);
   }
 }
 

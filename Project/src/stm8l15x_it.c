@@ -377,7 +377,7 @@ INTERRUPT_HANDLER(TIM4_UPD_OVF_TRG_IRQHandler, 25)
      it is recommended to set a breakpoint on the following instruction.
   */
   int_timer4 ++;
-  if ((int_timer4%5) == 0)
+  if ((int_timer4 % TIM4_CHECK_TICKS) == 0)
   {
     int_timer4 = 0;
     tick_timeout_handler();
