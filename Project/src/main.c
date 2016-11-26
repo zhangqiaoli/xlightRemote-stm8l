@@ -304,7 +304,7 @@ int main( void ) {
     SaveConfig();
     
     // Delay for while
-    delay_ms(100);
+    //delay_ms(100);
   }
 }
 
