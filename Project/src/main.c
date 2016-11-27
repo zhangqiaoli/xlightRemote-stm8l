@@ -41,6 +41,10 @@ Connections:
 #define ADDRESS_WIDTH                   5
 #define PLOAD_WIDTH                     32
 
+// Window Watchdog
+#define WWDG_COUNTER                    0x7f
+#define WWDG_WINDOW                     0x77
+
 // Unique ID for STM8L151x4
 #define     UNIQUE_ID_ADDRESS         (0x4926)
 
@@ -66,6 +70,19 @@ static void clock_init(void)
   CLK_SYSCLKDivConfig(SYS_CLOCK_DIVIDER);
   CLK_PeripheralClockConfig(CLK_Peripheral_TIM4, ENABLE);
   CLK_ClockSecuritySystemEnable();
+}
+
+// Initialize Window Watchdog
+void wwdg_init() {
+  WWDG_Init(WWDG_COUNTER, WWDG_WINDOW);
+}
+
+// Feed the Window Watchdog
+void Feed_WWDG(void) {
+  uint8_t cntValue = WWDG_GetCounter() & WWDG_COUNTER;
+  if( cntValue < WWDG_WINDOW ) {
+    WWDG_SetCounter(WWDG_COUNTER);
+  }
 }
 
 void Flash_ReadBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
@@ -296,7 +313,13 @@ int main( void ) {
   // Must establish connection firstly
   SayHelloToDevice(TRUE);
 
+  // Init Watchdog
+  wwdg_init();
+  
   while (1) {
+    
+    // Feed the Watchdog
+    Feed_WWDG();
     
     // Send message if ready
     SendMyMessage();
