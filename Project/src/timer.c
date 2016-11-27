@@ -19,6 +19,7 @@ static u8 m_current_timer_num = 0;
 static u8 m_running_timer_num = 0;
 static s32 m_wait_timer_tick = 0;
 static s32 system_past_tick = 0;
+u16 tmrIdleDuration = 0;
 
 void timer_init(void)
 {
@@ -101,6 +102,7 @@ void timer_stop(u8 timer_index)
 
 void tick_timeout_handler(void)
 {
+  tmrIdleDuration++;
   if (m_running_timer_num > 0)
   {
     system_past_tick ++;

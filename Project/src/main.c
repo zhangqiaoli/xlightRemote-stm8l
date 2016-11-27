@@ -65,6 +65,7 @@ static void clock_init(void)
   CLK_HSICmd(ENABLE);
   CLK_SYSCLKDivConfig(SYS_CLOCK_DIVIDER);
   CLK_PeripheralClockConfig(CLK_Peripheral_TIM4, ENABLE);
+  CLK_ClockSecuritySystemEnable();
 }
 
 void Flash_ReadBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
@@ -276,7 +277,7 @@ int main( void ) {
   // Init Device Status Buffer
   InitDeviceStatus();
   
-  delay_ms(3000);   // about 3 sec
+  delay_ms(1500);   // about 1.5 sec
   
   // Update RF addresses and Setup RF environment
   //gConfig.nodeID = 0x11; // test
@@ -302,10 +303,16 @@ int main( void ) {
     
     // Save Config if Changed
     SaveConfig();
+    
+    // Enter Low Power Mode
+    if( tmrIdleDuration > TIMEOUT_IDLE ) {
+      tmrIdleDuration = 0;
+    }
   }
 }
 
 void RF24L01_IRQ_Handler() {
+  tmrIdleDuration = 0;
   if(RF24L01_is_data_available()) {
     //Packet was received
     RF24L01_clear_interrupts();

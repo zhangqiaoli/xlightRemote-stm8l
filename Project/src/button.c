@@ -404,7 +404,7 @@ void btn_double_button_press(uint8_t _btn)
     
   case keylstFn1:
     // Toggle In-presentation flag
-    gConfig.inPresentation = !gConfig.inPresentation;
+    //gConfig.inPresentation = !gConfig.inPresentation;
     break;
     
   case keylstFn2:
@@ -516,7 +516,7 @@ void btn_long_button_press(uint8_t _btn)
     
   case keylstFn1:
     // Toggle In-presentation flag
-    gConfig.inPresentation = !gConfig.inPresentation;
+    //gConfig.inPresentation = !gConfig.inPresentation;
     break;
     
   case keylstFn2:
@@ -754,6 +754,7 @@ void button_release(uint8_t _btn)
 
 void button_event_handler(uint8_t _pin)
 {
+  tmrIdleDuration = 0;
   button_first_detect_status = GPIO_ReadInputData(BUTTONS_PORT1);
   button_first_detect_status <<= 8;
   button_first_detect_status |= GPIO_ReadInputData(BUTTONS_PORT2);
