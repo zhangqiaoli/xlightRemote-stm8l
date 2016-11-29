@@ -59,6 +59,7 @@ bool gIsChanged = FALSE;
 uint8_t _uniqueID[UNIQUE_ID_LEN];
 
 // Moudle variables
+bool bPowerOn = FALSE;
 uint8_t mutex;
 uint8_t rx_addr[ADDRESS_WIDTH] = {0x11, 0x11, 0x11, 0x11, 0x11};
 uint8_t tx_addr[ADDRESS_WIDTH] = {0x11, 0x11, 0x11, 0x11, 0x11};
@@ -78,11 +79,71 @@ void wwdg_init() {
 }
 
 // Feed the Window Watchdog
-void Feed_WWDG(void) {
+void feed_wwdg(void) {
   uint8_t cntValue = WWDG_GetCounter() & WWDG_COUNTER;
   if( cntValue < WWDG_WINDOW ) {
     WWDG_SetCounter(WWDG_COUNTER);
   }
+}
+
+/**
+  * @brief  configure GPIOs before entering low power
+	* @caller lowpower_config
+  * @param None
+  * @retval None
+  */  
+void GPIO_LowPower_Config(void)
+{
+  GPIO_Init(GPIOA, GPIO_Pin_2|GPIO_Pin_4, GPIO_Mode_In_FL_No_IT);
+  GPIO_Init(GPIOA, GPIO_Pin_3|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7, GPIO_Mode_Out_PP_Low_Slow);
+  GPIO_Init(GPIOC, GPIO_Pin_All, GPIO_Mode_Out_PP_Low_Slow);
+  //GPIO_Init(GPIOD, GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3, GPIO_Mode_In_FL_No_IT);
+  //GPIO_Init(GPIOB, GPIO_Pin_0, GPIO_Mode_In_FL_No_IT);
+  GPIO_Init(GPIOE, GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_5, GPIO_Mode_Out_PP_Low_Slow);
+  GPIO_Init(GPIOF,GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7 ,GPIO_Mode_Out_PP_Low_Slow);
+}
+
+// Enter Low Power Mode, which can be woken up by external interupts
+void lowpower_config(void) {
+  // Set STM8 in low power
+  PWR->CSR2 = 0x2;
+ 
+  // Stop Timers
+  TIM4_DeInit();
+  
+  // Set GPIO in low power
+  GPIO_LowPower_Config();
+  
+  // RF24 Chip in low power
+  RF24L01_DeInit();
+  
+  // Stop RTC Source clock
+  CLK_RTCClockConfig(CLK_RTCCLKSource_Off, CLK_RTCCLKDiv_1);
+  
+  CLK_LSICmd(DISABLE);
+  while ((CLK->ICKCR & 0x04) != 0x00);
+  
+  // Stop peripheral clocks
+  CLK_PeripheralClockConfig(CLK_Peripheral_TIM5, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_TIM4, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_TIM3, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_TIM2, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_TIM1, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_I2C1, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_SPI1, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_USART1, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_DAC, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_ADC1, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_RTC, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_LCD, DISABLE);
+  CLK_PeripheralClockConfig(CLK_Peripheral_AES, DISABLE);
+}
+
+// Resume Normal Mode
+void wakeup_config(void) {
+  clock_init();
+  timer_init();
+  RF24L01_init();
 }
 
 void Flash_ReadBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
@@ -288,8 +349,6 @@ int main( void ) {
   FLASH_DeInit();
   Read_UniqueID(_uniqueID, UNIQUE_ID_LEN);
   LoadConfig();
-  gIsChanged = TRUE;
-  SaveConfig();
 
   // Init Device Status Buffer
   InitDeviceStatus();
@@ -304,11 +363,7 @@ int main( void ) {
   //UpdateNodeAddress();
 
   // NRF_IRQ
-  disableInterrupts();
-  GPIO_Init(GPIOD, GPIO_Pin_5, GPIO_Mode_In_FL_IT);
-  EXTI_SelectPort(EXTI_Port_D);
-  EXTI_SetPinSensitivity(EXTI_Pin_5, EXTI_Trigger_Falling);  
-  enableInterrupts();
+  NRF2401_EnableIRQ();
 
   // Must establish connection firstly
   SayHelloToDevice(TRUE);
@@ -316,10 +371,13 @@ int main( void ) {
   // Init Watchdog
   wwdg_init();
   
+  // Set PowerOn flag
+  bPowerOn = TRUE;
+  
   while (1) {
     
     // Feed the Watchdog
-    Feed_WWDG();
+    feed_wwdg();
     
     // Send message if ready
     SendMyMessage();
@@ -330,6 +388,16 @@ int main( void ) {
     // Enter Low Power Mode
     if( tmrIdleDuration > TIMEOUT_IDLE ) {
       tmrIdleDuration = 0;
+      lowpower_config();
+      bPowerOn = FALSE;
+      halt();
+    } else if( !bPowerOn ) {
+      // Wakeup
+      bPowerOn = TRUE;
+      wakeup_config();
+      // REQ device status
+      //delay_ms(10);
+      //Msg_RequestDeviceStatus(CurrentDeviceID);
     }
   }
 }

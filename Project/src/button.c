@@ -252,7 +252,7 @@ void button_init()
   
   // Setup Interrupts
   disableInterrupts();
-  GPIO_Init(LEDS_PORT, (LED_PIN_ONOFF | LED_PIN_DEV0 | LED_PIN_DEV1 | LED_PIN_DEV2 | LED_PIN_DEV3), GPIO_Mode_Out_PP_Low_Fast);
+  //GPIO_Init(LEDS_PORT, (LED_PIN_ONOFF | LED_PIN_DEV0 | LED_PIN_DEV1 | LED_PIN_DEV2 | LED_PIN_DEV3), GPIO_Mode_Out_PP_Low_Fast);
   GPIO_Init(BUTTONS_PORT1, (BUTTON_PIN_LEFT | BUTTON_PIN_RIGHT | BUTTON_PIN_UP | BUTTON_PIN_DOWN), GPIO_Mode_In_PU_IT);
   //GPIO_Init(BUTTONS_PORT2, (BUTTON_PIN_CENTER | BUTTON_PIN_FN1 | BUTTON_PIN_FN2 | BUTTON_PIN_FN3), GPIO_Mode_In_PU_IT);
   // Note: sbs test center button is broken!!!

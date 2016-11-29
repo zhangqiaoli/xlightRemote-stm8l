@@ -192,6 +192,8 @@ typedef struct _RF24L01_reg_FEATURE_content {
 } RF24L01_reg_FEATURE_content;
 
 void RF24L01_init(void);
+void RF24L01_DeInit(void);
+void NRF2401_EnableIRQ(void);
 bool NRF24L01_Check(void);
 void RF24L01_setup(uint8_t *tx_addr, uint8_t *rx_addr, uint8_t channel, uint8_t boardcast);
 void RF24L01_set_mode_TX(void);

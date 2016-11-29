@@ -5,8 +5,8 @@
 #include "stm8l15x_tim4.h"
 
 // Time Parameters
-// Could be CLK_SYSCLKDiv_1, CLK_SYSCLKDiv_2
-// But use CLK_SYSCLKDiv_2 is supposed to save power
+// Could be CLK_SYSCLKDiv_1, CLK_SYSCLKDiv_2, CLK_SYSCLKDiv_4
+// while bigger value is supposed to save power
 #define SYS_CLOCK_DIVIDER       CLK_SYSCLKDiv_2
 
 // We will make it to 2ms, (1/16MHz)*128*250 = 2mS or (1/8MHz)*128*125 = 2mS
@@ -16,7 +16,7 @@
 #define TIM4_CHECK_TICKS        5
 
 // Idle duration before enter low power mode
-#define TIMEOUT_IDLE            1000            // The unit is 10 ms, so the duration is 30 s.
+#define TIMEOUT_IDLE            800            // The unit is 10 ms, so the duration is 15 s.
 
 extern u16 tmrIdleDuration;
 

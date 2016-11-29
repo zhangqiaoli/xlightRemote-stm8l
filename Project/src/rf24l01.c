@@ -34,6 +34,24 @@ void RF24L01_init(void) {
   SPI_Cmd(SPI1, ENABLE);  
 }
 
+void RF24L01_DeInit(void) {
+  disableInterrupts();
+  SPI_Cmd(SPI1, DISABLE);  
+  GPIO_Init(GPIOB, GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6, GPIO_Mode_Out_PP_Low_Slow);
+  GPIO_Init(GPIOB, GPIO_Pin_7, GPIO_Mode_In_FL_No_IT);
+  GPIO_Init(GPIOD, GPIO_Pin_4, GPIO_Mode_Out_PP_Low_Slow);
+  GPIO_Init(GPIOD, GPIO_Pin_5, GPIO_Mode_In_FL_IT);
+  enableInterrupts();
+}
+
+void NRF2401_EnableIRQ(void) {
+  disableInterrupts();
+  GPIO_Init(GPIOD, GPIO_Pin_5, GPIO_Mode_In_FL_IT);
+  EXTI_SelectPort(EXTI_Port_D);
+  EXTI_SetPinSensitivity(EXTI_Pin_5, EXTI_Trigger_Falling);  
+  enableInterrupts();
+}
+
 // Check the existence of NRF24L01 chip
 bool NRF24L01_Check(void)
 {
