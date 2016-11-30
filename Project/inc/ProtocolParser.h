@@ -10,7 +10,7 @@ void build(uint8_t _destination, uint8_t _sensor, uint8_t _command, uint8_t _typ
 void Msg_RequestNodeID();
 void Msg_Presentation();
 void Msg_RequestDeviceStatus(UC _nodeID);
-void Msg_DevOnOff(bool _sw);
+void Msg_DevOnOff(uint8_t _sw);
 void Msg_DevBrightness(uint8_t _br);
 void Msg_DevCCT(uint16_t _cct);
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct);

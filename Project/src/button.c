@@ -334,14 +334,15 @@ void btn_short_button_press(uint8_t _btn)
       // Next Page
     } else {
       // Toggle lights on/off
-      Msg_DevOnOff(CurrentDeviceOnOff == 0);
+      //Msg_DevOnOff(CurrentDeviceOnOff == 0);
+      Msg_DevOnOff(DEVICE_SW_TOGGLE);
     }
     break;
     
   case keylstFn1:
     //Msg_DevBR_CCT(BTN_FN1_BR, BTN_FN1_CCT);
     // Toggle lights on/off, in stead of keylstCenter for testing
-    Msg_DevOnOff(CurrentDeviceOnOff == 0);
+    Msg_DevOnOff(DEVICE_SW_TOGGLE);
     break;
     
   case keylstFn2:

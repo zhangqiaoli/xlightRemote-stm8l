@@ -16,7 +16,7 @@
 #define TIM4_CHECK_TICKS        5
 
 // Idle duration before enter low power mode
-#define TIMEOUT_IDLE            800            // The unit is 10 ms, so the duration is 15 s.
+#define TIMEOUT_IDLE            1500            // The unit is 10 ms, so the duration is 15 s.
 
 extern u16 tmrIdleDuration;
 

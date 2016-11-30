@@ -36,7 +36,9 @@ void RF24L01_init(void) {
 
 void RF24L01_DeInit(void) {
   disableInterrupts();
-  SPI_Cmd(SPI1, DISABLE);  
+  CE_LOW;
+  CSN_LOW;
+  SPI_Cmd(SPI1, DISABLE);
   GPIO_Init(GPIOB, GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6, GPIO_Mode_Out_PP_Low_Slow);
   GPIO_Init(GPIOB, GPIO_Pin_7, GPIO_Mode_In_FL_No_IT);
   GPIO_Init(GPIOD, GPIO_Pin_4, GPIO_Mode_Out_PP_Low_Slow);

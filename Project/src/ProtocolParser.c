@@ -151,8 +151,8 @@ void Msg_RequestDeviceStatus(UC _nodeID) {
   bMsgReady = 1;
 }
 
-// Set current device On/Off
-void Msg_DevOnOff(bool _sw) {
+// Set current device 1:On; 0:Off; 2:toggle
+void Msg_DevOnOff(uint8_t _sw) {
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_STATUS, 1, 0);
   miSetLength(1);
   miSetPayloadType(P_BYTE);
