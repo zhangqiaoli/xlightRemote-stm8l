@@ -284,16 +284,13 @@ void btn_short_button_press(uint8_t _btn)
   // Assert button
   if( !IS_VALID_BUTTON(_btn) ) return;
   
-  uint8_t _br;
-  uint16_t _cct;
   switch( _btn ) {
   case keylstLeft:
     if( gConfig.inPresentation ) {
       // Turn screen black or restore
     } else {
       // Reduce CCT and get warmmer white
-      _cct = (CurrentDeviceCCT - BTN_STEP_SHORT_CCT > CT_MIN_VALUE ? CurrentDeviceCCT - BTN_STEP_SHORT_CCT : CT_MIN_VALUE);
-      Msg_DevCCT(_cct);
+      Msg_DevCCT(OPERATOR_SUB, BTN_STEP_SHORT_CCT);
     }
     break;
     
@@ -302,9 +299,7 @@ void btn_short_button_press(uint8_t _btn)
       // Start play or stop play
     } else {
       // Increase CCT and get colder white
-      _cct = CurrentDeviceCCT + BTN_STEP_SHORT_CCT;
-      if( _cct > CT_MAX_VALUE ) _cct = CT_MAX_VALUE;
-      Msg_DevCCT(_cct);
+      Msg_DevCCT(OPERATOR_ADD, BTN_STEP_SHORT_CCT);
     }
     break;
     
@@ -313,9 +308,7 @@ void btn_short_button_press(uint8_t _btn)
       // Page Up
     } else {
       // more bright
-      _br = CurrentDeviceBright + BTN_STEP_SHORT_BR;
-      if( _br > 100 ) _br = 100;
-      Msg_DevBrightness(_br);
+      Msg_DevBrightness(OPERATOR_ADD, BTN_STEP_SHORT_BR);
       break;
     }
     
@@ -324,8 +317,7 @@ void btn_short_button_press(uint8_t _btn)
       // Page Down
     } else {
       // less bright
-      _br = (CurrentDeviceBright > BTN_STEP_SHORT_BR ? CurrentDeviceBright - BTN_STEP_SHORT_BR : 0);
-      Msg_DevBrightness(_br);
+      Msg_DevBrightness(OPERATOR_SUB, BTN_STEP_SHORT_BR);
     }
     break;
     
@@ -371,7 +363,7 @@ void btn_double_button_press(uint8_t _btn)
     if( gConfig.inPresentation ) {
       // Replay media
     } else {
-      Msg_DevCCT(CT_MIN_VALUE);
+      Msg_DevCCT(OPERATOR_SET, CT_MIN_VALUE);
     }
     break;
     
@@ -379,7 +371,7 @@ void btn_double_button_press(uint8_t _btn)
     if( gConfig.inPresentation ) {
       // Play media or stop play
     } else {
-      Msg_DevCCT(CT_MAX_VALUE);
+      Msg_DevCCT(OPERATOR_SET, CT_MAX_VALUE);
     }
     break;
     
@@ -387,7 +379,7 @@ void btn_double_button_press(uint8_t _btn)
     if( gConfig.inPresentation ) {
       // Last Page
     } else {
-      Msg_DevBrightness(100);
+      Msg_DevBrightness(OPERATOR_SET, 100);
     }
     break;
     
@@ -395,7 +387,7 @@ void btn_double_button_press(uint8_t _btn)
     if( gConfig.inPresentation ) {
       // First Page
     } else {
-      Msg_DevBrightness(BTN_BR_LOW);
+      Msg_DevBrightness(OPERATOR_SET, BTN_BR_LOW);
     }
     break;
     
@@ -466,16 +458,13 @@ void btn_long_button_press(uint8_t _btn)
   // Assert button
   if( !IS_VALID_BUTTON(_btn) ) return;
   
-  uint8_t _br;
-  uint16_t _cct;
   switch( _btn ) {
   case keylstLeft:
     if( gConfig.inPresentation ) {
       // Media FB (Fast Backward)
     } else {
       // Reduce CCT and get warmmer white
-      _cct = (CurrentDeviceCCT - BTN_STEP_LONG_CCT > CT_MIN_VALUE ? CurrentDeviceCCT - BTN_STEP_LONG_CCT : CT_MIN_VALUE);
-      Msg_DevCCT(_cct); 
+      Msg_DevCCT(OPERATOR_SUB, BTN_STEP_LONG_CCT);
     }
     break;
     
@@ -484,9 +473,7 @@ void btn_long_button_press(uint8_t _btn)
       // Media FF (Fast Forward)
     } else {
       // Increase CCT and get colder white
-      _cct = CurrentDeviceCCT + BTN_STEP_LONG_CCT;
-      if( _cct > CT_MAX_VALUE ) _cct = CT_MAX_VALUE;
-      Msg_DevCCT(_cct);
+      Msg_DevCCT(OPERATOR_ADD, BTN_STEP_LONG_CCT); 
     }
     break;
     
@@ -495,9 +482,7 @@ void btn_long_button_press(uint8_t _btn)
       // n Pages Up
     } else {
       // more bright
-      _br = CurrentDeviceBright + BTN_STEP_LONG_BR;
-      if( _br > 100 ) _br = 100;
-      Msg_DevBrightness(_br);
+      Msg_DevBrightness(OPERATOR_ADD, BTN_STEP_LONG_BR);
     }
     break;
     
@@ -506,8 +491,7 @@ void btn_long_button_press(uint8_t _btn)
       // n Pages Down
     } else {
       // less bright
-      _br = (CurrentDeviceBright > BTN_STEP_LONG_BR ? CurrentDeviceBright - BTN_STEP_LONG_BR : 0);
-      Msg_DevBrightness(_br);
+      Msg_DevBrightness(OPERATOR_SUB, BTN_STEP_LONG_BR);
     }
     break;
     

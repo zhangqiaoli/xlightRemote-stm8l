@@ -161,22 +161,23 @@ void Msg_DevOnOff(uint8_t _sw) {
 }
 
 // Set current device brightness
-void Msg_DevBrightness(uint8_t _br) {
+void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_PERCENTAGE, 1, 0);
-  miSetLength(1);
+  miSetLength(2);
   miSetPayloadType(P_BYTE);
-  msg.payload.bValue = _br;
+  msg.payload.data[0] = _op;
+  msg.payload.data[1] = _br;
   bMsgReady = 1;
 }
 
 // Set current device CCT
-void Msg_DevCCT(uint16_t _cct) {
+void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_LEVEL, 1, 0);
-  miSetLength(2);
+  miSetLength(3);
   miSetPayloadType(P_UINT16);
-  //msg.payload.uiValue = _cct;
-  msg.payload.data[0] = _cct % 256;
-  msg.payload.data[1] = _cct / 256;
+  msg.payload.data[0] = _op;
+  msg.payload.data[1] = _cct % 256;
+  msg.payload.data[2] = _cct / 256;
   bMsgReady = 1;
 }
 

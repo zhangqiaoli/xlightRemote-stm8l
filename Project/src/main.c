@@ -144,6 +144,7 @@ void wakeup_config(void) {
   clock_init();
   timer_init();
   RF24L01_init();
+  NRF2401_EnableIRQ();
 }
 
 void Flash_ReadBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
