@@ -291,24 +291,26 @@ bool SendMyMessage() {
 }
 
 bool SayHelloToDevice(bool infinate) {
-
   uint8_t _count = 0;
   UpdateNodeAddress();
   while(1) {
-    if( IS_NOT_REMOTE_NODEID(CurrentNodeID) || _count++ > 5 ) {
-      // Try RequestNodeID message once for a while, 
-      // even if we have a valid nodeID, in case the controller is changed.
-      _count = 0;
-      Msg_RequestNodeID();
-    } else {
-      Msg_Presentation();
+    if( _count++ == 0 ) {
+      if( IS_NOT_REMOTE_NODEID(CurrentNodeID) ) {
+        Msg_RequestNodeID();
+      } else {
+        Msg_Presentation();
+      }
+      
+      if( SendMyMessage() ) break;
+      if( !infinate ) return FALSE;
     }
-    
-    if( SendMyMessage() ) break;
-    if( !infinate ) return FALSE;
+
+    // Feed the Watchdog
+    feed_wwdg();
     
     // Failed or Timeout, then repeat init-step
-    delay_ms(10000);   // Delay 10 seconds
+    delay_ms(500);
+    _count %= 20;  // Every 10 seconds
   }
   
   return TRUE;
