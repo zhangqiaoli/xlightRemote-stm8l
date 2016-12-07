@@ -3,7 +3,6 @@
 #include "MyMessage.h"
 
 uint8_t bMsgReady = 0;
-char strOutput[50];
 
 // Assemble message
 void build(uint8_t _destination, uint8_t _sensor, uint8_t _command, uint8_t _type, bool _enableAck, bool _isAck)
@@ -44,9 +43,6 @@ uint8_t ParseProtocol(){
       uint8_t lv_nodeID = _sensor;
       if( lv_nodeID == NODEID_GATEWAY || lv_nodeID == NODEID_DUMMY ) {
       } else {
-        sprintf(strOutput, "Get NodeId: %d, networkId: %X:%X:%X:%X:%X:%X:%X:%X", lv_nodeID, 
-                msg.payload.data[0], msg.payload.data[1], msg.payload.data[2], msg.payload.data[3], 
-                msg.payload.data[4], msg.payload.data[5], msg.payload.data[6], msg.payload.data[7]);
         CurrentNodeID = lv_nodeID;
         gIsChanged = TRUE;
         memcpy(CurrentNetworkID, msg.payload.data, sizeof(CurrentNetworkID));
@@ -64,7 +60,6 @@ uint8_t ParseProtocol(){
         gConfig.token = msg.payload.uiValue;
         gConfig.present = (gConfig.token >  0);
         gIsChanged = TRUE;
-        sprintf(strOutput, "Got Presentation Ack Node:%d token:%d", CurrentNodeID, gConfig.token);
         
         // REQ device status
         Msg_RequestDeviceStatus(CurrentDeviceID);
