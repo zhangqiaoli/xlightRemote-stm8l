@@ -179,7 +179,7 @@ void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
 // Set current device brightness & CCT
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_RGBW, 1, 0);
-  miSetLength(4);
+  miSetLength(5);
   miSetPayloadType(P_CUSTOM);
   msg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
   msg.payload.data[1] = 1;                // State: On
