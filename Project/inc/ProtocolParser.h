@@ -14,5 +14,6 @@ void Msg_DevOnOff(uint8_t _sw);
 void Msg_DevBrightness(uint8_t _op, uint8_t _br);
 void Msg_DevCCT(uint8_t _op, uint16_t _cct);
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct);
+void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w);
 
 #endif /* __PROTOCOL_PARSER_H */

@@ -379,6 +379,8 @@ int main( void ) {
   
   while (1) {
     
+    //GPIO_WriteBit(GPIOC, GPIO_Pin_1, SET);
+    
     // Feed the Watchdog
     feed_wwdg();
     

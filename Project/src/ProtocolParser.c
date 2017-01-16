@@ -101,7 +101,7 @@ uint8_t ParseProtocol(){
           if( IS_SUNNY(CurrentDeviceType) ) {
             uint16_t _CCTValue = msg.payload.data[7] * 256 + msg.payload.data[6];
             CurrentDeviceCCT = _CCTValue;
-          } else if( IS_RAINBOW(gConfig.type) || IS_MIRAGE(gConfig.type) ) {
+          } else if( IS_RAINBOW(CurrentDeviceType) || IS_MIRAGE(CurrentDeviceType) ) {
             // Set RGBW
             CurrentDeviceCCT = msg.payload.data[6];
             CurrentDevice_R = msg.payload.data[7];
@@ -148,6 +148,7 @@ void Msg_RequestDeviceStatus(UC _nodeID) {
 
 // Set current device 1:On; 0:Off; 2:toggle
 void Msg_DevOnOff(uint8_t _sw) {
+  if( bMsgReady ) return;
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_STATUS, 1, 0);
   miSetLength(1);
   miSetPayloadType(P_BYTE);
@@ -157,6 +158,7 @@ void Msg_DevOnOff(uint8_t _sw) {
 
 // Set current device brightness
 void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
+  if( bMsgReady ) return;
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_PERCENTAGE, 1, 0);
   miSetLength(2);
   miSetPayloadType(P_BYTE);
@@ -167,6 +169,7 @@ void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
 
 // Set current device CCT
 void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
+  if( bMsgReady ) return;
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_LEVEL, 1, 0);
   miSetLength(3);
   miSetPayloadType(P_UINT16);
@@ -178,6 +181,7 @@ void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
 
 // Set current device brightness & CCT
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
+  if( bMsgReady ) return;
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_RGBW, 1, 0);
   miSetLength(5);
   miSetPayloadType(P_CUSTOM);
@@ -186,5 +190,21 @@ void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
   msg.payload.data[2] = _br;
   msg.payload.data[3] = _cct % 256;
   msg.payload.data[4] = _cct / 256;
+  bMsgReady = 1;
+}
+
+// Set current device brightness & RGBW
+void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w) {
+  if( bMsgReady ) return;
+  build(CurrentDeviceID, CurrentNodeID, C_SET, V_RGBW, 1, 0);
+  miSetLength(7);
+  miSetPayloadType(P_CUSTOM);
+  msg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
+  msg.payload.data[1] = 1;                // State: On
+  msg.payload.data[2] = _br;
+  msg.payload.data[3] = _w;
+  msg.payload.data[4] = _r;
+  msg.payload.data[5] = _g;
+  msg.payload.data[6] = _b;
   bMsgReady = 1;
 }

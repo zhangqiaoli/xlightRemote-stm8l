@@ -2,11 +2,11 @@
  xlight remoter button functions
 
 - Dimmer keys:
-      PD1 -> keyUp
-      PB0 -> keyDown
+      PD2 -> keyUp
+      PD3 -> keyDown
       PD0 -> keyLeft
-      PD3 -> KeyRight
-      PD2 -> KeyCenter
+      PD1 -> KeyRight
+      PB0 -> KeyCenter
 
   - Functuon keys:
       PB1 -> Fn1
@@ -15,6 +15,7 @@
       //PD6 -> Fn4
 
 LEDs
+  Flashlight (White LED) -> PC1
   On/Off (Green LED) -> PC6
   Device Selection (Red LEDs) -> PC0 to PC3
 
@@ -35,8 +36,8 @@ LEDs
 // LED pin map
 #define LEDS_PORT               (GPIOC)
 #define LED_PIN_ONOFF           (GPIO_Pin_6)
-#define LED_PIN_DEV0            (GPIO_Pin_0)
-#define LED_PIN_DEV1            (GPIO_Pin_1)
+#define BUTTON_PIN_FLASHLIGHT   (GPIO_Pin_0)
+#define LED_PIN_FLASHLIGHT      (GPIO_Pin_1)
 #define LED_PIN_DEV2            (GPIO_Pin_2)
 #define LED_PIN_DEV3            (GPIO_Pin_3)
 
@@ -57,6 +58,7 @@ LEDs
 
 // Set LED pin status
 #define ledSetPin(x, pin)       GPIO_WriteBit(LEDS_PORT, pin, ((x) > 0 ? SET : RESET))
+#define ledFlashLight(x)        ledSetPin(x, LED_PIN_FLASHLIGHT)
 #define ledOnOff(x)             ledSetPin(x, LED_PIN_ONOFF)
 #define ledDevice0(x)           ledSetPin(x, LED_PIN_DEV0)
 #define ledDevice1(x)           ledSetPin(x, LED_PIN_DEV1)
@@ -74,6 +76,8 @@ LEDs
 #define pinKeyFn2               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN2))
 #define pinKeyFn3               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN3))
 //#define pinKeyFn4               ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_FN4))
+#define pinKeyFlashlight        ((BitStatus)(LEDS_PORT->IDR & (uint8_t)BUTTON_PIN_FLASHLIGHT))
+#define pinLEDFlashlight        ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_FLASHLIGHT))
 
 #define BUTTON_DEBONCE_DURATION                 3       // The unit is 10 ms, so the duration is 30 ms.
 #define BUTTON_WAIT_2S                          100     // The unit is 10 ms, so the duration is 2 s.
@@ -88,12 +92,20 @@ LEDs
 #define BTN_STEP_LONG_BR        25
 #define BTN_STEP_LONG_CCT       800
 #define BTN_BR_LOW              10
+
 #define BTN_FN1_BR              100
 #define BTN_FN1_CCT             2700
+
 #define BTN_FN2_BR              25
 #define BTN_FN2_CCT             3000
+
 #define BTN_FN3_BR              85
 #define BTN_FN3_CCT             5000
+#define BTN_FN3_W               0
+#define BTN_FN3_R               230
+#define BTN_FN3_G               32  
+#define BTN_FN3_B               80
+
 #define BTN_FN4_BR              100
 #define BTN_FN4_CCT             6000
 
@@ -119,29 +131,29 @@ void button_release(uint8_t _btn);
 void SelectDeviceLED(uint8_t _dev) {
   switch(_dev) {
   case 1:
-    ledDevice0(0);
-    ledDevice1(1);
+    //ledDevice0(0);
+    //ledDevice1(1);
     ledDevice2(0);
     ledDevice3(0);
     break;
     
   case 2:
-    ledDevice0(0);
-    ledDevice1(0);
+    //ledDevice0(0);
+    //ledDevice1(0);
     ledDevice2(1);
     ledDevice3(0);
     break;
 
   case 3:
-    ledDevice0(0);
-    ledDevice1(0);
+    //ledDevice0(0);
+    //ledDevice1(0);
     ledDevice2(0);
     ledDevice3(1);
     break;
 
   default:
-    ledDevice0(1);
-    ledDevice1(0);
+    //ledDevice0(1);
+    //ledDevice1(0);
     ledDevice2(0);
     ledDevice3(0);
     break;
@@ -253,10 +265,10 @@ void button_init()
   // Setup Interrupts
   disableInterrupts();
   //GPIO_Init(LEDS_PORT, (LED_PIN_ONOFF | LED_PIN_DEV0 | LED_PIN_DEV1 | LED_PIN_DEV2 | LED_PIN_DEV3), GPIO_Mode_Out_PP_Low_Fast);
+  //GPIO_Init(LEDS_PORT, LED_PIN_FLASHLIGHT, GPIO_Mode_Out_PP_Low_Fast);
+  //GPIO_Init(LEDS_PORT, BUTTON_PIN_FLASHLIGHT, GPIO_Mode_In_PU_IT);
   GPIO_Init(BUTTONS_PORT1, (BUTTON_PIN_LEFT | BUTTON_PIN_RIGHT | BUTTON_PIN_UP | BUTTON_PIN_DOWN), GPIO_Mode_In_PU_IT);
-  //GPIO_Init(BUTTONS_PORT2, (BUTTON_PIN_CENTER | BUTTON_PIN_FN1 | BUTTON_PIN_FN2 | BUTTON_PIN_FN3), GPIO_Mode_In_PU_IT);
-  // Note: sbs test center button is broken!!!
-  GPIO_Init(BUTTONS_PORT2, (BUTTON_PIN_FN1 | BUTTON_PIN_FN2 | BUTTON_PIN_FN3), GPIO_Mode_In_PU_IT);
+  GPIO_Init(BUTTONS_PORT2, (BUTTON_PIN_CENTER | BUTTON_PIN_FN1 | BUTTON_PIN_FN2 | BUTTON_PIN_FN3), GPIO_Mode_In_PU_IT);
   EXTI_DeInit();
   EXTI_SelectPort(EXTI_Port_D);
   EXTI_SetPinSensitivity(EXTI_Pin_0, EXTI_Trigger_Rising_Falling);
@@ -265,7 +277,7 @@ void button_init()
   EXTI_SetPinSensitivity(EXTI_Pin_3, EXTI_Trigger_Rising_Falling);
   //EXTI_SetPinSensitivity(EXTI_Pin_6, EXTI_Trigger_Rising_Falling);
   EXTI_SelectPort(EXTI_Port_B);
-  //EXTI_SetPinSensitivity(EXTI_Pin_0, EXTI_Trigger_Rising_Falling);
+  EXTI_SetPinSensitivity(EXTI_Pin_0, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_1, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_2, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_3, EXTI_Trigger_Rising_Falling);
@@ -332,17 +344,21 @@ void btn_short_button_press(uint8_t _btn)
     break;
     
   case keylstFn1:
-    //Msg_DevBR_CCT(BTN_FN1_BR, BTN_FN1_CCT);
+    Msg_DevBR_CCT(80, BTN_FN1_CCT);
     // Toggle lights on/off, in stead of keylstCenter for testing
-    Msg_DevOnOff(DEVICE_SW_TOGGLE);
+    //Msg_DevOnOff(DEVICE_SW_TOGGLE);
     break;
     
   case keylstFn2:
-    Msg_DevBR_CCT(BTN_FN2_BR, BTN_FN2_CCT);
+    Msg_DevBR_CCT(10, BTN_FN2_CCT);
     break;
     
   case keylstFn3:
-    Msg_DevBR_CCT(BTN_FN3_BR, BTN_FN3_CCT);
+    //if( IS_SUNNY(CurrentDeviceType) ) {
+    //  Msg_DevBR_CCT(BTN_FN3_BR, BTN_FN3_CCT);
+    //} else {
+      Msg_DevBR_RGBW(BTN_FN2_BR, BTN_FN3_R, BTN_FN3_G, BTN_FN3_B, BTN_FN3_W);
+    //}
     break;
     
     //case keylstFn4:
@@ -744,4 +760,15 @@ void button_event_handler(uint8_t _pin)
   button_first_detect_status <<= 8;
   button_first_detect_status |= GPIO_ReadInputData(BUTTONS_PORT2);
   timer_start(m_timer_id_debonce_detet, BUTTON_DEBONCE_DURATION);
+  
+  // Check Flashlight
+  /*
+  static BitStatus keyFL = 0;
+  if( _pin == GPIO_Pin_0 ) {
+    if( keyFL != pinKeyFlashlight ) {
+      keyFL = pinKeyFlashlight;
+      // Set Flashlight
+      ledFlashLight(keyFL);
+    }
+  }*/
 }
