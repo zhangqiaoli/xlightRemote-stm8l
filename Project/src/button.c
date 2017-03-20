@@ -22,6 +22,7 @@ LEDs
 */
 
 #include "_global.h"
+#include "PPTCtrl_Protocol.h"
 #include "stm8l15x.h"
 #include "stm8l15x_gpio.h"
 #include "stm8l15x_exti.h"
@@ -35,19 +36,24 @@ LEDs
 //---------------------------------------------------
 // LED pin map
 #define LEDS_PORT               (GPIOC)
-#define LED_PIN_ONOFF           (GPIO_Pin_6)
-#define BUTTON_PIN_FLASHLIGHT   (GPIO_Pin_0)
+#define LED_PIN_LASERPEN        (GPIO_Pin_0)
 #define LED_PIN_FLASHLIGHT      (GPIO_Pin_1)
-#define LED_PIN_DEV2            (GPIO_Pin_2)
-#define LED_PIN_DEV3            (GPIO_Pin_3)
 
 // Button pin map
 #define BUTTONS_PORT1           (GPIOD)
+/*
 #define BUTTON_PIN_LEFT         (GPIO_Pin_0)
 #define BUTTON_PIN_RIGHT        (GPIO_Pin_1)
 #define BUTTON_PIN_UP           (GPIO_Pin_2)
 #define BUTTON_PIN_DOWN         (GPIO_Pin_3)
-//#define BUTTON_PIN_FN4          (GPIO_Pin_6)
+*/
+#define BUTTON_PIN_UP           (GPIO_Pin_0)
+#define BUTTON_PIN_DOWN         (GPIO_Pin_1)
+#define BUTTON_PIN_LEFT         (GPIO_Pin_2)
+#define BUTTON_PIN_RIGHT        (GPIO_Pin_3)
+
+#define BUTTON_PIN_FN4          (GPIO_Pin_6)
+#define BUTTON_PIN_FLASHLIGHT   (GPIO_Pin_7)    // Reserved
 
 #define BUTTONS_PORT2           (GPIOB)
 #define BUTTON_PIN_CENTER       (GPIO_Pin_0)
@@ -59,11 +65,9 @@ LEDs
 // Set LED pin status
 #define ledSetPin(x, pin)       GPIO_WriteBit(LEDS_PORT, pin, ((x) > 0 ? SET : RESET))
 #define ledFlashLight(x)        ledSetPin(x, LED_PIN_FLASHLIGHT)
-#define ledOnOff(x)             ledSetPin(x, LED_PIN_ONOFF)
-#define ledDevice0(x)           ledSetPin(x, LED_PIN_DEV0)
-#define ledDevice1(x)           ledSetPin(x, LED_PIN_DEV1)
-#define ledDevice2(x)           ledSetPin(x, LED_PIN_DEV2)
-#define ledDevice3(x)           ledSetPin(x, LED_PIN_DEV3)
+#define ledToggleFlashLight     GPIO_ToggleBits(LEDS_PORT, LED_PIN_FLASHLIGHT)
+#define ledLaserPen(x)          ledSetPin(x, LED_PIN_LASERPEN)
+#define ledToggleLaserPen       GPIO_ToggleBits(LEDS_PORT, LED_PIN_LASERPEN)
 
 // Get Button pin input
 #define pinKeyLeft              ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_LEFT))
@@ -75,9 +79,10 @@ LEDs
 #define pinKeyFn1               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN1))
 #define pinKeyFn2               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN2))
 #define pinKeyFn3               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN3))
-//#define pinKeyFn4               ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_FN4))
-#define pinKeyFlashlight        ((BitStatus)(LEDS_PORT->IDR & (uint8_t)BUTTON_PIN_FLASHLIGHT))
+#define pinKeyFn4               ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_FN4))
+#define pinKeyFlashlight        ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_FLASHLIGHT))
 #define pinLEDFlashlight        ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_FLASHLIGHT))
+#define pinLEDLaserPen          ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_LASERPEN))
 
 #define BUTTON_DEBONCE_DURATION                 3       // The unit is 10 ms, so the duration is 30 ms.
 #define BUTTON_WAIT_2S                          100     // The unit is 10 ms, so the duration is 2 s.
@@ -133,29 +138,29 @@ void SelectDeviceLED(uint8_t _dev) {
   case 1:
     //ledDevice0(0);
     //ledDevice1(1);
-    ledDevice2(0);
-    ledDevice3(0);
+    //ledDevice2(0);
+    //ledDevice3(0);
     break;
     
   case 2:
     //ledDevice0(0);
     //ledDevice1(0);
-    ledDevice2(1);
-    ledDevice3(0);
+    //ledDevice2(1);
+    //ledDevice3(0);
     break;
 
   case 3:
     //ledDevice0(0);
     //ledDevice1(0);
-    ledDevice2(0);
-    ledDevice3(1);
+    //ledDevice2(0);
+    //ledDevice3(1);
     break;
 
   default:
     //ledDevice0(1);
     //ledDevice1(0);
-    ledDevice2(0);
-    ledDevice3(0);
+    //ledDevice2(0);
+    //ledDevice3(0);
     break;
   }
 }
@@ -255,19 +260,21 @@ void button_init()
   btn_bit_postion[keylstUp] <<= 8;
   btn_bit_postion[keylstDown] = BUTTON_PIN_DOWN;
   btn_bit_postion[keylstDown] <<= 8;
+  btn_bit_postion[keylstFn4] = BUTTON_PIN_FN4;
+  btn_bit_postion[keylstFn4] <<= 8;
+  btn_bit_postion[keylstFLASH] = BUTTON_PIN_FLASHLIGHT;
+  btn_bit_postion[keylstFLASH] <<= 8;
+
   btn_bit_postion[keylstCenter] = BUTTON_PIN_CENTER;
   btn_bit_postion[keylstFn1] = BUTTON_PIN_FN1;
   btn_bit_postion[keylstFn2] = BUTTON_PIN_FN2;
   btn_bit_postion[keylstFn3] = BUTTON_PIN_FN3;
-  //btn_bit_postion[keylstFn4] = BUTTON_PIN_FN4;
-  //btn_bit_postion[keylstFn4] <<= 8;
   
   // Setup Interrupts
   disableInterrupts();
   //GPIO_Init(LEDS_PORT, (LED_PIN_ONOFF | LED_PIN_DEV0 | LED_PIN_DEV1 | LED_PIN_DEV2 | LED_PIN_DEV3), GPIO_Mode_Out_PP_Low_Fast);
-  //GPIO_Init(LEDS_PORT, LED_PIN_FLASHLIGHT, GPIO_Mode_Out_PP_Low_Fast);
-  //GPIO_Init(LEDS_PORT, BUTTON_PIN_FLASHLIGHT, GPIO_Mode_In_PU_IT);
-  GPIO_Init(BUTTONS_PORT1, (BUTTON_PIN_LEFT | BUTTON_PIN_RIGHT | BUTTON_PIN_UP | BUTTON_PIN_DOWN), GPIO_Mode_In_PU_IT);
+  GPIO_Init(LEDS_PORT, (LED_PIN_FLASHLIGHT | LED_PIN_LASERPEN), GPIO_Mode_Out_PP_Low_Fast);
+  GPIO_Init(BUTTONS_PORT1, (BUTTON_PIN_LEFT | BUTTON_PIN_RIGHT | BUTTON_PIN_UP | BUTTON_PIN_DOWN | BUTTON_PIN_FN4 | BUTTON_PIN_FLASHLIGHT), GPIO_Mode_In_PU_IT);
   GPIO_Init(BUTTONS_PORT2, (BUTTON_PIN_CENTER | BUTTON_PIN_FN1 | BUTTON_PIN_FN2 | BUTTON_PIN_FN3), GPIO_Mode_In_PU_IT);
   EXTI_DeInit();
   EXTI_SelectPort(EXTI_Port_D);
@@ -275,7 +282,8 @@ void button_init()
   EXTI_SetPinSensitivity(EXTI_Pin_1, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_2, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_3, EXTI_Trigger_Rising_Falling);
-  //EXTI_SetPinSensitivity(EXTI_Pin_6, EXTI_Trigger_Rising_Falling);
+  EXTI_SetPinSensitivity(EXTI_Pin_6, EXTI_Trigger_Rising_Falling);
+  EXTI_SetPinSensitivity(EXTI_Pin_7, EXTI_Trigger_Rising_Falling);
   EXTI_SelectPort(EXTI_Port_B);
   EXTI_SetPinSensitivity(EXTI_Pin_0, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_1, EXTI_Trigger_Rising_Falling);
@@ -291,6 +299,28 @@ void button_init()
   timer_create(&m_timer_id_debonce_detet, 0, btn_debonce_timeout_handler);
 }
 
+void SetFlashlight(uint8_t _st)
+{
+  if( _st == DEVICE_SW_ON ) {
+    ledFlashLight(SET);
+  } else if( _st == DEVICE_SW_OFF ) {
+    ledFlashLight(RESET);
+  } else {
+    ledToggleFlashLight;
+  }
+}
+
+void SetLasterBeam(uint8_t _st)
+{
+  if( _st == DEVICE_SW_ON ) {
+    ledLaserPen(SET);
+  } else if( _st == DEVICE_SW_OFF ) {
+    ledLaserPen(RESET);
+  } else {
+    ledToggleLaserPen;
+  }
+}
+
 void btn_short_button_press(uint8_t _btn)
 {
   // Assert button
@@ -300,6 +330,7 @@ void btn_short_button_press(uint8_t _btn)
   case keylstLeft:
     if( gConfig.inPresentation ) {
       // Turn screen black or restore
+      Msg_PPT_ObjAction(PPT_OBJ_SCREEN, DEVICE_SW_TOGGLE);
     } else {
       // Reduce CCT and get warmmer white
       Msg_DevCCT(OPERATOR_SUB, BTN_STEP_SHORT_CCT);
@@ -309,6 +340,7 @@ void btn_short_button_press(uint8_t _btn)
   case keylstRight:
     if( gConfig.inPresentation ) {
       // Start play or stop play
+      Msg_PPT_ObjAction(PPT_OBJ_PAGE, DEVICE_SW_TOGGLE);
     } else {
       // Increase CCT and get colder white
       Msg_DevCCT(OPERATOR_ADD, BTN_STEP_SHORT_CCT);
@@ -318,6 +350,7 @@ void btn_short_button_press(uint8_t _btn)
   case keylstUp:
     if( gConfig.inPresentation ) {
       // Page Up
+      Msg_PPT_ObjAction(PPT_OBJ_PAGE, CONTENT_GO_PREV);
     } else {
       // more bright
       Msg_DevBrightness(OPERATOR_ADD, BTN_STEP_SHORT_BR);
@@ -327,6 +360,7 @@ void btn_short_button_press(uint8_t _btn)
   case keylstDown:
     if( gConfig.inPresentation ) {
       // Page Down
+      Msg_PPT_ObjAction(PPT_OBJ_PAGE, CONTENT_GO_NEXT);
     } else {
       // less bright
       Msg_DevBrightness(OPERATOR_SUB, BTN_STEP_SHORT_BR);
@@ -336,6 +370,7 @@ void btn_short_button_press(uint8_t _btn)
   case keylstCenter:
     if( gConfig.inPresentation ) {
       // Next Page
+      Msg_PPT_ObjAction(PPT_OBJ_PAGE, CONTENT_GO_NEXT);
     } else {
       // Toggle lights on/off
       //Msg_DevOnOff(CurrentDeviceOnOff == 0);
@@ -361,8 +396,14 @@ void btn_short_button_press(uint8_t _btn)
     //}
     break;
     
-    //case keylstFn4:
-    //  break;
+  case keylstFn4:
+    break;
+
+  case keylstFLASH:
+    // Toggle the flash light
+    //ledFlashLight(!pinLEDFlashlight);
+    ledToggleFlashLight;
+    break;
     
   default:
     break;
@@ -378,6 +419,7 @@ void btn_double_button_press(uint8_t _btn)
   case keylstLeft:
     if( gConfig.inPresentation ) {
       // Replay media
+      Msg_PPT_ObjAction(PPT_OBJ_MEDIA, CONTENT_REPLAY);
     } else {
       Msg_DevCCT(OPERATOR_SET, CT_MIN_VALUE);
     }
@@ -386,6 +428,7 @@ void btn_double_button_press(uint8_t _btn)
   case keylstRight:
     if( gConfig.inPresentation ) {
       // Play media or stop play
+      Msg_PPT_ObjAction(PPT_OBJ_MEDIA, DEVICE_SW_TOGGLE);
     } else {
       Msg_DevCCT(OPERATOR_SET, CT_MAX_VALUE);
     }
@@ -394,6 +437,7 @@ void btn_double_button_press(uint8_t _btn)
   case keylstUp:
     if( gConfig.inPresentation ) {
       // Last Page
+      Msg_PPT_ObjAction(PPT_OBJ_PAGE, CONTENT_GO_LAST);
     } else {
       Msg_DevBrightness(OPERATOR_SET, 100);
     }
@@ -402,6 +446,7 @@ void btn_double_button_press(uint8_t _btn)
   case keylstDown:
     if( gConfig.inPresentation ) {
       // First Page
+      Msg_PPT_ObjAction(PPT_OBJ_PAGE, CONTENT_GO_FIRST);
     } else {
       Msg_DevBrightness(OPERATOR_SET, BTN_BR_LOW);
     }
@@ -409,11 +454,12 @@ void btn_double_button_press(uint8_t _btn)
     
   case keylstCenter:
     // Toggle the flash light
+    ledToggleFlashLight;
     break;
     
   case keylstFn1:
     // Toggle In-presentation flag
-    //gConfig.inPresentation = !gConfig.inPresentation;
+    gConfig.inPresentation = !gConfig.inPresentation;
     break;
     
   case keylstFn2:
@@ -422,8 +468,11 @@ void btn_double_button_press(uint8_t _btn)
   case keylstFn3:
     break;
     
-    //case keylstFn4:
-    //  break;
+  case keylstFn4:
+    break;
+
+  case keylstFLASH:
+    break;
     
   default:
     break;
@@ -450,6 +499,7 @@ void btn_long_hold_button_press(uint8_t _btn)
     
   case keylstCenter:
     // Turn on the laser
+    ledLaserPen(1);
     break;
     
   case keylstFn1:
@@ -461,8 +511,11 @@ void btn_long_hold_button_press(uint8_t _btn)
   case keylstFn3:
     break;
     
-    //case keylstFn4:
-    //  break;
+  case keylstFn4:
+    break;
+    
+  case keylstFLASH:
+    break;
     
   default:
     break;
@@ -478,6 +531,7 @@ void btn_long_button_press(uint8_t _btn)
   case keylstLeft:
     if( gConfig.inPresentation ) {
       // Media FB (Fast Backward)
+      Msg_PPT_ObjAction(PPT_OBJ_MEDIA, CONTENT_FAST_BACKWARD);
     } else {
       // Reduce CCT and get warmmer white
       Msg_DevCCT(OPERATOR_SUB, BTN_STEP_LONG_CCT);
@@ -487,6 +541,7 @@ void btn_long_button_press(uint8_t _btn)
   case keylstRight:
     if( gConfig.inPresentation ) {
       // Media FF (Fast Forward)
+      Msg_PPT_ObjAction(PPT_OBJ_MEDIA, CONTENT_FAST_FORWARD);
     } else {
       // Increase CCT and get colder white
       Msg_DevCCT(OPERATOR_ADD, BTN_STEP_LONG_CCT); 
@@ -496,6 +551,7 @@ void btn_long_button_press(uint8_t _btn)
   case keylstUp:
     if( gConfig.inPresentation ) {
       // n Pages Up
+      Msg_PPT_ObjAction(PPT_OBJ_PAGE, CONTENT_FAST_BACKWARD);
     } else {
       // more bright
       Msg_DevBrightness(OPERATOR_ADD, BTN_STEP_LONG_BR);
@@ -505,6 +561,7 @@ void btn_long_button_press(uint8_t _btn)
   case keylstDown:
     if( gConfig.inPresentation ) {
       // n Pages Down
+      Msg_PPT_ObjAction(PPT_OBJ_PAGE, CONTENT_FAST_FORWARD);
     } else {
       // less bright
       Msg_DevBrightness(OPERATOR_SUB, BTN_STEP_LONG_BR);
@@ -513,11 +570,12 @@ void btn_long_button_press(uint8_t _btn)
     
   case keylstCenter:
     // Turn off the laser
+    ledLaserPen(0);
     break;
     
   case keylstFn1:
     // Toggle In-presentation flag
-    //gConfig.inPresentation = !gConfig.inPresentation;
+    gConfig.inPresentation = !gConfig.inPresentation;
     break;
     
   case keylstFn2:
@@ -526,8 +584,11 @@ void btn_long_button_press(uint8_t _btn)
   case keylstFn3:
     break;
     
-    //case keylstFn4:
-    //  break;
+  case keylstFn4:
+    break;
+    
+  case keylstFLASH:
+    break;
     
   default:
     break;
@@ -569,8 +630,11 @@ void btn_very_long_hold_button_press(uint8_t _btn)
     SayHelloToDevice(FALSE);
     break;
     
-    //case keylstFn4:
-    //  break;
+  case keylstFn4:
+    break;
+  
+  case keylstFLASH:
+    break;
     
   default:
     break;
@@ -607,8 +671,11 @@ void btn_very_long_button_press(uint8_t _btn)
   case keylstFn3:
     break;
     
-    //case keylstFn4:
-    //  break;
+  case keylstFn4:
+    break;
+    
+  case keylstFLASH:
+    break;
     
   default:
     break;

@@ -36,12 +36,18 @@ Connections:
 #define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
 #define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
 
+// Config Flashlight and Laser
+// Uncomment this line if need Flashlight or Laser Pen
+#define ENABLE_FLASHLIGHT_LASER
+
 // RF channel for the sensor net, 0-127
 #define RF24_CHANNEL	   		71
 #define ADDRESS_WIDTH                   5
 #define PLOAD_WIDTH                     32
 
 // Window Watchdog
+// Uncomment this line if in debug mode
+#define DEBUG_NO_WWDG
 #define WWDG_COUNTER                    0x7f
 #define WWDG_WINDOW                     0x77
 
@@ -75,15 +81,19 @@ static void clock_init(void)
 
 // Initialize Window Watchdog
 void wwdg_init() {
+#ifndef DEBUG_NO_WWDG  
   WWDG_Init(WWDG_COUNTER, WWDG_WINDOW);
+#endif  
 }
 
 // Feed the Window Watchdog
 void feed_wwdg(void) {
+#ifndef DEBUG_NO_WWDG    
   uint8_t cntValue = WWDG_GetCounter() & WWDG_COUNTER;
   if( cntValue < WWDG_WINDOW ) {
     WWDG_SetCounter(WWDG_COUNTER);
   }
+#endif
 }
 
 /**
@@ -96,7 +106,13 @@ void GPIO_LowPower_Config(void)
 {
   GPIO_Init(GPIOA, GPIO_Pin_2|GPIO_Pin_4, GPIO_Mode_In_FL_No_IT);
   GPIO_Init(GPIOA, GPIO_Pin_3|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7, GPIO_Mode_Out_PP_Low_Slow);
+
+#ifdef ENABLE_FLASHLIGHT_LASER
+  GPIO_Init(GPIOC, GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6, GPIO_Mode_Out_PP_Low_Slow);
+#else  
   GPIO_Init(GPIOC, GPIO_Pin_All, GPIO_Mode_Out_PP_Low_Slow);
+#endif
+  
   //GPIO_Init(GPIOD, GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3, GPIO_Mode_In_FL_No_IT);
   //GPIO_Init(GPIOB, GPIO_Pin_0, GPIO_Mode_In_FL_No_IT);
   GPIO_Init(GPIOE, GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_5, GPIO_Mode_Out_PP_Low_Slow);
@@ -242,6 +258,8 @@ void LoadConfig()
       gIsChanged = TRUE;
       SaveConfig();
     }
+    // Test Only
+    DeviceID(0) = 11;
 }
 
 void UpdateNodeAddress() {
@@ -343,7 +361,14 @@ int main( void ) {
   clock_init();
   timer_init();
   button_init();
-  
+
+  //GPIO_Init(GPIOC, (GPIO_Pin_0 | GPIO_Pin_2), GPIO_Mode_Out_PP_Low_Fast);
+  //SetFlashlight(DEVICE_SW_ON);
+  //SetLasterBeam(DEVICE_SW_ON);
+  //GPIO_WriteBit(GPIOC, GPIO_Pin_0, SET);
+  //GPIO_WriteBit(GPIOC, GPIO_Pin_2, SET);
+  //while (1);
+
   // Go on only if NRF chip is presented
   RF24L01_init();
   while(!NRF24L01_Check());
@@ -376,10 +401,8 @@ int main( void ) {
   
   // Set PowerOn flag
   bPowerOn = TRUE;
-  
+
   while (1) {
-    
-    //GPIO_WriteBit(GPIOC, GPIO_Pin_1, SET);
     
     // Feed the Watchdog
     feed_wwdg();

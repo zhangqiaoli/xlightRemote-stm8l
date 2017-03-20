@@ -208,3 +208,16 @@ void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w)
   msg.payload.data[6] = _b;
   bMsgReady = 1;
 }
+
+// PPT Object Action
+void Msg_PPT_ObjAction(uint8_t _obj, uint8_t _action) {
+  if( bMsgReady ) return;
+  build(CurrentDeviceID, NODEID_PROJECTOR, C_SET, V_STATUS, 1, 0);
+  miSetLength(4);
+  miSetPayloadType(P_CUSTOM);
+  msg.payload.data[0] = _obj;
+  msg.payload.data[1] = _action;
+  msg.payload.data[2] = 0;      // Reserved
+  msg.payload.data[3] = 0;      // Reserved
+  bMsgReady = 1;
+}

@@ -40,6 +40,8 @@
 #define NODEID_MAX_DEVCIE       63
 #define NODEID_MIN_REMOTE       64
 #define NODEID_MAX_REMOTE       127
+#define NODEID_PROJECTOR        128
+#define NODEID_SMARTPHONE       139
 #define NODEID_DUMMY            255
 #define BASESERVICE_ADDRESS     0xFE
 #define BROADCAST_ADDRESS       0xFF
@@ -172,5 +174,6 @@ uint8_t ChangeCurrentDevice(uint8_t _newDev);
 void UpdateNodeAddress();
 bool SendMyMessage();
 void EraseCurrentDeviceInfo();
+bool SayHelloToDevice(bool infinate);
 
 #endif /* __GLOBAL_H */

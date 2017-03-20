@@ -87,6 +87,9 @@
         <name>$PROJ_DIR$\..\inc\MyMessage.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\inc\PPTCtrl_Protocol.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\inc\ProtocolParser.h</name>
       </file>
       <file>

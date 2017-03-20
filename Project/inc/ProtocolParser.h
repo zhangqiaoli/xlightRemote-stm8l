@@ -15,5 +15,6 @@ void Msg_DevBrightness(uint8_t _op, uint8_t _br);
 void Msg_DevCCT(uint8_t _op, uint16_t _cct);
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct);
 void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w);
+void Msg_PPT_ObjAction(uint8_t _obj, uint8_t _action);
 
 #endif /* __PROTOCOL_PARSER_H */
