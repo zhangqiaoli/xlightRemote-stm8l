@@ -36,6 +36,10 @@ Connections:
 #define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
 #define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
 
+// Simple Direct Test
+// Uncomment this line to work in Simple Direct Test Mode
+//#define ENABLE_SDTM
+
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen
 #define ENABLE_FLASHLIGHT_LASER
@@ -69,6 +73,24 @@ bool bPowerOn = FALSE;
 uint8_t mutex;
 uint8_t rx_addr[ADDRESS_WIDTH] = {0x11, 0x11, 0x11, 0x11, 0x11};
 uint8_t tx_addr[ADDRESS_WIDTH] = {0x11, 0x11, 0x11, 0x11, 0x11};
+
+bool isIdentityEmpty(const UC *pId, UC nLen)
+{
+  for( int i = 0; i < nLen; i++ ) { if(pId[i] > 0) return FALSE; }
+  return TRUE;
+}
+
+bool isIdentityEqual(const UC *pId1, const UC *pId2, UC nLen)
+{
+  for( int i = 0; i < nLen; i++ ) { if(pId1[i] != pId2[i]) return FALSE; }
+  return TRUE;
+}
+
+bool isNodeIdRequired()
+{
+  return( (IS_NOT_DEVICE_NODEID(CurrentNodeID) && !IS_GROUP_NODEID(CurrentNodeID)) || 
+         isIdentityEmpty(CurrentNetworkID, ADDRESS_WIDTH) || isIdentityEqual(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH) );
+}
 
 static void clock_init(void)
 {
@@ -211,10 +233,12 @@ uint8_t *Read_UniqueID(uint8_t *UniqueID, uint16_t Length)
 // Save config to Flash
 void SaveConfig()
 {
+#ifndef ENABLE_SDTM
   if( gIsChanged ) {
     Flash_WriteBuf(FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS, (uint8_t *)&gConfig, sizeof(gConfig));
     gIsChanged = FALSE;
   }
+#endif  
 }
 
 // Init Device Status
@@ -235,7 +259,8 @@ void LoadConfig()
     // Load the most recent settings from FLASH
     Flash_ReadBuf(FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS, (uint8_t *)&gConfig, sizeof(gConfig));
     if( gConfig.version > XLA_VERSION || gConfig.indDevice >= NUM_DEVICES || 
-        !IS_VALID_REMOTE(gConfig.type) || gConfig.rfPowerLevel > RF24_PA_MAX ) {
+        !IS_VALID_REMOTE(gConfig.type) || gConfig.rfPowerLevel > RF24_PA_MAX 
+          || strcmp(gConfig.Organization, XLA_ORGANIZATION) != 0 ) {
       memset(&gConfig, 0x00, sizeof(gConfig));
       gConfig.version = XLA_VERSION;
       gConfig.indDevice = 0;
@@ -258,17 +283,19 @@ void LoadConfig()
       gIsChanged = TRUE;
       SaveConfig();
     }
-    // Test Only
-    DeviceID(0) = 11;
 }
 
 void UpdateNodeAddress() {
+#ifdef ENABLE_SDTM
+  RF24L01_setup(tx_addr, rx_addr, RF24_CHANNEL, 0);     // Without openning the boardcast pipe
+#else  
   memcpy(rx_addr, CurrentNetworkID, ADDRESS_WIDTH);
   rx_addr[0] = CurrentNodeID;
   memcpy(tx_addr, CurrentNetworkID, ADDRESS_WIDTH);
-  tx_addr[0] = (CurrentNodeID >= BASESERVICE_ADDRESS ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
+  tx_addr[0] = (isNodeIdRequired() ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
   RF24L01_setup(tx_addr, rx_addr, RF24_CHANNEL, BROADCAST_ADDRESS);     // With openning the boardcast pipe
-}
+#endif  
+}  
 
 void EraseCurrentDeviceInfo() {
   CurrentNodeID = BASESERVICE_ADDRESS;
@@ -314,7 +341,7 @@ bool SayHelloToDevice(bool infinate) {
   UpdateNodeAddress();
   while(1) {
     if( _count++ == 0 ) {
-      if( IS_NOT_REMOTE_NODEID(CurrentNodeID) ) {
+      if( isNodeIdRequired() ) {
         Msg_RequestNodeID();
       } else {
         Msg_Presentation();
@@ -394,7 +421,14 @@ int main( void ) {
   NRF2401_EnableIRQ();
 
   // Must establish connection firstly
+#ifdef ENABLE_SDTM
+  gConfig.indDevice = 0;
+  CurrentNodeID = 0x11;
+  CurrentDeviceID = 0x11;
+  UpdateNodeAddress();
+#else  
   SayHelloToDevice(TRUE);
+#endif
 
   // Init Watchdog
   wwdg_init();

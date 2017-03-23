@@ -660,6 +660,8 @@ void btn_very_long_button_press(uint8_t _btn)
     break;
     
   case keylstCenter:
+    // Turn off the laser
+    ledLaserPen(0);
     break;
     
   case keylstFn1:
