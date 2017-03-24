@@ -88,7 +88,7 @@ bool isIdentityEqual(const UC *pId1, const UC *pId2, UC nLen)
 
 bool isNodeIdRequired()
 {
-  return( (IS_NOT_DEVICE_NODEID(CurrentNodeID) && !IS_GROUP_NODEID(CurrentNodeID)) || 
+  return( (IS_NOT_REMOTE_NODEID(CurrentNodeID) && !IS_GROUP_NODEID(CurrentNodeID)) || 
          isIdentityEmpty(CurrentNetworkID, ADDRESS_WIDTH) || isIdentityEqual(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH) );
 }
 

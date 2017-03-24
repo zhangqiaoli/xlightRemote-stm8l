@@ -59,6 +59,9 @@ uint8_t ParseProtocol(){
         // Device/client got Response to Presentation message, ready to work
         gConfig.token = msg.payload.uiValue;
         gConfig.present = (gConfig.token >  0);
+        if(!IS_NOT_DEVICE_NODEID(_type) || IS_GROUP_NODEID(_type) ) {
+          CurrentDeviceID = _type;
+        }
         gIsChanged = TRUE;
         
         // REQ device status
