@@ -36,7 +36,7 @@ ActionState=1
 Enabled=0
 ShowSource=1
 [DebugChecksum]
-Checksum=1645565336
+Checksum=1101753060
 [CallStack]
 ShowArgs=0
 [Disassembly]
@@ -57,9 +57,11 @@ Bp0=_ "STD_CODE" "{$PROJ_DIR$\main.c}.230.5" 0 0 0 0 "" 0 ""
 Bp1=_ "STD_CODE" "{$PROJ_DIR$\ProtocolParser.c}.21.3" 0 0 0 0 "" 0 ""
 Bp2=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.261.5" 1 0 0 0 "" 0 ""
 Bp3=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.430.3" 1 0 0 0 "" 0 ""
-Bp4=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.63.11" 1 0 0 0 "" 0 ""
-Bp5=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.58.7" 1 0 0 0 "" 0 ""
-Count=6
+Bp4=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.67.7" 1 0 0 0 "" 0 ""
+Bp5=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.58.9" 1 0 0 0 "" 0 ""
+Bp6=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.305.3" 1 0 0 0 "" 0 ""
+Bp7=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.270.7" 1 0 0 0 "" 0 ""
+Count=8
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""

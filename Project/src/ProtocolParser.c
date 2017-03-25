@@ -1,6 +1,7 @@
 #include "ProtocolParser.h"
 #include "_global.h"
 #include "MyMessage.h"
+#include "xliNodeConfig.h"
 
 uint8_t bMsgReady = 0;
 
@@ -50,7 +51,15 @@ uint8_t ParseProtocol(){
         Msg_Presentation();
         return 1;
       }
-    }    
+    } else if( _type == I_CONFIG ) {
+      // Node Config
+      switch( _sensor ) {
+      case NCF_DEV_ASSOCIATE:
+        CurrentDeviceID = msg.payload.uiValue / 256;
+        gIsChanged = TRUE;
+        break;
+      }
+    }
     break;
       
   case C_PRESENTATION:

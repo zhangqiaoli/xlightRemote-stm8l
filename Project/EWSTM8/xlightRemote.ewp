@@ -1676,6 +1676,9 @@
       <file>
         <name>$PROJ_DIR$\..\inc\timer.h</name>
       </file>
+      <file>
+        <name>$PROJ_DIR$\..\inc\xliNodeConfig.h</name>
+      </file>
     </group>
     <group>
       <name>src</name>
