@@ -273,7 +273,9 @@ void button_init()
   // Setup Interrupts
   disableInterrupts();
   //GPIO_Init(LEDS_PORT, (LED_PIN_ONOFF | LED_PIN_DEV0 | LED_PIN_DEV1 | LED_PIN_DEV2 | LED_PIN_DEV3), GPIO_Mode_Out_PP_Low_Fast);
+#ifdef ENABLE_FLASHLIGHT_LASER  
   GPIO_Init(LEDS_PORT, (LED_PIN_FLASHLIGHT | LED_PIN_LASERPEN), GPIO_Mode_Out_PP_Low_Fast);
+#endif
   GPIO_Init(BUTTONS_PORT1, (BUTTON_PIN_LEFT | BUTTON_PIN_RIGHT | BUTTON_PIN_UP | BUTTON_PIN_DOWN | BUTTON_PIN_FN4 | BUTTON_PIN_FLASHLIGHT), GPIO_Mode_In_PU_IT);
   GPIO_Init(BUTTONS_PORT2, (BUTTON_PIN_CENTER | BUTTON_PIN_FN1 | BUTTON_PIN_FN2 | BUTTON_PIN_FN3), GPIO_Mode_In_PU_IT);
   EXTI_DeInit();
@@ -301,6 +303,7 @@ void button_init()
 
 void SetFlashlight(uint8_t _st)
 {
+#ifdef ENABLE_FLASHLIGHT_LASER
   if( _st == DEVICE_SW_ON ) {
     ledFlashLight(SET);
   } else if( _st == DEVICE_SW_OFF ) {
@@ -308,10 +311,12 @@ void SetFlashlight(uint8_t _st)
   } else {
     ledToggleFlashLight;
   }
+#endif  
 }
 
 void SetLasterBeam(uint8_t _st)
 {
+#ifdef ENABLE_FLASHLIGHT_LASER
   if( _st == DEVICE_SW_ON ) {
     ledLaserPen(SET);
   } else if( _st == DEVICE_SW_OFF ) {
@@ -319,6 +324,7 @@ void SetLasterBeam(uint8_t _st)
   } else {
     ledToggleLaserPen;
   }
+#endif  
 }
 
 void btn_short_button_press(uint8_t _btn)

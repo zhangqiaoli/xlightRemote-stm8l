@@ -32,17 +32,13 @@ Connections:
 */
 
 // Xlight Application Identification
-#define XLA_VERSION               0x01
+#define XLA_VERSION               0x03
 #define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
 #define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
 
 // Simple Direct Test
 // Uncomment this line to work in Simple Direct Test Mode
 //#define ENABLE_SDTM
-
-// Config Flashlight and Laser
-// Uncomment this line if need Flashlight or Laser Pen
-#define ENABLE_FLASHLIGHT_LASER
 
 // RF channel for the sensor net, 0-127
 #define RF24_CHANNEL	   		71
@@ -408,7 +404,10 @@ int main( void ) {
   // Init Device Status Buffer
   InitDeviceStatus();
   
+  SetLasterBeam(DEVICE_SW_OFF);
+  SetFlashlight(DEVICE_SW_ON);
   delay_ms(1500);   // about 1.5 sec
+  SetFlashlight(DEVICE_SW_OFF);
   
   // Update RF addresses and Setup RF environment
   //gConfig.nodeID = 0x11; // test

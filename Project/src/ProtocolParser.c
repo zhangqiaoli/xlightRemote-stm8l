@@ -54,6 +54,11 @@ uint8_t ParseProtocol(){
     } else if( _type == I_CONFIG ) {
       // Node Config
       switch( _sensor ) {
+      case NCF_QUERY:
+        // Inform controller with version & NCF data
+        Msg_NodeConfigData(_sender);
+        return 1;
+        break;
       case NCF_DEV_ASSOCIATE:
         CurrentDeviceID = msg.payload.uiValue / 256;
         gIsChanged = TRUE;
@@ -129,6 +134,26 @@ uint8_t ParseProtocol(){
   }
   
   return 0;
+}
+
+// Prepare NCF query ack message
+void Msg_NodeConfigData(uint8_t _to) {
+  uint8_t payl_len = 0;
+  build(_to, NCF_QUERY, C_INTERNAL, I_CONFIG, 0, 1);
+
+  msg.payload.data[payl_len++] = gConfig.version;
+  msg.payload.data[payl_len++] = gConfig.type;
+  for(uint8_t _index = 0; _index < NUM_DEVICES; _index++ ) {
+    msg.payload.data[payl_len++] = DeviceID(_index);
+  }
+  msg.payload.data[payl_len++] = 0;     // Reservered
+  msg.payload.data[payl_len++] = 0;     // Reservered
+  msg.payload.data[payl_len++] = 0;     // Reservered
+  msg.payload.data[payl_len++] = 0;     // Reservered
+  
+  miSetLength(payl_len);
+  miSetPayloadType(P_CUSTOM);
+  bMsgReady = 1;
 }
 
 void Msg_RequestNodeID() {

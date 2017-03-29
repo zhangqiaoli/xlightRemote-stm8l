@@ -6,6 +6,10 @@
 #include "string.h"
 #include "stm8l15x_conf.h"
 
+// Config Flashlight and Laser
+// Uncomment this line if need Flashlight or Laser Pen
+#define ENABLE_FLASHLIGHT_LASER
+
 /* Exported types ------------------------------------------------------------*/
 // Common Data Type
 #define UC                        uint8_t
