@@ -142,12 +142,14 @@ void Msg_NodeConfigData(uint8_t _to) {
   build(_to, NCF_QUERY, C_INTERNAL, I_CONFIG, 0, 1);
 
   msg.payload.data[payl_len++] = gConfig.version;
-  msg.payload.data[payl_len++] = gConfig.type;
+  msg.payload.data[payl_len++] = gConfig.type + 224;
+  msg.payload.data[payl_len++] = 0;     // Reservered
+  msg.payload.data[payl_len++] = 0;     // Reservered
+  msg.payload.data[payl_len++] = 0;     // Reservered
+  msg.payload.data[payl_len++] = 0;     // Reservered
   for(uint8_t _index = 0; _index < NUM_DEVICES; _index++ ) {
     msg.payload.data[payl_len++] = DeviceID(_index);
   }
-  msg.payload.data[payl_len++] = 0;     // Reservered
-  msg.payload.data[payl_len++] = 0;     // Reservered
   msg.payload.data[payl_len++] = 0;     // Reservered
   msg.payload.data[payl_len++] = 0;     // Reservered
   
