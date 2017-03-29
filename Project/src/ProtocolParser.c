@@ -62,6 +62,8 @@ uint8_t ParseProtocol(){
       case NCF_DEV_ASSOCIATE:
         CurrentDeviceID = msg.payload.uiValue / 256;
         gIsChanged = TRUE;
+        Msg_NodeConfigAck(_sender, _sensor);
+        return 1;
         break;
       }
     }
@@ -134,6 +136,15 @@ uint8_t ParseProtocol(){
   }
   
   return 0;
+}
+
+void Msg_NodeConfigAck(uint8_t _to, uint8_t _ncf) {
+  build(_to, _ncf, C_INTERNAL, I_CONFIG, 0, 1);
+
+  msg.payload.data[0] = 1;      // OK
+  miSetPayloadType(P_BYTE);
+  miSetLength(1);
+  bMsgReady = 1;
 }
 
 // Prepare NCF query ack message
