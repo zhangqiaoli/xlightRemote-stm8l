@@ -47,7 +47,7 @@ Connections:
 
 // Window Watchdog
 // Uncomment this line if in debug mode
-#define DEBUG_NO_WWDG
+//#define DEBUG_NO_WWDG
 #define WWDG_COUNTER                    0x7f
 #define WWDG_WINDOW                     0x77
 
@@ -275,6 +275,12 @@ void LoadConfig()
       gConfig.devItem[1] = gConfig.devItem[0];
       gConfig.devItem[2] = gConfig.devItem[0];
       gConfig.devItem[3] = gConfig.devItem[0];
+      
+      // Fn Scenario
+      gConfig.fnScenario[0] = 0;
+      gConfig.fnScenario[1] = 0;
+      gConfig.fnScenario[2] = 0;
+      gConfig.fnScenario[3] = 0;
     
       gIsChanged = TRUE;
       SaveConfig();

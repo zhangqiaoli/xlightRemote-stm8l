@@ -59,11 +59,24 @@ uint8_t ParseProtocol(){
         Msg_NodeConfigData(_sender);
         return 1;
         break;
+
       case NCF_DEV_ASSOCIATE:
         CurrentDeviceID = msg.payload.uiValue / 256;
         gIsChanged = TRUE;
         Msg_NodeConfigAck(_sender, _sensor);
         return 1;
+        break;
+
+      case NCF_DATA_FN_SCENARIO:
+        {
+          uint8_t fn_id = msg.payload.data[0];
+          if( fn_id < 4 ) {
+            gConfig.fnScenario[fn_id] = msg.payload.data[1];
+            gIsChanged = TRUE;
+            Msg_NodeConfigAck(_sender, _sensor);
+            return 1;
+          }
+        }
         break;
       }
     }
@@ -161,8 +174,10 @@ void Msg_NodeConfigData(uint8_t _to) {
   for(uint8_t _index = 0; _index < NUM_DEVICES; _index++ ) {
     msg.payload.data[payl_len++] = DeviceID(_index);
   }
-  msg.payload.data[payl_len++] = 0;     // Reservered
-  msg.payload.data[payl_len++] = 0;     // Reservered
+  msg.payload.data[payl_len++] = gConfig.fnScenario[0];
+  msg.payload.data[payl_len++] = gConfig.fnScenario[1];
+  msg.payload.data[payl_len++] = gConfig.fnScenario[2];
+  msg.payload.data[payl_len++] = gConfig.fnScenario[3];
   
   miSetLength(payl_len);
   miSetPayloadType(P_CUSTOM);
@@ -198,7 +213,7 @@ void Msg_RequestDeviceStatus(UC _nodeID) {
 
 // Set current device 1:On; 0:Off; 2:toggle
 void Msg_DevOnOff(uint8_t _sw) {
-  if( bMsgReady ) return;
+  SendMyMessage();
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_STATUS, 1, 0);
   miSetLength(1);
   miSetPayloadType(P_BYTE);
@@ -208,7 +223,7 @@ void Msg_DevOnOff(uint8_t _sw) {
 
 // Set current device brightness
 void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
-  if( bMsgReady ) return;
+  SendMyMessage();
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_PERCENTAGE, 1, 0);
   miSetLength(2);
   miSetPayloadType(P_BYTE);
@@ -219,7 +234,7 @@ void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
 
 // Set current device CCT
 void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
-  if( bMsgReady ) return;
+  SendMyMessage();
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_LEVEL, 1, 0);
   miSetLength(3);
   miSetPayloadType(P_UINT16);
@@ -231,7 +246,7 @@ void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
 
 // Set current device brightness & CCT
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
-  if( bMsgReady ) return;
+  SendMyMessage();
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_RGBW, 1, 0);
   miSetLength(5);
   miSetPayloadType(P_CUSTOM);
@@ -245,7 +260,7 @@ void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
 
 // Set current device brightness & RGBW
 void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w) {
-  if( bMsgReady ) return;
+  SendMyMessage();
   build(CurrentDeviceID, CurrentNodeID, C_SET, V_RGBW, 1, 0);
   miSetLength(7);
   miSetPayloadType(P_CUSTOM);
@@ -259,9 +274,19 @@ void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w)
   bMsgReady = 1;
 }
 
+// Change scenario on current device
+void Msg_DevScenario(uint8_t _scenario) {
+  SendMyMessage();
+  build(CurrentDeviceID, CurrentNodeID, C_SET, V_SCENE_ON, 1, 0);
+  miSetLength(1);
+  miSetPayloadType(P_BYTE);
+  msg.payload.bValue = _scenario;
+  bMsgReady = 1;
+}
+
 // PPT Object Action
 void Msg_PPT_ObjAction(uint8_t _obj, uint8_t _action) {
-  if( bMsgReady ) return;
+  SendMyMessage();
   build(CurrentDeviceID, NODEID_PROJECTOR, C_SET, V_STATUS, 1, 0);
   miSetLength(4);
   miSetPayloadType(P_CUSTOM);

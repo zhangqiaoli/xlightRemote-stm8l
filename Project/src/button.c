@@ -98,20 +98,20 @@ LEDs
 #define BTN_STEP_LONG_CCT       800
 #define BTN_BR_LOW              10
 
-#define BTN_FN1_BR              100
-#define BTN_FN1_CCT             2700
+#define BTN_FN1_BR              90
+#define BTN_FN1_CCT             3000
 
-#define BTN_FN2_BR              25
-#define BTN_FN2_CCT             3000
+#define BTN_FN2_BR              20
+#define BTN_FN2_CCT             3500
 
-#define BTN_FN3_BR              85
+#define BTN_FN3_BR              75
 #define BTN_FN3_CCT             5000
 #define BTN_FN3_W               0
 #define BTN_FN3_R               230
 #define BTN_FN3_G               32  
 #define BTN_FN3_B               80
 
-#define BTN_FN4_BR              100
+#define BTN_FN4_BR              85
 #define BTN_FN4_CCT             6000
 
 static button_timer_status_t  m_btn_timer_status[keylstDummy] = {BUTTON_STATUS_INIT};
@@ -385,24 +385,41 @@ void btn_short_button_press(uint8_t _btn)
     break;
     
   case keylstFn1:
-    Msg_DevBR_CCT(80, BTN_FN1_CCT);
+    if( gConfig.fnScenario[0] > 0 ) {
+      Msg_DevScenario(gConfig.fnScenario[0]);
+    } else {
+      Msg_DevBR_CCT(BTN_FN1_BR, BTN_FN1_CCT);
+    }
     // Toggle lights on/off, in stead of keylstCenter for testing
     //Msg_DevOnOff(DEVICE_SW_TOGGLE);
     break;
     
   case keylstFn2:
-    Msg_DevBR_CCT(10, BTN_FN2_CCT);
+    if( gConfig.fnScenario[1] > 0 ) {
+      Msg_DevScenario(gConfig.fnScenario[1]);
+    } else {
+      Msg_DevBR_CCT(BTN_FN2_BR, BTN_FN2_CCT);
+    }
     break;
     
   case keylstFn3:
-    //if( IS_SUNNY(CurrentDeviceType) ) {
-    //  Msg_DevBR_CCT(BTN_FN3_BR, BTN_FN3_CCT);
-    //} else {
-      Msg_DevBR_RGBW(BTN_FN2_BR, BTN_FN3_R, BTN_FN3_G, BTN_FN3_B, BTN_FN3_W);
-    //}
+    if( gConfig.fnScenario[2] > 0 ) {
+      Msg_DevScenario(gConfig.fnScenario[2]);
+    } else {
+      if( IS_SUNNY(CurrentDeviceType) ) {
+        Msg_DevBR_CCT(BTN_FN3_BR, BTN_FN3_CCT);
+      } else {
+        Msg_DevBR_RGBW(BTN_FN2_BR, BTN_FN3_R, BTN_FN3_G, BTN_FN3_B, BTN_FN3_W);
+      }
+    }
     break;
     
   case keylstFn4:
+    if( gConfig.fnScenario[3] > 0 ) {
+      Msg_DevScenario(gConfig.fnScenario[3]);
+    } else {
+      Msg_DevBR_CCT(BTN_FN4_BR, BTN_FN4_CCT);
+    }
     break;
 
   case keylstFLASH:

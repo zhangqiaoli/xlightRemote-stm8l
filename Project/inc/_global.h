@@ -8,7 +8,7 @@
 
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen
-#define ENABLE_FLASHLIGHT_LASER
+//#define ENABLE_FLASHLIGHT_LASER
 
 /* Exported types ------------------------------------------------------------*/
 // Common Data Type
@@ -59,7 +59,7 @@
 #define CT_STEP                 ((CT_MAX_VALUE-CT_MIN_VALUE)/10)
 
 #define UNIQUE_ID_LEN           8
-#define NUM_DEVICES             4
+#define NUM_DEVICES             2
 
 // Device (lamp) type
 typedef enum
@@ -130,6 +130,7 @@ typedef struct
   UC rfPowerLevel             :2;           // RF Power Level 0..3
   UC Reserved1                :6;           // Reserved bits
   DeviceInfo_t devItem[NUM_DEVICES];
+  UC fnScenario[4];
 } Config_t;
 
 extern Config_t gConfig;
