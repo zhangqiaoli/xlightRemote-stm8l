@@ -48,6 +48,7 @@ uint8_t ParseProtocol(){
         gIsChanged = TRUE;
         memcpy(CurrentNetworkID, msg.payload.data, sizeof(CurrentNetworkID));
         UpdateNodeAddress();
+        LED_Blink(5, TRUE);
         Msg_Presentation();
         return 1;
       }

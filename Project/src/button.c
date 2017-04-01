@@ -132,6 +132,16 @@ void app_button_event_handler(uint8_t _btn, button_event_t button_event);
 void button_push(uint8_t _btn);
 void button_release(uint8_t _btn);
 
+// Blink LED to indicate starting
+void LED_Blink(uint8_t _times, bool _fast) {
+  for( uint8_t i = 0; i < _times; i++ ) {
+    SetFlashlight(DEVICE_SW_ON);
+    delay_ms(_fast ? 200 : 500);
+    SetFlashlight(DEVICE_SW_OFF);
+    delay_ms(_fast ? 200 : 500);
+  }
+}
+
 // Change device selection LEDs according to current device index
 void SelectDeviceLED(uint8_t _dev) {
   switch(_dev) {
@@ -147,13 +157,6 @@ void SelectDeviceLED(uint8_t _dev) {
     //ledDevice1(0);
     //ledDevice2(1);
     //ledDevice3(0);
-    break;
-
-  case 3:
-    //ledDevice0(0);
-    //ledDevice1(0);
-    //ledDevice2(0);
-    //ledDevice3(1);
     break;
 
   default:
@@ -649,6 +652,7 @@ void btn_very_long_hold_button_press(uint8_t _btn)
     
   case keylstFn3:
     // Erase current device infomation
+    LED_Blink(3, TRUE);
     EraseCurrentDeviceInfo();
     SayHelloToDevice(FALSE);
     break;
