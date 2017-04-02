@@ -42,12 +42,12 @@ uint8_t ParseProtocol(){
     if( _type == I_ID_RESPONSE ) {
       // Device/client got nodeID from Controller
       uint8_t lv_nodeID = _sensor;
-      if( lv_nodeID == NODEID_GATEWAY || lv_nodeID == NODEID_DUMMY ) {
+      if( IS_NOT_REMOTE_NODEID(lv_nodeID) && !IS_GROUP_NODEID(lv_nodeID) ) {
       } else {
         CurrentNodeID = lv_nodeID;
-        gIsChanged = TRUE;
         memcpy(CurrentNetworkID, msg.payload.data, sizeof(CurrentNetworkID));
         UpdateNodeAddress();
+        gIsChanged = TRUE;
         LED_Blink(5, TRUE);
         Msg_Presentation();
         return 1;

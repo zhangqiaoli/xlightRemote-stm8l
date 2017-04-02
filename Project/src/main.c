@@ -254,8 +254,9 @@ void LoadConfig()
 {
     // Load the most recent settings from FLASH
     Flash_ReadBuf(FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS, (uint8_t *)&gConfig, sizeof(gConfig));
-    if( gConfig.version > XLA_VERSION || gConfig.indDevice >= NUM_DEVICES || 
-        !IS_VALID_REMOTE(gConfig.type) || gConfig.rfPowerLevel > RF24_PA_MAX 
+    if( gConfig.version > XLA_VERSION || gConfig.indDevice >= NUM_DEVICES 
+          || !IS_VALID_REMOTE(gConfig.type) || isNodeIdRequired()
+          || gConfig.rfPowerLevel > RF24_PA_MAX 
           || strcmp(gConfig.Organization, XLA_ORGANIZATION) != 0 ) {
       memset(&gConfig, 0x00, sizeof(gConfig));
       gConfig.version = XLA_VERSION;
@@ -271,7 +272,7 @@ void LoadConfig()
       // Set device info
       NodeID(0) = BASESERVICE_ADDRESS;       // NODEID_MIN_REMOTE; BASESERVICE_ADDRESS; NODEID_DUMMY
       DeviceID(0) = NODEID_MAINDEVICE;
-      DeviceType(0) = devtypUnknown;
+      DeviceType(0) = devtypDummy;
       gConfig.devItem[1] = gConfig.devItem[0];
       gConfig.devItem[2] = gConfig.devItem[0];
       gConfig.devItem[3] = gConfig.devItem[0];
@@ -302,7 +303,7 @@ void UpdateNodeAddress() {
 void EraseCurrentDeviceInfo() {
   CurrentNodeID = BASESERVICE_ADDRESS;
   CurrentDeviceID = NODEID_MAINDEVICE;
-  CurrentDeviceType = devtypUnknown;
+  CurrentDeviceType = devtypMRing3;
   CurrentDevicePresent = 0;
   memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
   gIsChanged = TRUE;
@@ -453,7 +454,7 @@ int main( void ) {
     SaveConfig();
     
     // Enter Low Power Mode
-    if( tmrIdleDuration > TIMEOUT_IDLE ) {
+    if( tmrIdleDuration > TIMEOUT_IDLE && !isNodeIdRequired() ) {
       tmrIdleDuration = 0;
       lowpower_config();
       bPowerOn = FALSE;
