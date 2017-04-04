@@ -414,7 +414,7 @@ int main( void ) {
   // Blink LED to indicate starting
   SetLasterBeam(DEVICE_SW_OFF);
   SetFlashlight(DEVICE_SW_OFF);
-  LED_Blink(2, FALSE);
+  LED_Blink(3, FALSE);
  
   // Update RF addresses and Setup RF environment
   //gConfig.nodeID = 0x11; // test

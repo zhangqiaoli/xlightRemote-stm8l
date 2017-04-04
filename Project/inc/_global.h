@@ -8,7 +8,7 @@
 
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen
-//#define ENABLE_FLASHLIGHT_LASER
+#define ENABLE_FLASHLIGHT_LASER
 
 /* Exported types ------------------------------------------------------------*/
 // Common Data Type
@@ -176,6 +176,7 @@ extern uint8_t _uniqueID[UNIQUE_ID_LEN];
 #define CurrentDevice_G            DEVST_G(gConfig.indDevice)
 #define CurrentDevice_B            DEVST_B(gConfig.indDevice)
 
+bool WaitMutex(uint32_t _timeout);
 void UpdateNodeAddress(void);
 void RF24L01_IRQ_Handler();
 uint8_t ChangeCurrentDevice(uint8_t _newDev);

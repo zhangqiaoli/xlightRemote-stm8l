@@ -135,10 +135,14 @@ void button_release(uint8_t _btn);
 // Blink LED to indicate starting
 void LED_Blink(uint8_t _times, bool _fast) {
   for( uint8_t i = 0; i < _times; i++ ) {
-    SetFlashlight(DEVICE_SW_ON);
-    delay_ms(_fast ? 200 : 500);
-    SetFlashlight(DEVICE_SW_OFF);
-    delay_ms(_fast ? 200 : 500);
+    //SetFlashlight(DEVICE_SW_ON);
+    SetLasterBeam(DEVICE_SW_ON);
+    //delay_ms(_fast ? 200 : 500);
+    WaitMutex(_fast ? 0x4FFF : 0xBFFF);
+    //SetFlashlight(DEVICE_SW_OFF);
+    SetLasterBeam(DEVICE_SW_OFF);
+    //delay_ms(_fast ? 200 : 500);
+    WaitMutex(_fast ? 0x4FFF : 0xBFFF);
   }
 }
 
@@ -652,7 +656,7 @@ void btn_very_long_hold_button_press(uint8_t _btn)
     
   case keylstFn3:
     // Erase current device infomation
-    LED_Blink(3, TRUE);
+    LED_Blink(8, TRUE);
     EraseCurrentDeviceInfo();
     SayHelloToDevice(FALSE);
     break;

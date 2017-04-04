@@ -2,6 +2,7 @@
 #include "_global.h"
 #include "MyMessage.h"
 #include "xliNodeConfig.h"
+#include "button.h"
 
 uint8_t bMsgReady = 0;
 
@@ -48,8 +49,10 @@ uint8_t ParseProtocol(){
         memcpy(CurrentNetworkID, msg.payload.data, sizeof(CurrentNetworkID));
         UpdateNodeAddress();
         gIsChanged = TRUE;
-        LED_Blink(5, TRUE);
+        LED_Blink(3, TRUE);
         Msg_Presentation();
+        LED_Blink(2, FALSE);
+        LED_Blink(3, TRUE);
         return 1;
       }
     } else if( _type == I_CONFIG ) {
