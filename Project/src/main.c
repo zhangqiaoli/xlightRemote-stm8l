@@ -286,6 +286,11 @@ void LoadConfig()
       gIsChanged = TRUE;
       SaveConfig();
     }
+    // Test for CR05
+    //CurrentDeviceID = 255;
+    //gConfig.fnScenario[0] = 2;
+    //gConfig.fnScenario[1] = 3;
+    //gConfig.fnScenario[2] = 1;
 }
 
 void UpdateNodeAddress() {
@@ -301,6 +306,7 @@ void UpdateNodeAddress() {
 }  
 
 void EraseCurrentDeviceInfo() {
+  LED_Blink(TRUE, 8, TRUE);
   CurrentNodeID = BASESERVICE_ADDRESS;
   CurrentDeviceID = NODEID_MAINDEVICE;
   CurrentDeviceType = devtypMRing3;
@@ -414,7 +420,7 @@ int main( void ) {
   // Blink LED to indicate starting
   SetLasterBeam(DEVICE_SW_OFF);
   SetFlashlight(DEVICE_SW_OFF);
-  LED_Blink(3, FALSE);
+  LED_Blink(TRUE, 3, FALSE);
  
   // Update RF addresses and Setup RF environment
   //gConfig.nodeID = 0x11; // test

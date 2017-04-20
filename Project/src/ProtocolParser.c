@@ -49,10 +49,10 @@ uint8_t ParseProtocol(){
         memcpy(CurrentNetworkID, msg.payload.data, sizeof(CurrentNetworkID));
         UpdateNodeAddress();
         gIsChanged = TRUE;
-        LED_Blink(3, TRUE);
+        LED_Blink(TRUE, 3, TRUE);
         Msg_Presentation();
-        LED_Blink(2, FALSE);
-        LED_Blink(3, TRUE);
+        LED_Blink(TRUE, 2, FALSE);
+        LED_Blink(TRUE, 3, TRUE);
         return 1;
       }
     } else if( _type == I_CONFIG ) {
@@ -293,10 +293,10 @@ void Msg_PPT_ObjAction(uint8_t _obj, uint8_t _action) {
   SendMyMessage();
   build(CurrentDeviceID, NODEID_PROJECTOR, C_SET, V_STATUS, 1, 0);
   miSetLength(4);
-  miSetPayloadType(P_CUSTOM);
+  miSetPayloadType(P_STRING);
   msg.payload.data[0] = _obj;
   msg.payload.data[1] = _action;
-  msg.payload.data[2] = 0;      // Reserved
-  msg.payload.data[3] = 0;      // Reserved
+  msg.payload.data[2] = '0';      // Reserved
+  msg.payload.data[3] = '0';      // Reserved
   bMsgReady = 1;
 }

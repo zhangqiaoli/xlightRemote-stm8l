@@ -132,17 +132,31 @@ void app_button_event_handler(uint8_t _btn, button_event_t button_event);
 void button_push(uint8_t _btn);
 void button_release(uint8_t _btn);
 
+// Switch PPT mode
+void SwitchPPTMode(bool _sw) {
+  gConfig.inPresentation = _sw;
+  if( _sw ) {
+    LED_Blink(FALSE, 9, TRUE);
+  } else {
+    LED_Blink(TRUE, 9, TRUE);
+  }
+}
+
 // Blink LED to indicate starting
-void LED_Blink(uint8_t _times, bool _fast) {
+void LED_Blink(bool _flash, uint8_t _times, bool _fast) {
   for( uint8_t i = 0; i < _times; i++ ) {
-    //SetFlashlight(DEVICE_SW_ON);
-    SetLasterBeam(DEVICE_SW_ON);
+    if( _flash )
+      SetFlashlight(DEVICE_SW_ON);
+    else
+      SetLasterBeam(DEVICE_SW_ON);
     //delay_ms(_fast ? 200 : 500);
-    WaitMutex(_fast ? 0x4FFF : 0xBFFF);
-    //SetFlashlight(DEVICE_SW_OFF);
-    SetLasterBeam(DEVICE_SW_OFF);
+    WaitMutex(_fast ? 0x5FFF : 0xBFFF);
+    if( _flash )
+      SetFlashlight(DEVICE_SW_OFF);
+    else
+      SetLasterBeam(DEVICE_SW_OFF);
     //delay_ms(_fast ? 200 : 500);
-    WaitMutex(_fast ? 0x4FFF : 0xBFFF);
+    WaitMutex(_fast ? 0x5FFF : 0xBFFF);
   }
 }
 
@@ -489,7 +503,7 @@ void btn_double_button_press(uint8_t _btn)
     
   case keylstFn1:
     // Toggle In-presentation flag
-    gConfig.inPresentation = !gConfig.inPresentation;
+    SwitchPPTMode(!gConfig.inPresentation);
     break;
     
   case keylstFn2:
@@ -605,7 +619,7 @@ void btn_long_button_press(uint8_t _btn)
     
   case keylstFn1:
     // Toggle In-presentation flag
-    gConfig.inPresentation = !gConfig.inPresentation;
+    SwitchPPTMode(!gConfig.inPresentation);
     break;
     
   case keylstFn2:
@@ -656,7 +670,6 @@ void btn_very_long_hold_button_press(uint8_t _btn)
     
   case keylstFn3:
     // Erase current device infomation
-    LED_Blink(8, TRUE);
     EraseCurrentDeviceInfo();
     SayHelloToDevice(FALSE);
     break;
