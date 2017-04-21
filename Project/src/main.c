@@ -38,7 +38,7 @@ Connections:
 
 // Simple Direct Test
 // Uncomment this line to work in Simple Direct Test Mode
-//#define ENABLE_SDTM
+#define ENABLE_SDTM
 
 // RF channel for the sensor net, 0-127
 #define RF24_CHANNEL	   		71
@@ -67,8 +67,8 @@ uint8_t _uniqueID[UNIQUE_ID_LEN];
 // Moudle variables
 bool bPowerOn = FALSE;
 uint8_t mutex;
-uint8_t rx_addr[ADDRESS_WIDTH] = {0x11, 0x11, 0x11, 0x11, 0x11};
-uint8_t tx_addr[ADDRESS_WIDTH] = {0x11, 0x11, 0x11, 0x11, 0x11};
+uint8_t rx_addr[ADDRESS_WIDTH];
+uint8_t tx_addr[ADDRESS_WIDTH];
 
 bool isIdentityEmpty(const UC *pId, UC nLen)
 {
@@ -294,18 +294,19 @@ void LoadConfig()
 }
 
 void UpdateNodeAddress() {
-#ifdef ENABLE_SDTM
-  RF24L01_setup(tx_addr, rx_addr, RF24_CHANNEL, 0);     // Without openning the boardcast pipe
-#else  
   memcpy(rx_addr, CurrentNetworkID, ADDRESS_WIDTH);
   rx_addr[0] = CurrentNodeID;
   memcpy(tx_addr, CurrentNetworkID, ADDRESS_WIDTH);
+#ifdef ENABLE_SDTM  
+  tx_addr[0] = CurrentDeviceID;
+#else
   tx_addr[0] = (isNodeIdRequired() ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
-  RF24L01_setup(tx_addr, rx_addr, RF24_CHANNEL, BROADCAST_ADDRESS);     // With openning the boardcast pipe
 #endif  
+  RF24L01_setup(tx_addr, rx_addr, RF24_CHANNEL, BROADCAST_ADDRESS);     // With openning the boardcast pipe
 }  
 
 void EraseCurrentDeviceInfo() {
+#ifndef ENABLE_SDTM  
   LED_Blink(TRUE, 8, TRUE);
   CurrentNodeID = BASESERVICE_ADDRESS;
   CurrentDeviceID = NODEID_MAINDEVICE;
@@ -314,6 +315,7 @@ void EraseCurrentDeviceInfo() {
   memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
   gIsChanged = TRUE;
   SaveConfig();
+#endif
 }
 
 bool WaitMutex(uint32_t _timeout) {
@@ -435,8 +437,9 @@ int main( void ) {
   // Must establish connection firstly
 #ifdef ENABLE_SDTM
   gConfig.indDevice = 0;
-  CurrentNodeID = 0x11;
-  CurrentDeviceID = 0x11;
+  CurrentNodeID = NODEID_MIN_REMOTE;
+  CurrentDeviceID = BASESERVICE_ADDRESS;
+  memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
   UpdateNodeAddress();
 #else  
   SayHelloToDevice(TRUE);

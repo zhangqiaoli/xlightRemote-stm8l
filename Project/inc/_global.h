@@ -8,7 +8,7 @@
 
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen
-#define ENABLE_FLASHLIGHT_LASER
+//#define ENABLE_FLASHLIGHT_LASER
 
 /* Exported types ------------------------------------------------------------*/
 // Common Data Type

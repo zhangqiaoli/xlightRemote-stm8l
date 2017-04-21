@@ -41,17 +41,18 @@ LEDs
 
 // Button pin map
 #define BUTTONS_PORT1           (GPIOD)
-/*
+
 #define BUTTON_PIN_LEFT         (GPIO_Pin_0)
 #define BUTTON_PIN_RIGHT        (GPIO_Pin_1)
 #define BUTTON_PIN_UP           (GPIO_Pin_2)
 #define BUTTON_PIN_DOWN         (GPIO_Pin_3)
-*/
+
+/*
 #define BUTTON_PIN_UP           (GPIO_Pin_0)
 #define BUTTON_PIN_DOWN         (GPIO_Pin_1)
 #define BUTTON_PIN_LEFT         (GPIO_Pin_2)
 #define BUTTON_PIN_RIGHT        (GPIO_Pin_3)
-
+*/
 #define BUTTON_PIN_FN4          (GPIO_Pin_6)
 #define BUTTON_PIN_FLASHLIGHT   (GPIO_Pin_7)    // Reserved
 
