@@ -42,17 +42,18 @@ LEDs
 // Button pin map
 #define BUTTONS_PORT1           (GPIOD)
 // Old PCB before 2017-03-20
+/*
 #define BUTTON_PIN_LEFT         (GPIO_Pin_0)
 #define BUTTON_PIN_RIGHT        (GPIO_Pin_1)
 #define BUTTON_PIN_UP           (GPIO_Pin_2)
 #define BUTTON_PIN_DOWN         (GPIO_Pin_3)
+*/
 // New PCB from 2017-03-20
-/*
 #define BUTTON_PIN_UP           (GPIO_Pin_0)
 #define BUTTON_PIN_DOWN         (GPIO_Pin_1)
 #define BUTTON_PIN_LEFT         (GPIO_Pin_2)
 #define BUTTON_PIN_RIGHT        (GPIO_Pin_3)
-*/
+
 #define BUTTON_PIN_FN4          (GPIO_Pin_6)
 #define BUTTON_PIN_FLASHLIGHT   (GPIO_Pin_7)    // Reserved
 
@@ -407,24 +408,36 @@ void btn_short_button_press(uint8_t _btn)
     break;
     
   case keylstFn1:
+#ifdef ENABLE_SDTM
+    // Pure Red
+    Msg_DevBR_RGBW(60, 255, 0, 0, 0);
+#else    
     if( gConfig.fnScenario[0] > 0 ) {
       Msg_DevScenario(gConfig.fnScenario[0]);
     } else {
       Msg_DevBR_CCT(BTN_FN1_BR, BTN_FN1_CCT);
     }
-    // Toggle lights on/off, in stead of keylstCenter for testing
-    //Msg_DevOnOff(DEVICE_SW_TOGGLE);
+#endif
     break;
     
   case keylstFn2:
+#ifdef ENABLE_SDTM
+    // Pure Green
+    Msg_DevBR_RGBW(60, 0, 255, 0, 0);
+#else    
     if( gConfig.fnScenario[1] > 0 ) {
       Msg_DevScenario(gConfig.fnScenario[1]);
     } else {
       Msg_DevBR_CCT(BTN_FN2_BR, BTN_FN2_CCT);
     }
+#endif
     break;
     
   case keylstFn3:
+#ifdef ENABLE_SDTM
+    // Pure Blue
+    Msg_DevBR_RGBW(60, 0, 0, 255, 0);
+#else    
     if( gConfig.fnScenario[2] > 0 ) {
       Msg_DevScenario(gConfig.fnScenario[2]);
     } else {
@@ -434,14 +447,20 @@ void btn_short_button_press(uint8_t _btn)
         Msg_DevBR_RGBW(BTN_FN2_BR, BTN_FN3_R, BTN_FN3_G, BTN_FN3_B, BTN_FN3_W);
       }
     }
+#endif    
     break;
     
   case keylstFn4:
+#ifdef ENABLE_SDTM
+    // Pure White
+    Msg_DevBR_RGBW(60, 0, 0, 0, 255);
+#else    
     if( gConfig.fnScenario[3] > 0 ) {
       Msg_DevScenario(gConfig.fnScenario[3]);
     } else {
       Msg_DevBR_CCT(BTN_FN4_BR, BTN_FN4_CCT);
     }
+#endif    
     break;
 
   case keylstFLASH:

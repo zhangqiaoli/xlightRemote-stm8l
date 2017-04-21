@@ -36,10 +36,6 @@ Connections:
 #define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
 #define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
 
-// Simple Direct Test
-// Uncomment this line to work in Simple Direct Test Mode
-#define ENABLE_SDTM
-
 // RF channel for the sensor net, 0-127
 #define RF24_CHANNEL	   		71
 #define ADDRESS_WIDTH                   5
@@ -297,7 +293,7 @@ void UpdateNodeAddress() {
   memcpy(rx_addr, CurrentNetworkID, ADDRESS_WIDTH);
   rx_addr[0] = CurrentNodeID;
   memcpy(tx_addr, CurrentNetworkID, ADDRESS_WIDTH);
-#ifdef ENABLE_SDTM  
+#ifdef ENABLE_SDTM
   tx_addr[0] = CurrentDeviceID;
 #else
   tx_addr[0] = (isNodeIdRequired() ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
