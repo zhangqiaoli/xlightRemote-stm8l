@@ -401,6 +401,8 @@ void OperationIndicator() {
     if( step >= 10 ) {
       gDelayedOperation = 0;    // Finished
       SetFlashlight(DEVICE_SW_OFF);
+      // Soft reset
+      WWDG->CR = 0x80;
     } else {
       if( step == 0 ) {
         SetFlashlight(DEVICE_SW_ON);
