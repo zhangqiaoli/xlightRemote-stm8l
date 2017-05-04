@@ -42,18 +42,17 @@ LEDs
 // Button pin map
 #define BUTTONS_PORT1           (GPIOD)
 // Old PCB before 2017-03-20
-/*
 #define BUTTON_PIN_LEFT         (GPIO_Pin_0)
 #define BUTTON_PIN_RIGHT        (GPIO_Pin_1)
 #define BUTTON_PIN_UP           (GPIO_Pin_2)
 #define BUTTON_PIN_DOWN         (GPIO_Pin_3)
-*/
 // New PCB from 2017-03-20
+/*
 #define BUTTON_PIN_UP           (GPIO_Pin_0)
 #define BUTTON_PIN_DOWN         (GPIO_Pin_1)
 #define BUTTON_PIN_LEFT         (GPIO_Pin_2)
 #define BUTTON_PIN_RIGHT        (GPIO_Pin_3)
-
+*/
 #define BUTTON_PIN_FN4          (GPIO_Pin_6)
 #define BUTTON_PIN_FLASHLIGHT   (GPIO_Pin_7)    // Reserved
 
@@ -137,29 +136,25 @@ void button_release(uint8_t _btn);
 // Switch PPT mode
 void SwitchPPTMode(bool _sw) {
   gConfig.inPresentation = _sw;
-  if( _sw ) {
-    LED_Blink(FALSE, 9, TRUE);
-  } else {
-    LED_Blink(TRUE, 9, TRUE);
+  if( gDelayedOperation == 0 ) {
+    gDelayedOperation = _sw ? DELAY_OP_PPTMODE_ON : DELAY_OP_PPTMODE_OFF;
   }
 }
 
 // Blink LED to indicate starting
-void LED_Blink(bool _flash, uint8_t _times, bool _fast) {
-  for( uint8_t i = 0; i < _times; i++ ) {
-    if( _flash )
-      SetFlashlight(DEVICE_SW_ON);
-    else
-      SetLasterBeam(DEVICE_SW_ON);
-    //delay_ms(_fast ? 200 : 500);
-    WaitMutex(_fast ? 0x5FFF : 0xBFFF);
-    if( _flash )
-      SetFlashlight(DEVICE_SW_OFF);
-    else
-      SetLasterBeam(DEVICE_SW_OFF);
-    //delay_ms(_fast ? 200 : 500);
-    WaitMutex(_fast ? 0x5FFF : 0xBFFF);
-  }
+void LED_Blink(bool _flash, bool _fast) {
+  if( _flash )
+    SetFlashlight(DEVICE_SW_ON);
+  else
+    SetLasterBeam(DEVICE_SW_ON);
+  //delay_ms(_fast ? 200 : 500);
+  WaitMutex(_fast ? 0x4FFF : 0xBFFF);
+  if( _flash )
+    SetFlashlight(DEVICE_SW_OFF);
+  else
+    SetLasterBeam(DEVICE_SW_OFF);
+  //delay_ms(_fast ? 200 : 500);
+  WaitMutex(_fast ? 0x4FFF : 0xBFFF);
 }
 
 // Change device selection LEDs according to current device index
@@ -691,7 +686,6 @@ void btn_very_long_hold_button_press(uint8_t _btn)
   case keylstFn3:
     // Erase current device infomation
     EraseCurrentDeviceInfo();
-    SayHelloToDevice(FALSE);
     break;
     
   case keylstFn4:
