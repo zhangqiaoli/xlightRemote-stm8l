@@ -45,6 +45,12 @@ uint8_t ParseProtocol(){
       uint8_t lv_nodeID = _sensor;
       if( IS_NOT_REMOTE_NODEID(lv_nodeID) && !IS_GROUP_NODEID(lv_nodeID) ) {
       } else {
+        if( miGetLength() > 8 ) {
+          // Verify _uniqueID        
+          if(!isIdentityEqual(_uniqueID, msg.payload.data+8, UNIQUE_ID_LEN)) {
+            return 0;
+          }
+        }
         CurrentNodeID = lv_nodeID;
         memcpy(CurrentNetworkID, msg.payload.data, sizeof(CurrentNetworkID));
         UpdateNodeAddress();

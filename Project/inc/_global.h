@@ -187,6 +187,7 @@ extern uint8_t gDelayedOperation;
 #define CurrentDevice_G            DEVST_G(gConfig.indDevice)
 #define CurrentDevice_B            DEVST_B(gConfig.indDevice)
 
+bool isIdentityEqual(const UC *pId1, const UC *pId2, UC nLen);
 bool WaitMutex(uint32_t _timeout);
 void UpdateNodeAddress(void);
 void RF24L01_IRQ_Handler();
