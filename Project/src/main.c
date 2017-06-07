@@ -81,8 +81,12 @@ bool isIdentityEqual(const UC *pId1, const UC *pId2, UC nLen)
 
 bool isNodeIdRequired()
 {
+#ifndef ENABLE_SDTM  
   return( (IS_NOT_REMOTE_NODEID(CurrentNodeID) && !IS_GROUP_NODEID(CurrentNodeID)) || 
          isIdentityEmpty(CurrentNetworkID, ADDRESS_WIDTH) || isIdentityEqual(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH) );
+#else
+  return FALSE;
+#endif  
 }
 
 static void clock_init(void)
@@ -253,8 +257,8 @@ void LoadConfig()
     Flash_ReadBuf(FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS, (uint8_t *)&gConfig, sizeof(gConfig));
     if( gConfig.version > XLA_VERSION || gConfig.indDevice >= NUM_DEVICES 
           || !IS_VALID_REMOTE(gConfig.type) || isNodeIdRequired()
-          || gConfig.rfPowerLevel > RF24_PA_MAX 
-          || strcmp(gConfig.Organization, XLA_ORGANIZATION) != 0 ) {
+            || gConfig.rfPowerLevel > RF24_PA_MAX ) {
+          //|| strcmp(gConfig.Organization, XLA_ORGANIZATION) != 0 ) {
       memset(&gConfig, 0x00, sizeof(gConfig));
       gConfig.version = XLA_VERSION;
       gConfig.indDevice = 0;
@@ -263,8 +267,8 @@ void LoadConfig()
       gConfig.type = remotetypRFStandard;
       gConfig.rfPowerLevel = RF24_PA_MAX;
       memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
-      sprintf(gConfig.Organization, "%s", XLA_ORGANIZATION);
-      sprintf(gConfig.ProductName, "%s", XLA_PRODUCT_NAME);
+      //sprintf(gConfig.Organization, "%s", XLA_ORGANIZATION);
+      //sprintf(gConfig.ProductName, "%s", XLA_PRODUCT_NAME);
 
       // Set device info
       NodeID(0) = BASESERVICE_ADDRESS;       // NODEID_MIN_REMOTE; BASESERVICE_ADDRESS; NODEID_DUMMY
