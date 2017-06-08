@@ -55,7 +55,7 @@ LEDs
 #define BUTTON_PIN_RIGHT        (GPIO_Pin_3)
 
 #define BUTTON_PIN_FN4          (GPIO_Pin_6)
-#define BUTTON_PIN_FLASHLIGHT   (GPIO_Pin_7)    // Reserved
+#define BUTTON_PIN_SA           (GPIO_Pin_7)
 
 #define BUTTONS_PORT2           (GPIOB)
 #define BUTTON_PIN_CENTER       (GPIO_Pin_0)
@@ -82,7 +82,7 @@ LEDs
 #define pinKeyFn2               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN2))
 #define pinKeyFn3               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN3))
 #define pinKeyFn4               ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_FN4))
-#define pinKeyFlashlight        ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_FLASHLIGHT))
+#define pinKeyFlashlight        ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_SA))
 #define pinLEDFlashlight        ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_FLASHLIGHT))
 #define pinLEDLaserPen          ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_LASERPEN))
 
@@ -281,7 +281,7 @@ void button_init()
   btn_bit_postion[keylstDown] <<= 8;
   btn_bit_postion[keylstFn4] = BUTTON_PIN_FN4;
   btn_bit_postion[keylstFn4] <<= 8;
-  btn_bit_postion[keylstFLASH] = BUTTON_PIN_FLASHLIGHT;
+  btn_bit_postion[keylstFLASH] = BUTTON_PIN_SA;
   btn_bit_postion[keylstFLASH] <<= 8;
 
   btn_bit_postion[keylstCenter] = BUTTON_PIN_CENTER;
@@ -295,7 +295,7 @@ void button_init()
 #ifdef ENABLE_FLASHLIGHT_LASER  
   GPIO_Init(LEDS_PORT, (LED_PIN_FLASHLIGHT | LED_PIN_LASERPEN), GPIO_Mode_Out_PP_Low_Fast);
 #endif
-  GPIO_Init(BUTTONS_PORT1, (BUTTON_PIN_LEFT | BUTTON_PIN_RIGHT | BUTTON_PIN_UP | BUTTON_PIN_DOWN | BUTTON_PIN_FN4 | BUTTON_PIN_FLASHLIGHT), GPIO_Mode_In_PU_IT);
+  GPIO_Init(BUTTONS_PORT1, (BUTTON_PIN_LEFT | BUTTON_PIN_RIGHT | BUTTON_PIN_UP | BUTTON_PIN_DOWN | BUTTON_PIN_FN4 | BUTTON_PIN_SA), GPIO_Mode_In_PU_IT);
   GPIO_Init(BUTTONS_PORT2, (BUTTON_PIN_CENTER | BUTTON_PIN_FN1 | BUTTON_PIN_FN2 | BUTTON_PIN_FN3), GPIO_Mode_In_PU_IT);
   EXTI_DeInit();
   EXTI_SelectPort(EXTI_Port_D);
@@ -513,13 +513,11 @@ void btn_double_button_press(uint8_t _btn)
     break;
     
   case keylstCenter:
-    // Toggle the flash light
-    ledToggleFlashLight;
+    // Toggle In-presentation flag
+    SwitchPPTMode(!gConfig.inPresentation);
     break;
     
   case keylstFn1:
-    // Toggle In-presentation flag
-    SwitchPPTMode(!gConfig.inPresentation);
     break;
     
   case keylstFn2:
@@ -635,7 +633,7 @@ void btn_long_button_press(uint8_t _btn)
     
   case keylstFn1:
     // Toggle In-presentation flag
-    SwitchPPTMode(!gConfig.inPresentation);
+    //SwitchPPTMode(!gConfig.inPresentation);
     break;
     
   case keylstFn2:
@@ -681,18 +679,20 @@ void btn_very_long_hold_button_press(uint8_t _btn)
     
   case keylstFn2:
     // Soft reset
-    WWDG->CR = 0x80;
+    //WWDG->CR = 0x80;
     break;
     
   case keylstFn3:
     // Erase current device infomation
-    EraseCurrentDeviceInfo();
+    //EraseCurrentDeviceInfo();
     break;
     
   case keylstFn4:
     break;
   
   case keylstFLASH:
+    // Soft reset
+    WWDG->CR = 0x80;
     break;
     
   default:
@@ -748,9 +748,19 @@ void btn_double_long_hold_press(uint8_t _btn1, uint8_t _btn2)
   // Assert button
   if( !IS_VALID_BUTTON(_btn1) || !IS_VALID_BUTTON(_btn2) ) return;
   
+  /*
   if( _btn1 == keylstCenter && _btn2 == keylstRight ) {
     // Change current device
     ChangeCurrentDevice(gConfig.indDevice+1);
+  }*/
+  if( _btn1 == keylstFLASH ) {
+    if( _btn2 == keylstFn1 ) {
+      // Erase current device infomation
+      EraseCurrentDeviceInfo();      
+    } else if( _btn2 == keylstFn4 ) {
+      // Toggle Simple Direct Test Mode
+      ToggleSDTM();
+    }
   }
 }
 

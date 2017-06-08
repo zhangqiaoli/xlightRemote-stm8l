@@ -8,7 +8,7 @@
 
 // Simple Direct Test
 // Uncomment this line to work in Simple Direct Test Mode
-#define ENABLE_SDTM
+//#define ENABLE_SDTM
 
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen
@@ -138,7 +138,8 @@ typedef struct
   //char Organization[24];                    // Organization name
   //char ProductName[24];                     // Product name
   UC rfPowerLevel             :2;           // RF Power Level 0..3
-  UC Reserved1                :6;           // Reserved bits
+  UC enSDTM                   :1;           // Simple Direct Test Mode Flag
+  UC Reserved1                :5;           // Reserved bits
   DeviceInfo_t devItem[NUM_DEVICES];
   UC fnScenario[4];
 } Config_t;
@@ -195,6 +196,7 @@ uint8_t ChangeCurrentDevice(uint8_t _newDev);
 void UpdateNodeAddress();
 bool SendMyMessage();
 void EraseCurrentDeviceInfo();
+void ToggleSDTM();
 bool SayHelloToDevice(bool infinate);
 
 #endif /* __GLOBAL_H */

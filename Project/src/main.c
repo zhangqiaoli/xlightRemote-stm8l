@@ -81,7 +81,9 @@ bool isIdentityEqual(const UC *pId1, const UC *pId2, UC nLen)
 
 bool isNodeIdRequired()
 {
-#ifndef ENABLE_SDTM  
+#ifndef ENABLE_SDTM
+  if( gConfig.enSDTM ) return FALSE;
+  
   return( (IS_NOT_REMOTE_NODEID(CurrentNodeID) && !IS_GROUP_NODEID(CurrentNodeID)) || 
          isIdentityEmpty(CurrentNetworkID, ADDRESS_WIDTH) || isIdentityEqual(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH) );
 #else
@@ -264,6 +266,7 @@ void LoadConfig()
       gConfig.indDevice = 0;
       gConfig.present = 0;
       gConfig.inPresentation = 0;
+      gConfig.enSDTM = 0;
       gConfig.type = remotetypRFStandard;
       gConfig.rfPowerLevel = RF24_PA_MAX;
       memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
@@ -301,22 +304,37 @@ void UpdateNodeAddress() {
 #ifdef ENABLE_SDTM
   tx_addr[0] = CurrentDeviceID;
 #else
-  tx_addr[0] = (isNodeIdRequired() ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
+  if( gConfig.enSDTM ) {
+    tx_addr[0] = CurrentDeviceID;
+  } else {
+    tx_addr[0] = (isNodeIdRequired() ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
+  }
 #endif  
   RF24L01_setup(tx_addr, rx_addr, RF24_CHANNEL, BROADCAST_ADDRESS);     // With openning the boardcast pipe
 }  
 
 void EraseCurrentDeviceInfo() {
-#ifndef ENABLE_SDTM  
+#ifndef ENABLE_SDTM
   gDelayedOperation = DELAY_OP_ERASEFLASH;
   CurrentNodeID = BASESERVICE_ADDRESS;
   CurrentDeviceID = NODEID_MAINDEVICE;
   CurrentDeviceType = devtypMRing3;
   CurrentDevicePresent = 0;
+  gConfig.enSDTM = 0;
   memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
   gIsChanged = TRUE;
   SaveConfig();
 #endif
+}
+
+void ToggleSDTM() {
+#ifndef ENABLE_SDTM  
+  gConfig.enSDTM = 1 - gConfig.enSDTM;
+  gIsChanged = TRUE;
+  SaveConfig();
+  // Soft reset
+  WWDG->CR = 0x80;
+#endif  
 }
 
 bool WaitMutex(uint32_t _timeout) {
@@ -526,7 +544,7 @@ int main( void ) {
   InitDeviceStatus();
 
   // Blink LED to indicate starting
-  SetLasterBeam(DEVICE_SW_OFF);
+  //SetLasterBeam(DEVICE_SW_OFF);
   SetFlashlight(DEVICE_SW_OFF);
   LED_Blink(TRUE, FALSE);
   LED_Blink(TRUE, FALSE);
@@ -548,8 +566,16 @@ int main( void ) {
   CurrentDeviceID = BASESERVICE_ADDRESS;
   memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
   UpdateNodeAddress();
-#else  
-  SayHelloToDevice(TRUE);
+#else
+  if( gConfig.enSDTM ) {
+    gConfig.indDevice = 0;
+    CurrentNodeID = NODEID_MIN_REMOTE;
+    CurrentDeviceID = BASESERVICE_ADDRESS;
+    memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
+    UpdateNodeAddress();
+  } else {
+    SayHelloToDevice(TRUE);
+  }
 #endif
 
   // Init Watchdog
@@ -557,6 +583,8 @@ int main( void ) {
   
   // Set PowerOn flag
   bPowerOn = TRUE;
+  
+  SetLasterBeam(DEVICE_SW_ON);
 
   while (1) {
     
