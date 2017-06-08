@@ -544,7 +544,7 @@ int main( void ) {
   InitDeviceStatus();
 
   // Blink LED to indicate starting
-  //SetLasterBeam(DEVICE_SW_OFF);
+  SetLasterBeam(DEVICE_SW_OFF);
   SetFlashlight(DEVICE_SW_OFF);
   LED_Blink(TRUE, FALSE);
   LED_Blink(TRUE, FALSE);
@@ -584,8 +584,6 @@ int main( void ) {
   // Set PowerOn flag
   bPowerOn = TRUE;
   
-  SetLasterBeam(DEVICE_SW_ON);
-
   while (1) {
     
     // Feed the Watchdog
