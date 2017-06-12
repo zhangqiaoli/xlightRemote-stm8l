@@ -70,23 +70,26 @@ uint8_t ParseProtocol(){
 
       case NCF_DEV_ASSOCIATE:
         CurrentDeviceID = msg.payload.uiValue / 256;
-        gIsChanged = TRUE;
-        Msg_NodeConfigAck(_sender, _sensor);
-        return 1;
         break;
 
+      case NCF_DEV_MAX_NMRT:
+        gConfig.rptTimes = msg.payload.data[0];
+        break;
+        
       case NCF_DATA_FN_SCENARIO:
         {
           uint8_t fn_id = msg.payload.data[0];
           if( fn_id < 4 ) {
             gConfig.fnScenario[fn_id] = msg.payload.data[1];
-            gIsChanged = TRUE;
-            Msg_NodeConfigAck(_sender, _sensor);
-            return 1;
+          } else {
+            return 0;
           }
         }
         break;
       }
+      gIsChanged = TRUE;
+      Msg_NodeConfigAck(_sender, _sensor);
+      return 1;
     }
     break;
       
@@ -176,7 +179,7 @@ void Msg_NodeConfigData(uint8_t _to) {
 
   msg.payload.data[payl_len++] = gConfig.version;
   msg.payload.data[payl_len++] = gConfig.type + 224;
-  msg.payload.data[payl_len++] = 0;     // Reservered
+  msg.payload.data[payl_len++] = ((gConfig.indDevice << 5) | (gConfig.inPresentation << 4) | gConfig.rptTimes);
   msg.payload.data[payl_len++] = 0;     // Reservered
   msg.payload.data[payl_len++] = 0;     // Reservered
   msg.payload.data[payl_len++] = 0;     // Reservered
