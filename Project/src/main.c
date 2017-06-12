@@ -358,8 +358,8 @@ bool SendMyMessage() {
       //It happens when rx address defers from tx address
       //asm("nop"); //Place a breakpoint here to see memory
       // Repeat the message if necessary
-      uint16_t delay = 0xFF;
-      while(delay--);      
+      uint16_t delay = 0xFFF;
+      while(delay--)feed_wwdg();
     }
     
     // Switch back to receive mode
