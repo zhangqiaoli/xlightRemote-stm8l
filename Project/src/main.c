@@ -64,8 +64,6 @@ uint8_t _uniqueID[UNIQUE_ID_LEN];
 // Moudle variables
 bool bPowerOn = FALSE;
 uint8_t mutex;
-uint8_t rx_addr[ADDRESS_WIDTH];
-uint8_t tx_addr[ADDRESS_WIDTH];
 
 bool isIdentityEmpty(const UC *pId, UC nLen)
 {
@@ -128,11 +126,11 @@ void GPIO_LowPower_Config(void)
   GPIO_Init(GPIOA, GPIO_Pin_2|GPIO_Pin_4, GPIO_Mode_In_FL_No_IT);
   GPIO_Init(GPIOA, GPIO_Pin_3|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7, GPIO_Mode_Out_PP_Low_Slow);
 
-#ifdef ENABLE_FLASHLIGHT_LASER
-  GPIO_Init(GPIOC, GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6, GPIO_Mode_Out_PP_Low_Slow);
-#else  
+//#ifdef ENABLE_FLASHLIGHT_LASER
+//  GPIO_Init(GPIOC, GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6, GPIO_Mode_Out_PP_Low_Slow);
+//#else  
   GPIO_Init(GPIOC, GPIO_Pin_All, GPIO_Mode_Out_PP_Low_Slow);
-#endif
+//#endif
   
   //GPIO_Init(GPIOD, GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3, GPIO_Mode_In_FL_No_IT);
   //GPIO_Init(GPIOB, GPIO_Pin_0, GPIO_Mode_In_FL_No_IT);
@@ -267,6 +265,7 @@ void LoadConfig()
       gConfig.present = 0;
       gConfig.inPresentation = 0;
       gConfig.enSDTM = 0;
+      gConfig.rptTimes = 1;
       gConfig.type = remotetypRFStandard;
       gConfig.rfPowerLevel = RF24_PA_MAX;
       memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
@@ -310,7 +309,7 @@ void UpdateNodeAddress() {
     tx_addr[0] = (isNodeIdRequired() ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
   }
 #endif  
-  RF24L01_setup(tx_addr, rx_addr, RF24_CHANNEL, BROADCAST_ADDRESS);     // With openning the boardcast pipe
+  RF24L01_setup(RF24_CHANNEL, BROADCAST_ADDRESS);     // With openning the boardcast pipe
 }  
 
 void EraseCurrentDeviceInfo() {
@@ -347,15 +346,18 @@ bool WaitMutex(uint32_t _timeout) {
 // Send message and switch back to receive mode
 bool SendMyMessage() {
   if( bMsgReady ) {
-    mutex = 0;
-    RF24L01_set_mode_TX();
-    RF24L01_write_payload(pMsg, PLOAD_WIDTH);
+    uint8_t lv_tried = 0;
+    while (lv_tried++ <= gConfig.rptTimes ) {
+      mutex = 0;
+      RF24L01_set_mode_TX();
+      RF24L01_write_payload(pMsg, PLOAD_WIDTH);
 
-    WaitMutex(0x1FFFF);
-    if (mutex != 1) {
+      WaitMutex(0x1FFFF);
+      if (mutex == 1) break; // sent sccessfully
       //The transmission failed, Notes: mutex == 2 doesn't mean failed
       //It happens when rx address defers from tx address
       //asm("nop"); //Place a breakpoint here to see memory
+      // Repeat the message if necessary   
     }
     
     // Switch back to receive mode

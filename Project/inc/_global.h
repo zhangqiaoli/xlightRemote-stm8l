@@ -8,7 +8,7 @@
 
 // Simple Direct Test
 // Uncomment this line to work in Simple Direct Test Mode
-//#define ENABLE_SDTM
+#define ENABLE_SDTM
 
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen
@@ -139,7 +139,8 @@ typedef struct
   //char ProductName[24];                     // Product name
   UC rfPowerLevel             :2;           // RF Power Level 0..3
   UC enSDTM                   :1;           // Simple Direct Test Mode Flag
-  UC Reserved1                :5;           // Reserved bits
+  UC rptTimes                 :2;           // Sending message max repeat times [0..3]
+  UC Reserved1                :3;           // Reserved bits
   DeviceInfo_t devItem[NUM_DEVICES];
   UC fnScenario[4];
 } Config_t;
