@@ -11,7 +11,7 @@ void Msg_NodeConfigAck(uint8_t _to, uint8_t _ncf);
 void Msg_NodeConfigData(uint8_t _to);
 void Msg_RequestNodeID();
 void Msg_Presentation();
-void Msg_RequestDeviceStatus(UC _nodeID);
+void Msg_RequestDeviceStatus();
 void Msg_DevOnOff(uint8_t _sw);
 void Msg_DevBrightness(uint8_t _op, uint8_t _br);
 void Msg_DevCCT(uint8_t _op, uint16_t _cct);

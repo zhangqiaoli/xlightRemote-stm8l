@@ -63,7 +63,7 @@
 #define CT_STEP                 ((CT_MAX_VALUE-CT_MIN_VALUE)/10)
 
 #define UNIQUE_ID_LEN           8
-#define NUM_DEVICES             2
+#define NUM_DEVICES             4
 
 #define DELAY_OP_ERASEFLASH     0x10
 #define DELAY_OP_PAIRED         0x20
@@ -87,7 +87,6 @@ typedef enum
   devtypDummy = 255
 } devicetype_t;
 
-
 // Remote type
 typedef enum
 {
@@ -100,8 +99,9 @@ typedef enum
 
 typedef struct
 {
-  UC State                    :1;           // Component state
-  UC BR                       :7;           // Brightness of white [0..100]
+  UC State                    :8;           // Component state
+  UC bmRing                   :8;           // Bitmap for rings, 0 means all rings
+  UC BR                       :8;           // Brightness of white [0..100]
   US CCT                      :16;          // CCT (warm or cold) [2700..6500]
   UC R                        :8;           // Brightness of red
   UC G                        :8;           // Brightness of green
@@ -114,8 +114,10 @@ typedef struct
 typedef struct
 {
   UC nodeID;                                // Node ID for Remote on specific controller
+  UC subID;                                 // SubID
   UC NetworkID[6];
-  UC devcieID;                              // Device Node ID
+  UC deviceID;                              // Device Node ID
+  UC subDevID;                              // Device SubID
   UC type;                                  // Type of Device
 } DeviceInfo_t;
 
@@ -125,6 +127,13 @@ typedef struct
   UC reserved                 :7;
   Hue_t ring;
 } DeviceStatus_t;
+
+typedef struct
+{
+  UC bmDevice                 :4;       // Bitmap of devices, 0 means current device
+  UC scenario;                          // ScenarioID or 0 means specific Hue
+  Hue_t hue;
+} fnScenario_t;
 
 typedef struct
 {
@@ -142,7 +151,7 @@ typedef struct
   UC rptTimes                 :2;           // Sending message max repeat times [0..3]
   UC Reserved1                :3;           // Reserved bits
   DeviceInfo_t devItem[NUM_DEVICES];
-  UC fnScenario[4];
+  fnScenario_t fnScenario[4];
 } Config_t;
 
 extern Config_t gConfig;
@@ -166,8 +175,10 @@ extern uint8_t gDelayedOperation;
 #define IS_NOT_REMOTE_NODEID(nID)  (nID < NODEID_MIN_REMOTE || nID > NODEID_MAX_REMOTE)
 
 #define NodeID(x)                  gConfig.devItem[x].nodeID
+#define SubNID(x)                  gConfig.devItem[x].subID
 #define NetworkID(x)               gConfig.devItem[x].NetworkID
-#define DeviceID(x)                gConfig.devItem[x].devcieID
+#define DeviceID(x)                gConfig.devItem[x].deviceID
+#define DeviceSubID(x)             gConfig.devItem[x].subDevID
 #define DeviceType(x)              gConfig.devItem[x].type
 #define DEVST_Present(x)           gDevStatus[x].present
 #define DEVST_OnOff(x)             gDevStatus[x].ring.State
@@ -178,8 +189,10 @@ extern uint8_t gDelayedOperation;
 #define DEVST_B(x)                 gDevStatus[x].ring.B
 
 #define CurrentNodeID              NodeID(gConfig.indDevice)
+#define CurrentSubNID              SubNID(gConfig.indDevice)
 #define CurrentNetworkID           NetworkID(gConfig.indDevice)
 #define CurrentDeviceID            DeviceID(gConfig.indDevice)
+#define CurrentDevSubID            DeviceSubID(gConfig.indDevice)
 #define CurrentDeviceType          DeviceType(gConfig.indDevice)
 #define CurrentDevicePresent       DEVST_Present(gConfig.indDevice)
 #define CurrentDeviceOnOff         DEVST_OnOff(gConfig.indDevice)
@@ -199,5 +212,7 @@ bool SendMyMessage();
 void EraseCurrentDeviceInfo();
 void ToggleSDTM();
 bool SayHelloToDevice(bool infinate);
+
+#define IS_MINE_SUBID(nSID)        ((nSID) == 0 || ((nSID) & CurrentDevSubID))
 
 #endif /* __GLOBAL_H */

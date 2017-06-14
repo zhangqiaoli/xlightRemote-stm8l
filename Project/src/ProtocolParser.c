@@ -78,9 +78,22 @@ uint8_t ParseProtocol(){
         
       case NCF_DATA_FN_SCENARIO:
         {
-          uint8_t fn_id = msg.payload.data[0];
+          uint8_t fn_id = msg.payload.data[0] & 0x0F;
           if( fn_id < 4 ) {
-            gConfig.fnScenario[fn_id] = msg.payload.data[1];
+            gConfig.fnScenario[fn_id].bmDevice = (msg.payload.data[0] >> 4);
+            gConfig.fnScenario[fn_id].scenario = msg.payload.data[1];
+          } else {
+            return 0;
+          }
+        }
+        break;
+      case NCF_DATA_FN_HUE:
+        {
+          uint8_t fn_id = msg.payload.data[0] & 0x0F;
+          if( fn_id < 4 ) {
+            gConfig.fnScenario[fn_id].bmDevice = (msg.payload.data[0] >> 4);
+            gConfig.fnScenario[fn_id].scenario = 0;
+            memcpy(&(gConfig.fnScenario[fn_id].hue), msg.payload.data+1, sizeof(Hue_t));
           } else {
             return 0;
           }
@@ -106,7 +119,7 @@ uint8_t ParseProtocol(){
         if( gDelayedOperation != DELAY_OP_PAIRED ) gDelayedOperation = DELAY_OP_CONNECTED;
         
         // REQ device status
-        Msg_RequestDeviceStatus(CurrentDeviceID);
+        Msg_RequestDeviceStatus();
         return 1;
       }
     }
@@ -186,10 +199,10 @@ void Msg_NodeConfigData(uint8_t _to) {
   for(uint8_t _index = 0; _index < NUM_DEVICES; _index++ ) {
     msg.payload.data[payl_len++] = DeviceID(_index);
   }
-  msg.payload.data[payl_len++] = gConfig.fnScenario[0];
-  msg.payload.data[payl_len++] = gConfig.fnScenario[1];
-  msg.payload.data[payl_len++] = gConfig.fnScenario[2];
-  msg.payload.data[payl_len++] = gConfig.fnScenario[3];
+  msg.payload.data[payl_len++] = gConfig.fnScenario[0].scenario;
+  msg.payload.data[payl_len++] = gConfig.fnScenario[1].scenario;
+  msg.payload.data[payl_len++] = gConfig.fnScenario[2].scenario;
+  msg.payload.data[payl_len++] = gConfig.fnScenario[3].scenario;
   
   miSetLength(payl_len);
   miSetPayloadType(P_CUSTOM);
@@ -215,8 +228,8 @@ void Msg_Presentation() {
 }
 
 // Enquiry Device Status
-void Msg_RequestDeviceStatus(UC _nodeID) {
-  build(_nodeID, CurrentNodeID, C_REQ, V_RGBW, 1, 0);
+void Msg_RequestDeviceStatus() {
+  build(CurrentDeviceID, CurrentDevSubID, C_REQ, V_RGBW, 1, 0);
   miSetLength(1);
   miSetPayloadType(P_BYTE);
   msg.payload.bValue = RING_ID_ALL;
@@ -226,7 +239,7 @@ void Msg_RequestDeviceStatus(UC _nodeID) {
 // Set current device 1:On; 0:Off; 2:toggle
 void Msg_DevOnOff(uint8_t _sw) {
   SendMyMessage();
-  build(CurrentDeviceID, CurrentNodeID, C_SET, V_STATUS, 1, 0);
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_STATUS, 1, 0);
   miSetLength(1);
   miSetPayloadType(P_BYTE);
   msg.payload.bValue = _sw;
@@ -236,7 +249,7 @@ void Msg_DevOnOff(uint8_t _sw) {
 // Set current device brightness
 void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
   SendMyMessage();
-  build(CurrentDeviceID, CurrentNodeID, C_SET, V_PERCENTAGE, 1, 0);
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_PERCENTAGE, 1, 0);
   miSetLength(2);
   miSetPayloadType(P_BYTE);
   msg.payload.data[0] = _op;
@@ -247,7 +260,7 @@ void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
 // Set current device CCT
 void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
   SendMyMessage();
-  build(CurrentDeviceID, CurrentNodeID, C_SET, V_LEVEL, 1, 0);
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_LEVEL, 1, 0);
   miSetLength(3);
   miSetPayloadType(P_UINT16);
   msg.payload.data[0] = _op;
@@ -259,7 +272,7 @@ void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
 // Set current device brightness & CCT
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
   SendMyMessage();
-  build(CurrentDeviceID, CurrentNodeID, C_SET, V_RGBW, 1, 0);
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 1, 0);
   miSetLength(5);
   miSetPayloadType(P_CUSTOM);
   msg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
@@ -273,7 +286,7 @@ void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
 // Set current device brightness & RGBW
 void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w) {
   SendMyMessage();
-  build(CurrentDeviceID, CurrentNodeID, C_SET, V_RGBW, 1, 0);
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 1, 0);
   miSetLength(7);
   miSetPayloadType(P_CUSTOM);
   msg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
@@ -289,7 +302,7 @@ void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w)
 // Change scenario on current device
 void Msg_DevScenario(uint8_t _scenario) {
   SendMyMessage();
-  build(CurrentDeviceID, CurrentNodeID, C_SET, V_SCENE_ON, 1, 0);
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_SCENE_ON, 1, 0);
   miSetLength(1);
   miSetPayloadType(P_BYTE);
   msg.payload.bValue = _scenario;

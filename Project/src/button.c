@@ -100,22 +100,6 @@ LEDs
 #define BTN_STEP_LONG_CCT       800
 #define BTN_BR_LOW              10
 
-#define BTN_FN1_BR              90
-#define BTN_FN1_CCT             3000
-
-#define BTN_FN2_BR              20
-#define BTN_FN2_CCT             3500
-
-#define BTN_FN3_BR              75
-#define BTN_FN3_CCT             5000
-#define BTN_FN3_W               0
-#define BTN_FN3_R               230
-#define BTN_FN3_G               32  
-#define BTN_FN3_B               80
-
-#define BTN_FN4_BR              85
-#define BTN_FN4_CCT             6000
-
 static button_timer_status_t  m_btn_timer_status[keylstDummy] = {BUTTON_STATUS_INIT};
 static bool detect_double_btn_press[keylstDummy] = {FALSE};
 static bool btn_is_pushed[keylstDummy] = {FALSE};
@@ -346,6 +330,39 @@ void SetLasterBeam(uint8_t _st)
 #endif  
 }
 
+void FN_Button_Action(uint8_t _fn) {
+  uint8_t lv_curInd = gConfig.indDevice;
+    
+  for( uint8_t idx = 0; idx < NUM_DEVICES; idx++ ) {
+    if( gConfig.fnScenario[_fn].bmDevice > 0 ) {
+      // Verify deviceID and switch current device if matched
+      if( gConfig.fnScenario[_fn].bmDevice & (0x01 << idx) ) {
+        if( gConfig.devItem[idx].deviceID > 0 ) {
+          gConfig.indDevice = idx;
+        } else {
+          continue;
+        }
+      } else {
+        continue;
+      }
+    }
+    
+    if( gConfig.fnScenario[_fn].scenario > 0 ) {
+      Msg_DevScenario(gConfig.fnScenario[_fn].scenario);
+    } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_OFF || gConfig.fnScenario[_fn].hue.State == DEVICE_SW_TOGGLE ) {
+      Msg_DevOnOff(gConfig.fnScenario[_fn].hue.State);
+    } else if( gConfig.fnScenario[_fn].hue.CCT >= CT_MIN_VALUE ) {
+      Msg_DevBR_CCT(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.CCT);
+    } else {
+      Msg_DevBR_RGBW(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.R, gConfig.fnScenario[_fn].hue.G, gConfig.fnScenario[_fn].hue.B, (uint8_t)gConfig.fnScenario[_fn].hue.CCT);
+    }
+    if( gConfig.fnScenario[_fn].bmDevice == 0 ) break;
+  }
+  
+  // Restore Device Index
+  gConfig.indDevice = lv_curInd;
+}
+
 void btn_short_button_press(uint8_t _btn)
 {
   // Assert button
@@ -407,12 +424,8 @@ void btn_short_button_press(uint8_t _btn)
 #ifdef ENABLE_SDTM
     // Pure Red
     Msg_DevBR_RGBW(60, 255, 0, 0, 0);
-#else    
-    if( gConfig.fnScenario[0] > 0 ) {
-      Msg_DevScenario(gConfig.fnScenario[0]);
-    } else {
-      Msg_DevBR_CCT(BTN_FN1_BR, BTN_FN1_CCT);
-    }
+#else
+    FN_Button_Action(0);
 #endif
     break;
     
@@ -420,12 +433,8 @@ void btn_short_button_press(uint8_t _btn)
 #ifdef ENABLE_SDTM
     // Pure Green
     Msg_DevBR_RGBW(60, 0, 255, 0, 0);
-#else    
-    if( gConfig.fnScenario[1] > 0 ) {
-      Msg_DevScenario(gConfig.fnScenario[1]);
-    } else {
-      Msg_DevBR_CCT(BTN_FN2_BR, BTN_FN2_CCT);
-    }
+#else
+    FN_Button_Action(1);
 #endif
     break;
     
@@ -433,16 +442,8 @@ void btn_short_button_press(uint8_t _btn)
 #ifdef ENABLE_SDTM
     // Pure Blue
     Msg_DevBR_RGBW(60, 0, 0, 255, 0);
-#else    
-    if( gConfig.fnScenario[2] > 0 ) {
-      Msg_DevScenario(gConfig.fnScenario[2]);
-    } else {
-      if( IS_SUNNY(CurrentDeviceType) ) {
-        Msg_DevBR_CCT(BTN_FN3_BR, BTN_FN3_CCT);
-      } else {
-        Msg_DevBR_RGBW(BTN_FN2_BR, BTN_FN3_R, BTN_FN3_G, BTN_FN3_B, BTN_FN3_W);
-      }
-    }
+#else
+    FN_Button_Action(2);
 #endif    
     break;
     
@@ -450,12 +451,8 @@ void btn_short_button_press(uint8_t _btn)
 #ifdef ENABLE_SDTM
     // Pure White
     Msg_DevBR_RGBW(60, 0, 0, 0, 255);
-#else    
-    if( gConfig.fnScenario[3] > 0 ) {
-      Msg_DevScenario(gConfig.fnScenario[3]);
-    } else {
-      Msg_DevBR_CCT(BTN_FN4_BR, BTN_FN4_CCT);
-    }
+#else
+    FN_Button_Action(3);
 #endif    
     break;
 

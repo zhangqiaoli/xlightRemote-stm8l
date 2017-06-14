@@ -32,7 +32,7 @@ Connections:
 */
 
 // Xlight Application Identification
-#define XLA_VERSION               0x03
+#define XLA_VERSION               0x04
 #define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
 #define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
 
@@ -280,12 +280,29 @@ void LoadConfig()
       gConfig.devItem[2] = gConfig.devItem[0];
       gConfig.devItem[3] = gConfig.devItem[0];
       
-      // Fn Scenario
-      gConfig.fnScenario[0] = 0;
-      gConfig.fnScenario[1] = 0;
-      gConfig.fnScenario[2] = 0;
-      gConfig.fnScenario[3] = 0;
-    
+      gConfig.fnScenario[0].hue.State = DEVICE_SW_ON;
+      gConfig.fnScenario[0].hue.bmRing = 0;
+      gConfig.fnScenario[0].hue.BR = BTN_FN1_BR;
+      gConfig.fnScenario[0].hue.CCT = BTN_FN1_CCT;
+
+      gConfig.fnScenario[1].hue.State = DEVICE_SW_ON;
+      gConfig.fnScenario[1].hue.bmRing = 0;
+      gConfig.fnScenario[1].hue.BR = BTN_FN2_BR;
+      gConfig.fnScenario[1].hue.CCT = BTN_FN2_CCT;
+
+      gConfig.fnScenario[2].hue.State = DEVICE_SW_ON;
+      gConfig.fnScenario[2].hue.bmRing = 0;
+      gConfig.fnScenario[2].hue.BR = BTN_FN3_BR;
+      gConfig.fnScenario[2].hue.CCT = BTN_FN3_W;
+      gConfig.fnScenario[2].hue.R = BTN_FN3_R;
+      gConfig.fnScenario[2].hue.G = BTN_FN3_G;
+      gConfig.fnScenario[2].hue.B = BTN_FN3_B;
+
+      gConfig.fnScenario[3].hue.State = DEVICE_SW_ON;
+      gConfig.fnScenario[3].hue.bmRing = 0;
+      gConfig.fnScenario[3].hue.BR = BTN_FN4_BR;
+      gConfig.fnScenario[3].hue.CCT = BTN_FN4_CCT;
+      
       gIsChanged = TRUE;
       SaveConfig();
     }
@@ -614,7 +631,7 @@ int main( void ) {
       wakeup_config();
       // REQ device status
       //delay_ms(10);
-      //Msg_RequestDeviceStatus(CurrentDeviceID);
+      //Msg_RequestDeviceStatus();
     }
   }
 }
