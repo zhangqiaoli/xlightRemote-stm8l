@@ -69,9 +69,14 @@ uint8_t ParseProtocol(){
         break;
 
       case NCF_DEV_ASSOCIATE:
-        CurrentDeviceID = msg.payload.uiValue / 256;
+        CurrentDeviceID = msg.payload.data[0];
+        CurrentSubNID = msg.payload.data[1];
         break;
 
+      case NCF_DEV_SET_SUBID:
+        CurrentSubNID = msg.payload.data[0];
+        break;
+        
       case NCF_DEV_MAX_NMRT:
         gConfig.rptTimes = msg.payload.data[0];
         break;
