@@ -47,6 +47,8 @@ Connections:
 #define WWDG_COUNTER                    0x7f
 #define WWDG_WINDOW                     0x77
 
+#define MAX_RF_FAILED_TIME              5      // Reset RF module when reach max failed times of sending
+
 // Unique ID for STM8L151x4
 #define     UNIQUE_ID_ADDRESS         (0x4926)
 
@@ -55,11 +57,13 @@ const UC RF24_BASE_RADIO_ID[ADDRESS_WIDTH] = {0x00,0x54,0x49,0x54,0x44};
 // Public variables
 Config_t gConfig;
 DeviceStatus_t gDevStatus[NUM_DEVICES];
-MyMessage_t msg;
-uint8_t *pMsg = (uint8_t *)&msg;
+MyMessage_t sndMsg, rcvMsg;
+uint8_t *psndMsg = (uint8_t *)&sndMsg;
+uint8_t *prcvMsg = (uint8_t *)&rcvMsg;
 bool gIsChanged = FALSE;
 uint8_t gDelayedOperation = 0;
 uint8_t _uniqueID[UNIQUE_ID_LEN];
+uint8_t m_cntRFSendFailed = 0;
 
 // Moudle variables
 bool bPowerOn = FALSE;
@@ -364,13 +368,29 @@ bool WaitMutex(uint32_t _timeout) {
 bool SendMyMessage() {
   if( bMsgReady ) {
     uint8_t lv_tried = 0;
+    uint16_t delay;
     while (lv_tried++ <= gConfig.rptTimes ) {
       mutex = 0;
       RF24L01_set_mode_TX();
-      RF24L01_write_payload(pMsg, PLOAD_WIDTH);
+      RF24L01_write_payload(psndMsg, PLOAD_WIDTH);
 
       WaitMutex(0x1FFFF);
-      if (mutex == 1) break; // sent sccessfully
+      if (mutex == 1) {
+        m_cntRFSendFailed = 0;
+        break; // sent sccessfully
+      } else if( m_cntRFSendFailed++ > MAX_RF_FAILED_TIME ) {
+        // Reset RF module
+        m_cntRFSendFailed = 0;
+        // RF24 Chip in low power
+        RF24L01_DeInit();
+        delay = 0x1FFF;
+        while(delay--)feed_wwdg();
+        RF24L01_init();
+        NRF2401_EnableIRQ();
+        UpdateNodeAddress();
+        continue;
+      }
+      
       //The transmission failed, Notes: mutex == 2 doesn't mean failed
       //It happens when rx address defers from tx address
       //asm("nop"); //Place a breakpoint here to see memory
@@ -641,7 +661,7 @@ void RF24L01_IRQ_Handler() {
   if(RF24L01_is_data_available()) {
     //Packet was received
     RF24L01_clear_interrupts();
-    RF24L01_read_payload(pMsg, PLOAD_WIDTH);
+    RF24L01_read_payload(prcvMsg, PLOAD_WIDTH);
     bMsgReady = ParseProtocol();
     return;
   }

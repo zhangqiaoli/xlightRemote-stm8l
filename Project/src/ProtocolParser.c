@@ -9,14 +9,14 @@ uint8_t bMsgReady = 0;
 // Assemble message
 void build(uint8_t _destination, uint8_t _sensor, uint8_t _command, uint8_t _type, bool _enableAck, bool _isAck)
 {
-    msg.header.version_length = PROTOCOL_VERSION;
-    msg.header.sender = CurrentNodeID;
-    msg.header.destination = _destination;
-    msg.header.sensor = _sensor;
-    msg.header.type = _type;
-    miSetCommand(_command);
-    miSetRequestAck(_enableAck);
-    miSetAck(_isAck);
+    sndMsg.header.version_length = PROTOCOL_VERSION;
+    sndMsg.header.sender = CurrentNodeID;
+    sndMsg.header.destination = _destination;
+    sndMsg.header.sensor = _sensor;
+    sndMsg.header.type = _type;
+    moSetCommand(_command);
+    moSetRequestAck(_enableAck);
+    moSetAck(_isAck);
 }
 
 void UpdateCurrentDeviceOnOff(bool _OnOff) {
@@ -29,12 +29,12 @@ void UpdateCurrentDeviceOnOff(bool _OnOff) {
 }
 
 uint8_t ParseProtocol(){
-  if( msg.header.destination != CurrentNodeID && msg.header.destination != BROADCAST_ADDRESS ) return 0;
+  if( rcvMsg.header.destination != CurrentNodeID && rcvMsg.header.destination != BROADCAST_ADDRESS ) return 0;
   
   uint8_t _cmd = miGetCommand();
-  uint8_t _sender = msg.header.sender;  // The original sender
-  uint8_t _type = msg.header.type;
-  uint8_t _sensor = msg.header.sensor;
+  uint8_t _sender = rcvMsg.header.sender;  // The original sender
+  uint8_t _type = rcvMsg.header.type;
+  uint8_t _sensor = rcvMsg.header.sensor;
   bool _needAck = (bool)miGetRequestAck();
   bool _isAck = (bool)miGetAck();
   
@@ -47,12 +47,12 @@ uint8_t ParseProtocol(){
       } else {
         if( miGetLength() > 8 ) {
           // Verify _uniqueID        
-          if(!isIdentityEqual(_uniqueID, msg.payload.data+8, UNIQUE_ID_LEN)) {
+          if(!isIdentityEqual(_uniqueID, rcvMsg.payload.data+8, UNIQUE_ID_LEN)) {
             return 0;
           }
         }
         CurrentNodeID = lv_nodeID;
-        memcpy(CurrentNetworkID, msg.payload.data, sizeof(CurrentNetworkID));
+        memcpy(CurrentNetworkID, rcvMsg.payload.data, sizeof(CurrentNetworkID));
         UpdateNodeAddress();
         gIsChanged = TRUE;
         gDelayedOperation = DELAY_OP_PAIRED;
@@ -69,24 +69,24 @@ uint8_t ParseProtocol(){
         break;
 
       case NCF_DEV_ASSOCIATE:
-        CurrentDeviceID = msg.payload.data[0];
-        CurrentSubNID = msg.payload.data[1];
+        CurrentDeviceID = rcvMsg.payload.data[0];
+        CurrentSubNID = rcvMsg.payload.data[1];
         break;
 
       case NCF_DEV_SET_SUBID:
-        CurrentSubNID = msg.payload.data[0];
+        CurrentSubNID = rcvMsg.payload.data[0];
         break;
         
       case NCF_DEV_MAX_NMRT:
-        gConfig.rptTimes = msg.payload.data[0];
+        gConfig.rptTimes = rcvMsg.payload.data[0];
         break;
         
       case NCF_DATA_FN_SCENARIO:
         {
-          uint8_t fn_id = msg.payload.data[0] & 0x0F;
+          uint8_t fn_id = rcvMsg.payload.data[0] & 0x0F;
           if( fn_id < 4 ) {
-            gConfig.fnScenario[fn_id].bmDevice = (msg.payload.data[0] >> 4);
-            gConfig.fnScenario[fn_id].scenario = msg.payload.data[1];
+            gConfig.fnScenario[fn_id].bmDevice = (rcvMsg.payload.data[0] >> 4);
+            gConfig.fnScenario[fn_id].scenario = rcvMsg.payload.data[1];
           } else {
             return 0;
           }
@@ -94,11 +94,11 @@ uint8_t ParseProtocol(){
         break;
       case NCF_DATA_FN_HUE:
         {
-          uint8_t fn_id = msg.payload.data[0] & 0x0F;
+          uint8_t fn_id = rcvMsg.payload.data[0] & 0x0F;
           if( fn_id < 4 ) {
-            gConfig.fnScenario[fn_id].bmDevice = (msg.payload.data[0] >> 4);
+            gConfig.fnScenario[fn_id].bmDevice = (rcvMsg.payload.data[0] >> 4);
             gConfig.fnScenario[fn_id].scenario = 0;
-            memcpy(&(gConfig.fnScenario[fn_id].hue), msg.payload.data+1, sizeof(Hue_t));
+            memcpy(&(gConfig.fnScenario[fn_id].hue), rcvMsg.payload.data+1, sizeof(Hue_t));
           } else {
             return 0;
           }
@@ -115,7 +115,7 @@ uint8_t ParseProtocol(){
     if( _sensor == S_DIMMER ) {
       if( _isAck ) {
         // Device/client got Response to Presentation message, ready to work
-        gConfig.token = msg.payload.uiValue;
+        gConfig.token = rcvMsg.payload.uiValue;
         gConfig.present = (gConfig.token >  0);
         if(!IS_NOT_DEVICE_NODEID(_type) || IS_GROUP_NODEID(_type) ) {
           CurrentDeviceID = _type;
@@ -134,41 +134,41 @@ uint8_t ParseProtocol(){
   case C_SET:
     if( _isAck ) {
       if( _type == V_STATUS ) {
-        bool _OnOff = msg.payload.bValue;
+        bool _OnOff = rcvMsg.payload.bValue;
         if( _OnOff != CurrentDeviceOnOff ) {
           UpdateCurrentDeviceOnOff(_OnOff);
           gIsChanged = TRUE;
           // ToDo: change On/Off LED
         }
       } else if( _type == V_PERCENTAGE ) {
-        if( msg.payload.data[1] != CurrentDeviceBright || msg.payload.data[0] != CurrentDeviceOnOff) {
-          CurrentDeviceBright = msg.payload.data[1];
-          UpdateCurrentDeviceOnOff(msg.payload.data[0]);
+        if( rcvMsg.payload.data[1] != CurrentDeviceBright || rcvMsg.payload.data[0] != CurrentDeviceOnOff) {
+          CurrentDeviceBright = rcvMsg.payload.data[1];
+          UpdateCurrentDeviceOnOff(rcvMsg.payload.data[0]);
           gIsChanged = TRUE;
           // ToDo: change On/Off LED
         }        
       } else if( _type == V_LEVEL ) { // CCT
-        uint16_t _CCTValue = msg.payload.data[1] * 256 + msg.payload.data[0];
+        uint16_t _CCTValue = rcvMsg.payload.data[1] * 256 + rcvMsg.payload.data[0];
         if( _CCTValue != CurrentDeviceCCT ) {
           CurrentDeviceCCT = _CCTValue;
           gIsChanged = TRUE;
         }
       } else if( _type == V_RGBW ) {
-        if( msg.payload.data[0] ) { // Success
-          CurrentDeviceType = msg.payload.data[1];
-          CurrentDevicePresent = msg.payload.data[2];
-          // uint8_t _RingID = msg.payload.data[3];     // No use for now
-          CurrentDeviceOnOff = msg.payload.data[4];
-          CurrentDeviceBright = msg.payload.data[5];
+        if( rcvMsg.payload.data[0] ) { // Success
+          CurrentDeviceType = rcvMsg.payload.data[1];
+          CurrentDevicePresent = rcvMsg.payload.data[2];
+          // uint8_t _RingID = rcvMsg.payload.data[3];     // No use for now
+          CurrentDeviceOnOff = rcvMsg.payload.data[4];
+          CurrentDeviceBright = rcvMsg.payload.data[5];
           if( IS_SUNNY(CurrentDeviceType) ) {
-            uint16_t _CCTValue = msg.payload.data[7] * 256 + msg.payload.data[6];
+            uint16_t _CCTValue = rcvMsg.payload.data[7] * 256 + rcvMsg.payload.data[6];
             CurrentDeviceCCT = _CCTValue;
           } else if( IS_RAINBOW(CurrentDeviceType) || IS_MIRAGE(CurrentDeviceType) ) {
             // Set RGBW
-            CurrentDeviceCCT = msg.payload.data[6];
-            CurrentDevice_R = msg.payload.data[7];
-            CurrentDevice_G = msg.payload.data[8];
-            CurrentDevice_B = msg.payload.data[9];
+            CurrentDeviceCCT = rcvMsg.payload.data[6];
+            CurrentDevice_R = rcvMsg.payload.data[7];
+            CurrentDevice_G = rcvMsg.payload.data[8];
+            CurrentDevice_B = rcvMsg.payload.data[9];
           }
           gIsChanged = TRUE;
           // ToDo: change On/Off LED
@@ -184,9 +184,9 @@ uint8_t ParseProtocol(){
 void Msg_NodeConfigAck(uint8_t _to, uint8_t _ncf) {
   build(_to, _ncf, C_INTERNAL, I_CONFIG, 0, 1);
 
-  msg.payload.data[0] = 1;      // OK
-  miSetPayloadType(P_BYTE);
-  miSetLength(1);
+  sndMsg.payload.data[0] = 1;      // OK
+  moSetPayloadType(P_BYTE);
+  moSetLength(1);
   bMsgReady = 1;
 }
 
@@ -195,49 +195,49 @@ void Msg_NodeConfigData(uint8_t _to) {
   uint8_t payl_len = 0;
   build(_to, NCF_QUERY, C_INTERNAL, I_CONFIG, 0, 1);
 
-  msg.payload.data[payl_len++] = gConfig.version;
-  msg.payload.data[payl_len++] = gConfig.type + 224;
-  msg.payload.data[payl_len++] = ((gConfig.indDevice << 5) | (gConfig.inPresentation << 4) | gConfig.rptTimes);
-  msg.payload.data[payl_len++] = 0;     // Reservered
-  msg.payload.data[payl_len++] = 0;     // Reservered
-  msg.payload.data[payl_len++] = 0;     // Reservered
+  sndMsg.payload.data[payl_len++] = gConfig.version;
+  sndMsg.payload.data[payl_len++] = gConfig.type + 224;
+  sndMsg.payload.data[payl_len++] = ((gConfig.indDevice << 5) | (gConfig.inPresentation << 4) | gConfig.rptTimes);
+  sndMsg.payload.data[payl_len++] = 0;     // Reservered
+  sndMsg.payload.data[payl_len++] = 0;     // Reservered
+  sndMsg.payload.data[payl_len++] = 0;     // Reservered
   for(uint8_t _index = 0; _index < NUM_DEVICES; _index++ ) {
-    msg.payload.data[payl_len++] = DeviceID(_index);
+    sndMsg.payload.data[payl_len++] = DeviceID(_index);
   }
-  msg.payload.data[payl_len++] = gConfig.fnScenario[0].scenario;
-  msg.payload.data[payl_len++] = gConfig.fnScenario[1].scenario;
-  msg.payload.data[payl_len++] = gConfig.fnScenario[2].scenario;
-  msg.payload.data[payl_len++] = gConfig.fnScenario[3].scenario;
+  sndMsg.payload.data[payl_len++] = gConfig.fnScenario[0].scenario;
+  sndMsg.payload.data[payl_len++] = gConfig.fnScenario[1].scenario;
+  sndMsg.payload.data[payl_len++] = gConfig.fnScenario[2].scenario;
+  sndMsg.payload.data[payl_len++] = gConfig.fnScenario[3].scenario;
   
-  miSetLength(payl_len);
-  miSetPayloadType(P_CUSTOM);
+  moSetLength(payl_len);
+  moSetPayloadType(P_CUSTOM);
   bMsgReady = 1;
 }
 
 void Msg_RequestNodeID() {
   // Request NodeID for remote
   build(BASESERVICE_ADDRESS, NODE_TYP_REMOTE, C_INTERNAL, I_ID_REQUEST, 1, 0);
-  miSetPayloadType(P_ULONG32);
-  miSetLength(UNIQUE_ID_LEN);
-  memcpy(msg.payload.data, _uniqueID, UNIQUE_ID_LEN);
+  moSetPayloadType(P_ULONG32);
+  moSetLength(UNIQUE_ID_LEN);
+  memcpy(sndMsg.payload.data, _uniqueID, UNIQUE_ID_LEN);
   bMsgReady = 1;
 }
 
 // Prepare device presentation message
 void Msg_Presentation() {
   build(NODEID_GATEWAY, S_DIMMER, C_PRESENTATION, gConfig.type, 1, 0);
-  miSetPayloadType(P_ULONG32);
-  miSetLength(UNIQUE_ID_LEN);
-  memcpy(msg.payload.data, _uniqueID, UNIQUE_ID_LEN);
+  moSetPayloadType(P_ULONG32);
+  moSetLength(UNIQUE_ID_LEN);
+  memcpy(sndMsg.payload.data, _uniqueID, UNIQUE_ID_LEN);
   bMsgReady = 1;
 }
 
 // Enquiry Device Status
 void Msg_RequestDeviceStatus() {
   build(CurrentDeviceID, CurrentDevSubID, C_REQ, V_RGBW, 1, 0);
-  miSetLength(1);
-  miSetPayloadType(P_BYTE);
-  msg.payload.bValue = RING_ID_ALL;
+  moSetLength(1);
+  moSetPayloadType(P_BYTE);
+  sndMsg.payload.bValue = RING_ID_ALL;
   bMsgReady = 1;
 }
 
@@ -245,9 +245,9 @@ void Msg_RequestDeviceStatus() {
 void Msg_DevOnOff(uint8_t _sw) {
   SendMyMessage();
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_STATUS, 1, 0);
-  miSetLength(1);
-  miSetPayloadType(P_BYTE);
-  msg.payload.bValue = _sw;
+  moSetLength(1);
+  moSetPayloadType(P_BYTE);
+  sndMsg.payload.bValue = _sw;
   bMsgReady = 1;
 }
 
@@ -255,10 +255,10 @@ void Msg_DevOnOff(uint8_t _sw) {
 void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
   SendMyMessage();
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_PERCENTAGE, 1, 0);
-  miSetLength(2);
-  miSetPayloadType(P_BYTE);
-  msg.payload.data[0] = _op;
-  msg.payload.data[1] = _br;
+  moSetLength(2);
+  moSetPayloadType(P_BYTE);
+  sndMsg.payload.data[0] = _op;
+  sndMsg.payload.data[1] = _br;
   bMsgReady = 1;
 }
 
@@ -266,11 +266,11 @@ void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
 void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
   SendMyMessage();
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_LEVEL, 1, 0);
-  miSetLength(3);
-  miSetPayloadType(P_UINT16);
-  msg.payload.data[0] = _op;
-  msg.payload.data[1] = _cct % 256;
-  msg.payload.data[2] = _cct / 256;
+  moSetLength(3);
+  moSetPayloadType(P_UINT16);
+  sndMsg.payload.data[0] = _op;
+  sndMsg.payload.data[1] = _cct % 256;
+  sndMsg.payload.data[2] = _cct / 256;
   bMsgReady = 1;
 }
 
@@ -278,13 +278,13 @@ void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
   SendMyMessage();
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 1, 0);
-  miSetLength(5);
-  miSetPayloadType(P_CUSTOM);
-  msg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
-  msg.payload.data[1] = 1;                // State: On
-  msg.payload.data[2] = _br;
-  msg.payload.data[3] = _cct % 256;
-  msg.payload.data[4] = _cct / 256;
+  moSetLength(5);
+  moSetPayloadType(P_CUSTOM);
+  sndMsg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
+  sndMsg.payload.data[1] = 1;                // State: On
+  sndMsg.payload.data[2] = _br;
+  sndMsg.payload.data[3] = _cct % 256;
+  sndMsg.payload.data[4] = _cct / 256;
   bMsgReady = 1;
 }
 
@@ -292,15 +292,15 @@ void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
 void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w) {
   SendMyMessage();
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 1, 0);
-  miSetLength(7);
-  miSetPayloadType(P_CUSTOM);
-  msg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
-  msg.payload.data[1] = 1;                // State: On
-  msg.payload.data[2] = _br;
-  msg.payload.data[3] = _w;
-  msg.payload.data[4] = _r;
-  msg.payload.data[5] = _g;
-  msg.payload.data[6] = _b;
+  moSetLength(7);
+  moSetPayloadType(P_CUSTOM);
+  sndMsg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
+  sndMsg.payload.data[1] = 1;                // State: On
+  sndMsg.payload.data[2] = _br;
+  sndMsg.payload.data[3] = _w;
+  sndMsg.payload.data[4] = _r;
+  sndMsg.payload.data[5] = _g;
+  sndMsg.payload.data[6] = _b;
   bMsgReady = 1;
 }
 
@@ -308,9 +308,9 @@ void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w)
 void Msg_DevScenario(uint8_t _scenario) {
   SendMyMessage();
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_SCENE_ON, 1, 0);
-  miSetLength(1);
-  miSetPayloadType(P_BYTE);
-  msg.payload.bValue = _scenario;
+  moSetLength(1);
+  moSetPayloadType(P_BYTE);
+  sndMsg.payload.bValue = _scenario;
   bMsgReady = 1;
 }
 
@@ -318,11 +318,11 @@ void Msg_DevScenario(uint8_t _scenario) {
 void Msg_PPT_ObjAction(uint8_t _obj, uint8_t _action) {
   SendMyMessage();
   build(CurrentDeviceID, NODEID_PROJECTOR, C_SET, V_STATUS, 1, 0);
-  miSetLength(4);
-  miSetPayloadType(P_STRING);
-  msg.payload.data[0] = _obj;
-  msg.payload.data[1] = _action;
-  msg.payload.data[2] = '0';      // Reserved
-  msg.payload.data[3] = '0';      // Reserved
+  moSetLength(4);
+  moSetPayloadType(P_STRING);
+  sndMsg.payload.data[0] = _obj;
+  sndMsg.payload.data[1] = _action;
+  sndMsg.payload.data[2] = '0';      // Reserved
+  sndMsg.payload.data[3] = '0';      // Reserved
   bMsgReady = 1;
 }
