@@ -47,7 +47,7 @@ Connections:
 #define WWDG_COUNTER                    0x7f
 #define WWDG_WINDOW                     0x77
 
-#define MAX_RF_FAILED_TIME              5      // Reset RF module when reach max failed times of sending
+#define MAX_RF_FAILED_TIME              3      // Reset RF module when reach max failed times of sending
 
 // Unique ID for STM8L151x4
 #define     UNIQUE_ID_ADDRESS         (0x4926)

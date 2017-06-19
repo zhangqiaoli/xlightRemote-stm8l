@@ -753,7 +753,7 @@ void btn_double_long_hold_press(uint8_t _btn1, uint8_t _btn2)
   if( _btn1 == keylstFLASH ) {
     if( _btn2 == keylstFn1 ) {
       // Erase current device infomation
-      EraseCurrentDeviceInfo();      
+      //EraseCurrentDeviceInfo();      
     } else if( _btn2 == keylstFn4 ) {
       // Toggle Simple Direct Test Mode
       ToggleSDTM();
@@ -763,6 +763,8 @@ void btn_double_long_hold_press(uint8_t _btn1, uint8_t _btn2)
 
 void app_button_event_handler(uint8_t _btn, button_event_t button_event)
 {
+  uint8_t sec_btn = keylstDummy;
+  
   switch (button_event)
   {
   case BUTTON_INVALID:
@@ -793,7 +795,10 @@ void app_button_event_handler(uint8_t _btn, button_event_t button_event)
     break;
     
   case DOUBLE_BTN_TRACK:
-    btn_double_long_hold_press(_btn, keylstRight);
+    if( btn_is_pushed[keylstFn1] ) sec_btn = keylstFn1;
+    else if( btn_is_pushed[keylstFn4] ) sec_btn = keylstFn4;
+    if( sec_btn < keylstDummy )
+      btn_double_long_hold_press(keylstFLASH, sec_btn);
     
   default:
     break;
@@ -803,27 +808,30 @@ void app_button_event_handler(uint8_t _btn, button_event_t button_event)
 // Only use button1_timer to track double button long hold.
 void check_track_double_button(void)
 {
-  // SBS skip this function since Center Key is invalid
-  /*
-  if ((btn_is_pushed[keylstCenter] == TRUE) && (btn_is_pushed[keylstRight] == TRUE))
+  if( btn_is_pushed[keylstFLASH] == TRUE && btn_is_pushed[keylstFn1] == TRUE )
   {
-  timer_stop(m_timer_id_btn_detet[keylstRight]);  // Disable btn2_timer when tracking double hold.
-  m_btn_timer_status[keylstCenter] = BUTTON_STATUS_DOUBLE_TRACK;
-  m_btn_timer_status[keylstRight] = BUTTON_STATUS_INIT;
-  double_button_track = TRUE;
-  timer_start(m_timer_id_btn_detet[keylstRight], BUTTON_DOUBLE_BTN_TRACK_DURATION);  //3 s
-}
-  else
-  {
-  if (double_button_track == TRUE)
-  {
-  m_btn_timer_status[keylstCenter] = BUTTON_STATUS_INIT;
-  m_btn_timer_status[keylstRight] = BUTTON_STATUS_INIT;
-  double_button_track = FALSE;
-  timer_stop(m_timer_id_btn_detet[keylstRight]);
-}
-}
-  */
+    timer_stop(m_timer_id_btn_detet[keylstFn1]);  // Disable btn2_timer when tracking double hold.
+    m_btn_timer_status[keylstFLASH] = BUTTON_STATUS_DOUBLE_TRACK;
+    m_btn_timer_status[keylstFn1] = BUTTON_STATUS_INIT;
+    double_button_track = TRUE;
+    timer_start(m_timer_id_btn_detet[keylstFn1], BUTTON_DOUBLE_BTN_TRACK_DURATION);  //3 s
+  } else if( btn_is_pushed[keylstFLASH] == TRUE && btn_is_pushed[keylstFn4] == TRUE ) {
+    timer_stop(m_timer_id_btn_detet[keylstFn4]);  // Disable btn2_timer when tracking double hold.
+    m_btn_timer_status[keylstFLASH] = BUTTON_STATUS_DOUBLE_TRACK;
+    m_btn_timer_status[keylstFn4] = BUTTON_STATUS_INIT;
+    double_button_track = TRUE;
+    timer_start(m_timer_id_btn_detet[keylstFn4], BUTTON_DOUBLE_BTN_TRACK_DURATION);  //3 s
+  } else {
+    if (double_button_track == TRUE)
+    {
+      m_btn_timer_status[keylstFLASH] = BUTTON_STATUS_INIT;
+      m_btn_timer_status[keylstFn1] = BUTTON_STATUS_INIT;
+      m_btn_timer_status[keylstFn4] = BUTTON_STATUS_INIT;
+      double_button_track = FALSE;
+      timer_stop(m_timer_id_btn_detet[keylstFn1]);
+      timer_stop(m_timer_id_btn_detet[keylstFn4]);
+    }
+  }
 }
 
 void button_push(uint8_t _btn)
