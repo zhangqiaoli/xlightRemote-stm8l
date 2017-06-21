@@ -141,7 +141,8 @@ typedef struct
   UC indDevice                :3;           // Current Device Index: [0..3]
   UC present                  :1;           // 0 - not present; 1 - present
   UC inPresentation           :1;           // whether in presentation
-  UC reserved                 :3;
+  UC inConfigMode             :1;           // whether in config mode
+  UC reserved                 :2;
   UC type;                                  // Type of Remote
   US token;                                 // Current token
   //char Organization[24];                    // Organization name
@@ -211,6 +212,7 @@ void UpdateNodeAddress();
 bool SendMyMessage();
 void EraseCurrentDeviceInfo();
 void ToggleSDTM();
+void SetConfigMode(bool _sw, uint8_t _devIndex);
 bool SayHelloToDevice(bool infinate);
 
 #define IS_MINE_SUBID(nSID)        ((nSID) == 0 || ((nSID) & CurrentDevSubID))

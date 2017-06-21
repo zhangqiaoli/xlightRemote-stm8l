@@ -382,7 +382,7 @@ INTERRUPT_HANDLER(TIM4_UPD_OVF_TRG_IRQHandler, 25)
   if ((int_timer4 % TIM4_CHECK_TICKS) == 0)
   {
     int_timer4 = 0;
-    tick_timeout_handler();
+    tick_timeout_handler(); // every 10ms
   }
   TIM4_ClearITPendingBit(TIM4_IT_Update);
 }

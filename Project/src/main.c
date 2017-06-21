@@ -50,7 +50,10 @@ Connections:
 #define MAX_RF_FAILED_TIME              3      // Reset RF module when reach max failed times of sending
 
 // Unique ID for STM8L151x4
-#define     UNIQUE_ID_ADDRESS         (0x4926)
+#define     UNIQUE_ID_ADDRESS           (0x4926)
+
+// Timeout
+#define RTE_TM_CONFIG_MODE              12000  // timeout in config mode, about 120s (12000 * 10ms)
 
 const UC RF24_BASE_RADIO_ID[ADDRESS_WIDTH] = {0x00,0x54,0x49,0x54,0x44};
 
@@ -68,6 +71,9 @@ uint8_t m_cntRFSendFailed = 0;
 // Moudle variables
 bool bPowerOn = FALSE;
 uint8_t mutex;
+uint8_t oldCurrentDevID = 0;
+uint16_t configMode_tick = 0;
+void tmrProcess();
 
 bool isIdentityEmpty(const UC *pId, UC nLen)
 {
@@ -310,6 +316,13 @@ void LoadConfig()
       gIsChanged = TRUE;
       SaveConfig();
     }
+    
+    // Session time parameters
+    gConfig.indDevice = 0;
+    gConfig.inConfigMode = 0;
+    gConfig.inPresentation = 0;
+    oldCurrentDevID = gConfig.indDevice;
+    
     // Test for CR05
     //CurrentDeviceID = 255;
     //gConfig.fnScenario[0] = 2;
@@ -355,6 +368,16 @@ void ToggleSDTM() {
   // Soft reset
   WWDG->CR = 0x80;
 #endif  
+}
+
+void SetConfigMode(bool _sw, uint8_t _devIndex) {
+  configMode_tick = 0;
+  if( !gConfig.inConfigMode ) oldCurrentDevID = gConfig.indDevice;
+  gConfig.inConfigMode = _sw;
+  
+  // May use ChangeCurrentDevice() later
+  if( _devIndex == 255 ) gConfig.indDevice = oldCurrentDevID;
+  else if( _devIndex < NUM_DEVICES ) gConfig.indDevice = _devIndex;
 }
 
 bool WaitMutex(uint32_t _timeout) {
@@ -624,6 +647,7 @@ int main( void ) {
   
   // Set PowerOn flag
   bPowerOn = TRUE;
+  TIM4_10ms_handler = tmrProcess;
   
   while (1) {
     
@@ -640,7 +664,7 @@ int main( void ) {
     if( gDelayedOperation > 0 ) OperationIndicator();
     
     // Enter Low Power Mode
-    if( tmrIdleDuration > TIMEOUT_IDLE && !isNodeIdRequired() ) {
+    if( tmrIdleDuration > TIMEOUT_IDLE && !isNodeIdRequired() && !gConfig.inConfigMode ) {
       tmrIdleDuration = 0;
       lowpower_config();
       bPowerOn = FALSE;
@@ -652,6 +676,15 @@ int main( void ) {
       // REQ device status
       //delay_ms(10);
       //Msg_RequestDeviceStatus();
+    }
+  }
+}
+
+// Execute timer operations
+void tmrProcess() {
+  if( gConfig.inConfigMode ) {
+    if( configMode_tick++ > RTE_TM_CONFIG_MODE ) {
+      SetConfigMode(FALSE, oldCurrentDevID);
     }
   }
 }

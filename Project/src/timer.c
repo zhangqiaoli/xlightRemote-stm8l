@@ -5,6 +5,8 @@
 
 #define MAX_TIMER_NUMBER    22
 
+TM4_CallBack_t TIM4_10ms_handler = 0;
+
 typedef struct timer_manager_s
 {
     u8   timer_index;
@@ -111,4 +113,6 @@ void tick_timeout_handler(void)
       timer_schedule(FALSE);
     }
   }
+  
+  if( TIM4_10ms_handler ) (*TIM4_10ms_handler)();
 }

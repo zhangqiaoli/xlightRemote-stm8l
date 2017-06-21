@@ -754,6 +754,9 @@ void btn_double_long_hold_press(uint8_t _btn1, uint8_t _btn2)
     if( _btn2 == keylstFn1 ) {
       // Erase current device infomation
       //EraseCurrentDeviceInfo();      
+    } else if( _btn2 == keylstFn2 ) {
+      // Toggle Simple Direct Test Mode
+      SetConfigMode(TRUE, gConfig.indDevice);
     } else if( _btn2 == keylstFn4 ) {
       // Toggle Simple Direct Test Mode
       ToggleSDTM();
@@ -796,6 +799,8 @@ void app_button_event_handler(uint8_t _btn, button_event_t button_event)
     
   case DOUBLE_BTN_TRACK:
     if( btn_is_pushed[keylstFn1] ) sec_btn = keylstFn1;
+    else if( btn_is_pushed[keylstFn2] ) sec_btn = keylstFn2;
+    else if( btn_is_pushed[keylstFn3] ) sec_btn = keylstFn3;
     else if( btn_is_pushed[keylstFn4] ) sec_btn = keylstFn4;
     if( sec_btn < keylstDummy )
       btn_double_long_hold_press(keylstFLASH, sec_btn);

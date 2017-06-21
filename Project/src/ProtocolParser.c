@@ -70,11 +70,15 @@ uint8_t ParseProtocol(){
 
       case NCF_DEV_ASSOCIATE:
         CurrentDeviceID = rcvMsg.payload.data[0];
-        CurrentSubNID = rcvMsg.payload.data[1];
+        CurrentDevSubID = rcvMsg.payload.data[1];
         break;
 
       case NCF_DEV_SET_SUBID:
         CurrentSubNID = rcvMsg.payload.data[0];
+        break;
+
+      case NCF_DEV_CONFIG_MODE:
+        SetConfigMode(rcvMsg.payload.data[0], rcvMsg.payload.data[1]);
         break;
         
       case NCF_DEV_MAX_NMRT:
