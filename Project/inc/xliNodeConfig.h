@@ -15,6 +15,13 @@
 #define NCF_DEV_MAX_NMRT                12      // Max. Node Message Repeat Times, payload length = 2
 #define NCF_DEV_SET_SUBID               13      // Set device subid, payload length = 2
 #define NCF_DEV_CONFIG_MODE             14      // Put Device into Config Mode, payload length = 2
+#define NCF_DEV_SET_RELAY_NODE          15      // Set relay node id & subID, payload length = 2
+#define NCF_DEV_SET_RELAY_KEYS          16      // Set relay keys, payload length = 2 to 4
+
+#define NCF_PAN_SET_BTN_1               20      // Set Panel Button Action, payload length = 2
+#define NCF_PAN_SET_BTN_2               21      // Set Panel Button Action, payload length = 2
+#define NCF_PAN_SET_BTN_3               22      // Set Panel Button Action, payload length = 2
+#define NCF_PAN_SET_BTN_4               23      // Set Panel Button Action, payload length = 2
 
 #define NCF_DATA_ALS_RANGE              50      // Lower and upper threshholds of ALS, payload length = 2
 #define NCF_DATA_TEMP_RANGE             51      // Tempreture threshholds, payload length = 2

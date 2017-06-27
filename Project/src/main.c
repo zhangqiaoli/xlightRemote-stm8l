@@ -32,7 +32,7 @@ Connections:
 */
 
 // Xlight Application Identification
-#define XLA_VERSION               0x04
+#define XLA_VERSION               0x05
 #define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
 #define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
 
@@ -323,11 +323,11 @@ void LoadConfig()
     gConfig.inPresentation = 0;
     oldCurrentDevID = gConfig.indDevice;
     
-    // Test for CR05
-    //CurrentDeviceID = 255;
-    //gConfig.fnScenario[0] = 2;
-    //gConfig.fnScenario[1] = 3;
-    //gConfig.fnScenario[2] = 1;
+    gConfig.relayKey.deviceID = 129;
+    gConfig.relayKey.subDevID = 1;
+    gConfig.relayKey.keys[0] = '1';
+    gConfig.relayKey.keys[1] = 0;
+    gConfig.relayKey.state = 0;
 }
 
 void UpdateNodeAddress() {

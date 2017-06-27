@@ -14,6 +14,9 @@
 // Uncomment this line if need Flashlight or Laser Pen
 #define ENABLE_FLASHLIGHT_LASER
 
+// Uncomment this line if need Presentation Mode
+//#define ENABLE_PRESENTATION_MODE
+
 /* Exported types ------------------------------------------------------------*/
 // Common Data Type
 #define UC                        uint8_t
@@ -64,6 +67,7 @@
 
 #define UNIQUE_ID_LEN           8
 #define NUM_DEVICES             4
+#define NUM_RELAY_KEYS          4
 
 #define DELAY_OP_ERASEFLASH     0x10
 #define DELAY_OP_PAIRED         0x20
@@ -137,6 +141,14 @@ typedef struct
 
 typedef struct
 {
+  UC deviceID;                              // Device Node ID
+  UC subDevID;                              // Device SubID
+  UC keys[NUM_RELAY_KEYS];
+  UC state                    :1;           // On / Off
+} RelayKeyInfo_t;
+
+typedef struct
+{
   UC version                  :8;           // Data version, other than 0xFF
   UC indDevice                :3;           // Current Device Index: [0..3]
   UC present                  :1;           // 0 - not present; 1 - present
@@ -153,6 +165,7 @@ typedef struct
   UC Reserved1                :3;           // Reserved bits
   DeviceInfo_t devItem[NUM_DEVICES];
   fnScenario_t fnScenario[4];
+  RelayKeyInfo_t relayKey;
 } Config_t;
 
 extern Config_t gConfig;

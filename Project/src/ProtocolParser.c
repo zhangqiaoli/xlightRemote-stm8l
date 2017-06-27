@@ -35,7 +35,7 @@ uint8_t ParseProtocol(){
   uint8_t _sender = rcvMsg.header.sender;  // The original sender
   uint8_t _type = rcvMsg.header.type;
   uint8_t _sensor = rcvMsg.header.sensor;
-  bool _needAck = (bool)miGetRequestAck();
+  uint8_t _lenPayl = miGetLength();
   bool _isAck = (bool)miGetAck();
   
   switch( _cmd ) {
@@ -45,7 +45,7 @@ uint8_t ParseProtocol(){
       uint8_t lv_nodeID = _sensor;
       if( IS_NOT_REMOTE_NODEID(lv_nodeID) && !IS_GROUP_NODEID(lv_nodeID) ) {
       } else {
-        if( miGetLength() > 8 ) {
+        if( _lenPayl > 8 ) {
           // Verify _uniqueID        
           if(!isIdentityEqual(_uniqueID, rcvMsg.payload.data+8, UNIQUE_ID_LEN)) {
             return 0;
@@ -77,6 +77,21 @@ uint8_t ParseProtocol(){
         CurrentSubNID = rcvMsg.payload.data[0];
         break;
 
+      case NCF_DEV_SET_RELAY_NODE:
+        gConfig.relayKey.deviceID = rcvMsg.payload.data[0];
+        gConfig.relayKey.subDevID = rcvMsg.payload.data[1];
+        break;
+
+      case NCF_DEV_SET_RELAY_KEYS:
+        {
+          uint8_t _len = (_lenPayl > NUM_RELAY_KEYS ? NUM_RELAY_KEYS : _lenPayl);
+          memset(gConfig.relayKey.keys, 0x00, NUM_RELAY_KEYS);
+          for( uint8_t i = 0; i < _len; i++ ) {
+            gConfig.relayKey.keys[i] = rcvMsg.payload.data[i];
+          }
+        }
+        break;
+        
       case NCF_DEV_CONFIG_MODE:
         SetConfigMode(rcvMsg.payload.data[0], rcvMsg.payload.data[1]);
         break;
@@ -253,6 +268,27 @@ void Msg_DevOnOff(uint8_t _sw) {
   moSetPayloadType(P_BYTE);
   sndMsg.payload.bValue = _sw;
   bMsgReady = 1;
+}
+
+// Set relay key (e.g. pot light) 1:On; 0:Off; 2:toggle
+void Msg_RelayOnOff(uint8_t _sw) {
+  if( gConfig.relayKey.deviceID > 0 ) {
+    SendMyMessage();
+    if( _sw == DEVICE_SW_TOGGLE ) {
+      gConfig.relayKey.state = 1 - gConfig.relayKey.state;
+    } else {
+      gConfig.relayKey.state = (_sw == DEVICE_SW_ON);
+    }
+    uint8_t _len = 0;
+    build(gConfig.relayKey.deviceID, gConfig.relayKey.subDevID, C_SET, (gConfig.relayKey.state ? V_RELAY_ON : V_RELAY_OFF), 0, 0);
+    moSetPayloadType(P_BYTE);
+    for( _len = 0; _len < NUM_RELAY_KEYS; _len++ ) {
+      if( gConfig.relayKey.keys[_len] == 0 ) break;
+      sndMsg.payload.data[_len] = gConfig.relayKey.keys[_len];
+    }
+    moSetLength(_len);
+    bMsgReady = 1;
+  }
 }
 
 // Set current device brightness

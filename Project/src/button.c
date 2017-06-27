@@ -120,10 +120,12 @@ void button_release(uint8_t _btn);
 
 // Switch PPT mode
 void SwitchPPTMode(bool _sw) {
+#ifdef ENABLE_PRESENTATION_MODE  
   gConfig.inPresentation = _sw;
   if( gDelayedOperation == 0 ) {
     gDelayedOperation = _sw ? DELAY_OP_PPTMODE_ON : DELAY_OP_PPTMODE_OFF;
   }
+#endif  
 }
 
 // Blink LED to indicate starting
@@ -349,12 +351,19 @@ void FN_Button_Action(uint8_t _fn) {
     
     if( gConfig.fnScenario[_fn].scenario > 0 ) {
       Msg_DevScenario(gConfig.fnScenario[_fn].scenario);
-    } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_OFF || gConfig.fnScenario[_fn].hue.State == DEVICE_SW_TOGGLE ) {
-      Msg_DevOnOff(gConfig.fnScenario[_fn].hue.State);
-    } else if( gConfig.fnScenario[_fn].hue.CCT >= CT_MIN_VALUE ) {
-      Msg_DevBR_CCT(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.CCT);
-    } else {
-      Msg_DevBR_RGBW(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.R, gConfig.fnScenario[_fn].hue.G, gConfig.fnScenario[_fn].hue.B, (uint8_t)gConfig.fnScenario[_fn].hue.CCT);
+    }
+    
+    if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_TOGGLE ) {
+      CurrentDeviceOnOff = 1 - CurrentDeviceOnOff;
+      Msg_DevOnOff(CurrentDeviceOnOff);
+    } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_OFF ) {
+      Msg_DevOnOff(DEVICE_SW_OFF);
+    } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_ON ) {
+        if( gConfig.fnScenario[_fn].hue.CCT >= CT_MIN_VALUE ) {
+        Msg_DevBR_CCT(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.CCT);
+      } else {
+        Msg_DevBR_RGBW(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.R, gConfig.fnScenario[_fn].hue.G, gConfig.fnScenario[_fn].hue.B, (uint8_t)gConfig.fnScenario[_fn].hue.CCT);
+      }
     }
     if( gConfig.fnScenario[_fn].bmDevice == 0 ) break;
   }
@@ -457,9 +466,12 @@ void btn_short_button_press(uint8_t _btn)
     break;
 
   case keylstFLASH:
+#ifdef ENABLE_FLASHLIGHT_LASER    
     // Toggle the flash light
-    //ledFlashLight(!pinLEDFlashlight);
     ledToggleFlashLight;
+#else
+    Msg_RelayOnOff(DEVICE_SW_TOGGLE);
+#endif    
     break;
     
   default:
