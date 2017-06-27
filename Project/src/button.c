@@ -359,7 +359,8 @@ void FN_Button_Action(uint8_t _fn) {
     } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_OFF ) {
       Msg_DevOnOff(DEVICE_SW_OFF);
     } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_ON ) {
-        if( gConfig.fnScenario[_fn].hue.CCT >= CT_MIN_VALUE ) {
+      Msg_DevOnOff(DEVICE_SW_ON);
+      if( gConfig.fnScenario[_fn].hue.CCT >= CT_MIN_VALUE ) {
         Msg_DevBR_CCT(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.CCT);
       } else {
         Msg_DevBR_RGBW(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.R, gConfig.fnScenario[_fn].hue.G, gConfig.fnScenario[_fn].hue.B, (uint8_t)gConfig.fnScenario[_fn].hue.CCT);
