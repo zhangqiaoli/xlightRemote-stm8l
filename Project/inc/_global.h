@@ -12,7 +12,7 @@
 
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen
-#define ENABLE_FLASHLIGHT_LASER
+//#define ENABLE_FLASHLIGHT_LASER
 
 // Uncomment this line if need Presentation Mode
 //#define ENABLE_PRESENTATION_MODE
@@ -173,6 +173,8 @@ extern DeviceStatus_t gDevStatus[NUM_DEVICES];
 extern bool gIsChanged;
 extern uint8_t _uniqueID[UNIQUE_ID_LEN];
 extern uint8_t gDelayedOperation;
+extern uint8_t gSendScenario;
+extern uint8_t gSendDelayTick;
 
 #define RING_ID_ALL             0
 #define RING_ID_1               1

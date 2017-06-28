@@ -67,6 +67,8 @@ bool gIsChanged = FALSE;
 uint8_t gDelayedOperation = 0;
 uint8_t _uniqueID[UNIQUE_ID_LEN];
 uint8_t m_cntRFSendFailed = 0;
+uint8_t gSendScenario = 0;
+uint8_t gSendDelayTick = 0;
 
 // Moudle variables
 bool bPowerOn = FALSE;
@@ -685,6 +687,15 @@ void tmrProcess() {
   if( gConfig.inConfigMode ) {
     if( configMode_tick++ > RTE_TM_CONFIG_MODE ) {
       SetConfigMode(FALSE, oldCurrentDevID);
+    }
+  }
+  
+  if( gSendScenario > 0 ) {
+    gSendDelayTick++;
+    if( gSendDelayTick > 5 && !bMsgReady ) {
+      Msg_DevScenario(gSendScenario);
+      gSendScenario = 0;
+      gSendDelayTick = 0;
     }
   }
 }

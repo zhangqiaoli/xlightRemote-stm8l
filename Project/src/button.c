@@ -349,10 +349,6 @@ void FN_Button_Action(uint8_t _fn) {
       }
     }
     
-    if( gConfig.fnScenario[_fn].scenario > 0 ) {
-      Msg_DevScenario(gConfig.fnScenario[_fn].scenario);
-    }
-    
     if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_TOGGLE ) {
       CurrentDeviceOnOff = 1 - CurrentDeviceOnOff;
       Msg_DevOnOff(CurrentDeviceOnOff);
@@ -366,6 +362,13 @@ void FN_Button_Action(uint8_t _fn) {
         Msg_DevBR_RGBW(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.R, gConfig.fnScenario[_fn].hue.G, gConfig.fnScenario[_fn].hue.B, (uint8_t)gConfig.fnScenario[_fn].hue.CCT);
       }
     }
+    
+    if( gConfig.fnScenario[_fn].scenario > 0 ) {
+      // Delay sending
+      gSendDelayTick = 0;
+      gSendScenario = gConfig.fnScenario[_fn].scenario;
+    }
+    
     if( gConfig.fnScenario[_fn].bmDevice == 0 ) break;
   }
   
