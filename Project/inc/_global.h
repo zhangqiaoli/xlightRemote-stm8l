@@ -8,7 +8,7 @@
 
 // Simple Direct Test
 // Uncomment this line to work in Simple Direct Test Mode
-//#define ENABLE_SDTM
+#define ENABLE_SDTM
 
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen

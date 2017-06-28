@@ -324,12 +324,48 @@ void LoadConfig()
     gConfig.inConfigMode = 0;
     gConfig.inPresentation = 0;
     oldCurrentDevID = gConfig.indDevice;
-    
+        
     gConfig.relayKey.deviceID = 129;
-    gConfig.relayKey.subDevID = 1;
+    gConfig.relayKey.subDevID = 4;
     gConfig.relayKey.keys[0] = '1';
     gConfig.relayKey.keys[1] = 0;
     gConfig.relayKey.state = 0;
+    
+     // Set Devices
+    gConfig.devItem[0].deviceID = 255;
+    gConfig.devItem[0].subDevID = 0;
+    gConfig.devItem[1] = gConfig.devItem[0];
+    gConfig.devItem[2] = gConfig.devItem[0];
+    gConfig.devItem[3] = gConfig.devItem[0];
+    gConfig.devItem[1].deviceID = 255;
+    gConfig.devItem[1].subDevID = 1;
+    gConfig.devItem[2].deviceID = 255;
+    gConfig.devItem[2].subDevID = 2;
+    
+    // Set Fn
+    /// F1
+    gConfig.fnScenario[0].bmDevice = 0x04;
+    gConfig.fnScenario[0].scenario = 65;
+    gConfig.fnScenario[0].hue.State = 2;
+    gConfig.fnScenario[0].hue.bmRing = 0;
+    /// F2
+    gConfig.fnScenario[1].bmDevice = 0x02;
+    gConfig.fnScenario[1].scenario = 66;
+    gConfig.fnScenario[1].hue.State = 2;
+    gConfig.fnScenario[1].hue.bmRing = 0;
+    /// F3
+    gConfig.fnScenario[2].bmDevice = 0x01;
+    gConfig.fnScenario[2].scenario = 67;
+    gConfig.fnScenario[2].hue.State = 1;
+    gConfig.fnScenario[2].hue.bmRing = 0;
+    gConfig.fnScenario[2].hue.BR = 90;
+    gConfig.fnScenario[2].hue.CCT = 5500;
+    /// F4
+    gConfig.fnScenario[3].bmDevice = 0x01;
+    gConfig.fnScenario[3].scenario = 68;
+    gConfig.fnScenario[3].hue.State = 0;    
+    gConfig.fnScenario[3].hue.bmRing = 0;
+    
 }
 
 void UpdateNodeAddress() {
