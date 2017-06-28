@@ -28,6 +28,26 @@ void UpdateCurrentDeviceOnOff(bool _OnOff) {
   }*/
 }
 
+void UpdateNodeID(uint8_t nID) {
+  CurrentNodeID = nID;
+  if( gConfig.indDevice == 0 ) {
+    for( uint8_t i = 1; i < NUM_DEVICES; i++ ) {
+      if( DeviceID(i) == 0 )
+        DeviceID(i) = CurrentNodeID;
+    }
+  }
+}
+
+void UpdateSubID(uint8_t nID) {
+  CurrentSubNID = nID;
+  if( gConfig.indDevice == 0 ) {
+    for( uint8_t i = 1; i < NUM_DEVICES; i++ ) {
+      if( DeviceSubID(i) == 0 )
+        DeviceSubID(i) = CurrentDevSubID;
+    }
+  }
+}
+
 uint8_t ParseProtocol(){
   if( rcvMsg.header.destination != CurrentNodeID && rcvMsg.header.destination != BROADCAST_ADDRESS ) return 0;
   
@@ -51,7 +71,7 @@ uint8_t ParseProtocol(){
             return 0;
           }
         }
-        CurrentNodeID = lv_nodeID;
+        UpdateNodeID(lv_nodeID);
         memcpy(CurrentNetworkID, rcvMsg.payload.data, sizeof(CurrentNetworkID));
         UpdateNodeAddress();
         gIsChanged = TRUE;
@@ -74,7 +94,7 @@ uint8_t ParseProtocol(){
         break;
 
       case NCF_DEV_SET_SUBID:
-        CurrentSubNID = rcvMsg.payload.data[0];
+        UpdateSubID(rcvMsg.payload.data[0]);        
         break;
 
       case NCF_DEV_SET_RELAY_NODE:
