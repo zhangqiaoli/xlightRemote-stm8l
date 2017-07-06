@@ -23,7 +23,7 @@ MISO   IRQ
 
 Connections:
   PB4 -> CE
-  PD4 -> CSN
+  PD4 -> CSN (10 buttons), PC6 -> CSN (11 buttons)
   PB5 -> SCK
   PB6 -> MOSI
   PB7 -> MISO
