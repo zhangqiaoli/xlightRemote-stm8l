@@ -12,7 +12,7 @@
 
 // Button Layout
 // Uncomment this line if PCB has 10 buttons
-#define PCB_10_BUTTONS
+//#define PCB_10_BUTTONS
 
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen

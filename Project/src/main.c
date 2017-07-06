@@ -32,7 +32,7 @@ Connections:
 */
 
 // Xlight Application Identification
-#define XLA_VERSION               0x05
+#define XLA_VERSION               0x06
 #define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
 #define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
 
