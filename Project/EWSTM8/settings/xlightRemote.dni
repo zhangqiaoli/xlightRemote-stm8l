@@ -36,7 +36,7 @@ ActionState=1
 Enabled=0
 ShowSource=1
 [DebugChecksum]
-Checksum=-650952925
+Checksum=-1686378684
 [CallStack]
 ShowArgs=0
 [Disassembly]
@@ -52,6 +52,10 @@ LogEnabled=0
 GraphEnabled=0
 ShowTimeLog=1
 ShowTimeSum=1
+[Log file]
+LoggingEnabled=_ 0
+LogFile=_ ""
+Category=_ 0
 [TermIOLog]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -62,13 +66,9 @@ Bp2=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.133.9" 1 0 0 0 "" 0 ""
 Bp3=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.46.9" 1 0 0 0 "" 0 ""
 Bp4=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.769.3" 1 0 0 0 "" 0 ""
 Bp5=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.817.5" 1 0 0 0 "" 0 ""
-Bp6=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.369.1" 1 0 0 0 "" 0 ""
+Bp6=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.370.1" 1 0 0 0 "" 0 ""
 Bp7=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.270.5" 1 0 0 0 "" 0 ""
 Count=8
-[Log file]
-LoggingEnabled=_ 0
-LogFile=_ ""
-Category=_ 0
 [Aliases]
 Count=0
 SuppressDialog=0

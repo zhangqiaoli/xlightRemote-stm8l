@@ -10,6 +10,10 @@
 // Uncomment this line to work in Simple Direct Test Mode
 #define ENABLE_SDTM
 
+// Button Layout
+// Uncomment this line if PCB has 10 buttons
+#define PCB_10_BUTTONS
+
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen
 //#define ENABLE_FLASHLIGHT_LASER

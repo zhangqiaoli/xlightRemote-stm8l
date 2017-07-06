@@ -1,6 +1,7 @@
 #ifndef RF24L01_H
 #define RF24L01_H
 
+#include "_global.h"
 #include <stm8l15x.h> //Required for the stdint typedefs
 
 #define ADDRESS_WIDTH                   5
@@ -46,8 +47,14 @@
 #define RF24L01_command_W_TX_PAYLOAD_NOACK    0x58
 #define RF24L01_command_NOP                   0xFF
 
+#ifdef PCB_10_BUTTONS
 #define CSN_LOW         GPIO_ResetBits(GPIOD, GPIO_Pin_4)
 #define CSN_HIGH        GPIO_SetBits(GPIOD, GPIO_Pin_4)
+#else
+#define CSN_LOW         GPIO_ResetBits(GPIOC, GPIO_Pin_6)
+#define CSN_HIGH        GPIO_SetBits(GPIOC, GPIO_Pin_6)
+#endif
+
 #define CE_LOW          GPIO_ResetBits(GPIOB, GPIO_Pin_4)
 #define CE_HIGH         GPIO_SetBits(GPIOB, GPIO_Pin_4)
 #define SCK_LOW         GPIO_ResetBits(GPIOB, GPIO_Pin_5)

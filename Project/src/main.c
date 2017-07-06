@@ -324,7 +324,8 @@ void LoadConfig()
     gConfig.inConfigMode = 0;
     gConfig.inPresentation = 0;
     oldCurrentDevID = gConfig.indDevice;
-        
+    
+    /*
     gConfig.relayKey.deviceID = 129;
     gConfig.relayKey.subDevID = 4;
     gConfig.relayKey.keys[0] = '1';
@@ -365,7 +366,7 @@ void LoadConfig()
     gConfig.fnScenario[3].scenario = 68;
     gConfig.fnScenario[3].hue.State = 0;    
     gConfig.fnScenario[3].hue.bmRing = 0;
-    
+    */
 }
 
 void UpdateNodeAddress() {

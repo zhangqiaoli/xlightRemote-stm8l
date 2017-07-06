@@ -41,23 +41,22 @@ LEDs
 
 // Button pin map
 #define BUTTONS_PORT1           (GPIOD)
-// Old PCB before 2017-03-20
-/*
-#define BUTTON_PIN_LEFT         (GPIO_Pin_0)
-#define BUTTON_PIN_RIGHT        (GPIO_Pin_1)
-#define BUTTON_PIN_UP           (GPIO_Pin_2)
-#define BUTTON_PIN_DOWN         (GPIO_Pin_3)
-*/
-// New PCB from 2017-03-20
+#define BUTTONS_PORT2           (GPIOB)
+
+// Port 1    
 #define BUTTON_PIN_UP           (GPIO_Pin_0)
 #define BUTTON_PIN_DOWN         (GPIO_Pin_1)
 #define BUTTON_PIN_LEFT         (GPIO_Pin_2)
 #define BUTTON_PIN_RIGHT        (GPIO_Pin_3)
 
+#ifndef PCB_10_BUTTONS
+#define BUTTON_PIN_SB           (GPIO_Pin_4)
+#endif
+
 #define BUTTON_PIN_FN4          (GPIO_Pin_6)
 #define BUTTON_PIN_SA           (GPIO_Pin_7)
 
-#define BUTTONS_PORT2           (GPIOB)
+// Port 2
 #define BUTTON_PIN_CENTER       (GPIO_Pin_0)
 #define BUTTON_PIN_FN1          (GPIO_Pin_1)
 #define BUTTON_PIN_FN2          (GPIO_Pin_2)
@@ -82,9 +81,13 @@ LEDs
 #define pinKeyFn2               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN2))
 #define pinKeyFn3               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN3))
 #define pinKeyFn4               ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_FN4))
-#define pinKeyFlashlight        ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_SA))
+#define pinKeySA                ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_SA))
 #define pinLEDFlashlight        ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_FLASHLIGHT))
 #define pinLEDLaserPen          ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_LASERPEN))
+
+#ifdef BUTTON_PIN_SB
+#define pinKeySB                ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_SB))
+#endif
 
 #define BUTTON_DEBONCE_DURATION                 3       // The unit is 10 ms, so the duration is 30 ms.
 #define BUTTON_WAIT_2S                          100     // The unit is 10 ms, so the duration is 2 s.
@@ -270,6 +273,11 @@ void button_init()
   btn_bit_postion[keylstFLASH] = BUTTON_PIN_SA;
   btn_bit_postion[keylstFLASH] <<= 8;
 
+#ifdef BUTTON_PIN_SB
+  btn_bit_postion[keylstLASER] = BUTTON_PIN_SB;
+  btn_bit_postion[keylstLASER] <<= 8;
+#endif
+  
   btn_bit_postion[keylstCenter] = BUTTON_PIN_CENTER;
   btn_bit_postion[keylstFn1] = BUTTON_PIN_FN1;
   btn_bit_postion[keylstFn2] = BUTTON_PIN_FN2;
@@ -281,7 +289,12 @@ void button_init()
 #ifdef ENABLE_FLASHLIGHT_LASER  
   GPIO_Init(LEDS_PORT, (LED_PIN_FLASHLIGHT | LED_PIN_LASERPEN), GPIO_Mode_Out_PP_Low_Fast);
 #endif
+#ifdef BUTTON_PIN_SB
+  GPIO_Init(BUTTONS_PORT1, (BUTTON_PIN_LEFT | BUTTON_PIN_RIGHT | BUTTON_PIN_UP | BUTTON_PIN_DOWN | BUTTON_PIN_FN4 | BUTTON_PIN_SA | BUTTON_PIN_SB), GPIO_Mode_In_PU_IT);
+#else
   GPIO_Init(BUTTONS_PORT1, (BUTTON_PIN_LEFT | BUTTON_PIN_RIGHT | BUTTON_PIN_UP | BUTTON_PIN_DOWN | BUTTON_PIN_FN4 | BUTTON_PIN_SA), GPIO_Mode_In_PU_IT);
+#endif  
+  
   GPIO_Init(BUTTONS_PORT2, (BUTTON_PIN_CENTER | BUTTON_PIN_FN1 | BUTTON_PIN_FN2 | BUTTON_PIN_FN3), GPIO_Mode_In_PU_IT);
   EXTI_DeInit();
   EXTI_SelectPort(EXTI_Port_D);
@@ -289,8 +302,12 @@ void button_init()
   EXTI_SetPinSensitivity(EXTI_Pin_1, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_2, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_3, EXTI_Trigger_Rising_Falling);
+#ifndef BUTTON_PIN_SB
+  EXTI_SetPinSensitivity(EXTI_Pin_4, EXTI_Trigger_Rising_Falling);
+#endif  
   EXTI_SetPinSensitivity(EXTI_Pin_6, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_7, EXTI_Trigger_Rising_Falling);
+  
   EXTI_SelectPort(EXTI_Port_B);
   EXTI_SetPinSensitivity(EXTI_Pin_0, EXTI_Trigger_Rising_Falling);
   EXTI_SetPinSensitivity(EXTI_Pin_1, EXTI_Trigger_Rising_Falling);
@@ -929,8 +946,8 @@ void button_event_handler(uint8_t _pin)
   /*
   static BitStatus keyFL = 0;
   if( _pin == GPIO_Pin_0 ) {
-    if( keyFL != pinKeyFlashlight ) {
-      keyFL = pinKeyFlashlight;
+    if( keyFL != pinKeySA ) {
+      keyFL = pinKeySA;
       // Set Flashlight
       ledFlashLight(keyFL);
     }
