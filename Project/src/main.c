@@ -31,11 +31,6 @@ Connections:
 
 */
 
-// Xlight Application Identification
-#define XLA_VERSION               0x06
-#define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
-#define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
-
 // RF channel for the sensor net, 0-127
 #define RF24_CHANNEL	   		71
 #define ADDRESS_WIDTH                   5
