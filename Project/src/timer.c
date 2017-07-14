@@ -3,7 +3,7 @@
 
 #include "timer.h"
 
-#define MAX_TIMER_NUMBER    22
+#define MAX_TIMER_NUMBER    24
 
 TM4_CallBack_t TIM4_10ms_handler = 0;
 

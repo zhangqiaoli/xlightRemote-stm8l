@@ -31,6 +31,7 @@ typedef enum
     keylstFn3,
     keylstFn4,
     keylstFLASH,
+    keylstLASER,
     keylstDummy
 } keylist_t;
 

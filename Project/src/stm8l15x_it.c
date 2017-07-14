@@ -219,6 +219,8 @@ INTERRUPT_HANDLER(EXTI4_IRQHandler, 12)
   /* In order to detect unexpected events during development,
      it is recommended to set a breakpoint on the following instruction.
   */
+  button_event_handler(GPIO_Pin_4);
+  EXTI_ClearITPendingBit(EXTI_IT_Pin4);    
 }
 
 /**

@@ -10,6 +10,10 @@
 // Uncomment this line to work in Simple Direct Test Mode
 #define ENABLE_SDTM
 
+// Button Layout
+// Uncomment this line if PCB has 10 buttons
+#define PCB_10_BUTTONS
+
 // Config Flashlight and Laser
 // Uncomment this line if need Flashlight or Laser Pen
 //#define ENABLE_FLASHLIGHT_LASER
@@ -101,6 +105,11 @@ typedef enum
   remotetypDummy
 } remotetype_t;
 
+// Xlight Application Identification
+#define XLA_VERSION               0x08
+#define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
+#define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
+
 typedef struct
 {
   UC State                    :8;           // Component state
@@ -117,9 +126,11 @@ typedef struct
 
 typedef struct
 {
+#if XLA_VERSION <= 0x07
   UC nodeID;                                // Node ID for Remote on specific controller
   UC subID;                                 // SubID
   UC NetworkID[6];
+#endif  
   UC deviceID;                              // Device Node ID
   UC subDevID;                              // Device SubID
   UC type;                                  // Type of Device
@@ -147,6 +158,35 @@ typedef struct
   UC state                    :1;           // On / Off
 } RelayKeyInfo_t;
 
+#if XLA_VERSION > 0x07
+typedef struct
+{
+  // Static & status parameters
+  UC version                  :8;           // Data version, other than 0xFF
+  UC present                  :1;           // 0 - not present; 1 - present
+  UC inPresentation           :1;           // whether in presentation
+  UC inConfigMode             :1;           // whether in config mode
+  UC reserved0                :5;
+  
+  // Configurable parameters
+  UC nodeID;                                // Node ID for Remote on specific controller
+  UC subID;                                 // SubID
+  UC NetworkID[6];
+  UC rfChannel;                             // RF Channel: [0..127]
+  UC rfPowerLevel             :2;           // RF Power Level 0..3
+  UC rfDataRate               :2;           // RF Data Rate [0..2], 0 for 1Mbps, or 1 for 2Mbps, 2 for 250kbs
+  UC rptTimes                 :2;           // Sending message max repeat times [0..3]
+  UC enSDTM                   :1;           // Simple Direct Test Mode Flag
+  UC reserved1                :1;
+  UC type;                                  // Type of Remote
+  US token;                                 // Current token
+  UC indDevice                :3;           // Current Device Index: [0..3]
+  UC reserved2                :5;
+  DeviceInfo_t devItem[NUM_DEVICES];
+  fnScenario_t fnScenario[4];
+  RelayKeyInfo_t relayKey;
+} Config_t;
+#else
 typedef struct
 {
   UC version                  :8;           // Data version, other than 0xFF
@@ -167,6 +207,7 @@ typedef struct
   fnScenario_t fnScenario[4];
   RelayKeyInfo_t relayKey;
 } Config_t;
+#endif
 
 extern Config_t gConfig;
 extern DeviceStatus_t gDevStatus[NUM_DEVICES];
@@ -190,9 +231,16 @@ extern uint8_t gSendDelayTick;
 #define IS_NOT_DEVICE_NODEID(nID)  ((nID < NODEID_MIN_DEVCIE || nID > NODEID_MAX_DEVCIE) && nID != NODEID_MAINDEVICE)
 #define IS_NOT_REMOTE_NODEID(nID)  (nID < NODEID_MIN_REMOTE || nID > NODEID_MAX_REMOTE)
 
+#if XLA_VERSION > 0x07
+#define NodeID(x)                  gConfig.nodeID
+#define SubNID(x)                  gConfig.subID
+#define NetworkID(x)               gConfig.NetworkID
+#else
 #define NodeID(x)                  gConfig.devItem[x].nodeID
 #define SubNID(x)                  gConfig.devItem[x].subID
 #define NetworkID(x)               gConfig.devItem[x].NetworkID
+#endif
+
 #define DeviceID(x)                gConfig.devItem[x].deviceID
 #define DeviceSubID(x)             gConfig.devItem[x].subDevID
 #define DeviceType(x)              gConfig.devItem[x].type

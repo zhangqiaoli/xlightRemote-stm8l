@@ -16,7 +16,11 @@ void RF24L01_init(void) {
   GPIO_Init(GPIOB, GPIO_Pin_7, GPIO_Mode_In_FL_No_IT);
 
   // NRF_CSN
+#ifdef PCB_10_BUTTONS  
   GPIO_Init(GPIOD, GPIO_Pin_4, GPIO_Mode_Out_PP_High_Fast);
+#else
+  GPIO_Init(GPIOC, GPIO_Pin_6, GPIO_Mode_Out_PP_High_Fast);
+#endif  
   CSN_HIGH;
 
   // NRF_CE
@@ -42,9 +46,16 @@ void RF24L01_DeInit(void) {
   CE_LOW;
   CSN_LOW;
   SPI_Cmd(SPI1, DISABLE);
+  
   GPIO_Init(GPIOB, GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6, GPIO_Mode_Out_PP_Low_Slow);
   GPIO_Init(GPIOB, GPIO_Pin_7, GPIO_Mode_In_FL_No_IT);
+  
+#ifdef PCB_10_BUTTONS    
   GPIO_Init(GPIOD, GPIO_Pin_4, GPIO_Mode_Out_PP_Low_Slow);
+#else
+  GPIO_Init(GPIOC, GPIO_Pin_6, GPIO_Mode_Out_PP_Low_Slow);
+#endif
+  
   GPIO_Init(GPIOD, GPIO_Pin_5, GPIO_Mode_In_FL_IT);
   enableInterrupts();
 }
@@ -188,9 +199,9 @@ void RF24L01_setup(uint8_t channel, uint8_t boardcast) {
 
   RF24L01_reg_RF_SETUP_content RF_SETUP;
   *((uint8_t *)&RF_SETUP) = 0;
-  RF_SETUP.RF_PWR = 0x00;   // 01: Low. 03: Max
+  RF_SETUP.RF_PWR = 0x01;   // 01: Low. 03: Max
   // '00' is 1Mbs, '01' is 2Mbs, '10' is 250Kbs
-  RF_SETUP.RF_DR_LOW = 0x00;
+  RF_SETUP.RF_DR_LOW = 0x01;
   RF_SETUP.RF_DR_HIGH = 0x00;
   RF_SETUP.LNA_HCURR = 0x01;
   RF24L01_write_register(RF24L01_reg_RF_SETUP, ((uint8_t *)&RF_SETUP), 1);

@@ -23,18 +23,13 @@ MISO   IRQ
 
 Connections:
   PB4 -> CE
-  PD4 -> CSN
+  PD4 -> CSN (10 buttons), PC6 -> CSN (11 buttons)
   PB5 -> SCK
   PB6 -> MOSI
   PB7 -> MISO
   PD5 -> IRQ
 
 */
-
-// Xlight Application Identification
-#define XLA_VERSION               0x05
-#define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
-#define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
 
 // RF channel for the sensor net, 0-127
 #define RF24_CHANNEL	   		71
@@ -324,7 +319,8 @@ void LoadConfig()
     gConfig.inConfigMode = 0;
     gConfig.inPresentation = 0;
     oldCurrentDevID = gConfig.indDevice;
-        
+    
+    /*
     gConfig.relayKey.deviceID = 129;
     gConfig.relayKey.subDevID = 4;
     gConfig.relayKey.keys[0] = '1';
@@ -365,7 +361,7 @@ void LoadConfig()
     gConfig.fnScenario[3].scenario = 68;
     gConfig.fnScenario[3].hue.State = 0;    
     gConfig.fnScenario[3].hue.bmRing = 0;
-    
+    */
 }
 
 void UpdateNodeAddress() {
