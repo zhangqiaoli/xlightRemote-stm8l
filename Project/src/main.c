@@ -274,8 +274,9 @@ void LoadConfig()
       gConfig.enSDTM = 0;
       gConfig.rptTimes = 1;
       gConfig.type = remotetypRFStandard;
-      gConfig.rfPowerLevel = RF24_PA_MAX;
-      memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
+      gConfig.rfChannel = RF24_CHANNEL;
+      gConfig.rfPowerLevel = RF24_PA_LOW;
+      gConfig.rfDataRate = RF24_1MBPS;      memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
       //sprintf(gConfig.Organization, "%s", XLA_ORGANIZATION);
       //sprintf(gConfig.ProductName, "%s", XLA_PRODUCT_NAME);
 
@@ -364,21 +365,38 @@ void LoadConfig()
     */
 }
 
-void UpdateNodeAddress() {
+void UpdateNodeAddress(uint8_t _tx) {
   memcpy(rx_addr, CurrentNetworkID, ADDRESS_WIDTH);
   rx_addr[0] = CurrentNodeID;
   memcpy(tx_addr, CurrentNetworkID, ADDRESS_WIDTH);
+  
+  if( _tx == NODEID_RF_SCANNER ) {
+    tx_addr[0] = NODEID_RF_SCANNER;
+  } else {  
 #ifdef ENABLE_SDTM
-  tx_addr[0] = CurrentDeviceID;
-#else
-  if( gConfig.enSDTM ) {
     tx_addr[0] = CurrentDeviceID;
-  } else {
-    tx_addr[0] = (isNodeIdRequired() ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
+#else
+    if( gConfig.enSDTM ) {
+      tx_addr[0] = CurrentDeviceID;
+    } else {
+      tx_addr[0] = (isNodeIdRequired() ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
+    }
+#endif
   }
-#endif  
-  RF24L01_setup(RF24_CHANNEL, BROADCAST_ADDRESS);     // With openning the boardcast pipe
+  RF24L01_setup(gConfig.rfChannel, gConfig.rfDataRate, gConfig.rfPowerLevel, BROADCAST_ADDRESS);     // With openning the boardcast pipe
 }  
+
+bool NeedUpdateRFAddress(uint8_t _dest) {
+  bool rc = FALSE;
+  if( sndMsg.header.destination == NODEID_RF_SCANNER && tx_addr[0] != NODEID_RF_SCANNER ) {
+    UpdateNodeAddress(NODEID_RF_SCANNER);
+    rc = TRUE;
+  } else if( sndMsg.header.destination != NODEID_RF_SCANNER && tx_addr[0] != NODEID_GATEWAY ) {
+    UpdateNodeAddress(NODEID_GATEWAY);
+    rc = TRUE;
+  }
+  return rc;
+}
 
 void EraseCurrentDeviceInfo() {
 #ifndef ENABLE_SDTM
@@ -424,6 +442,10 @@ bool WaitMutex(uint32_t _timeout) {
 // Send message and switch back to receive mode
 bool SendMyMessage() {
   if( bMsgReady ) {
+    
+    // Change tx destination if necessary
+    NeedUpdateRFAddress(sndMsg.header.destination);
+    
     uint8_t lv_tried = 0;
     uint16_t delay;
     while (lv_tried++ <= gConfig.rptTimes ) {
@@ -444,7 +466,7 @@ bool SendMyMessage() {
         while(delay--)feed_wwdg();
         RF24L01_init();
         NRF2401_EnableIRQ();
-        UpdateNodeAddress();
+        UpdateNodeAddress(NODEID_GATEWAY);
         continue;
       }
       
@@ -466,7 +488,7 @@ bool SendMyMessage() {
 
 bool SayHelloToDevice(bool infinate) {
   uint8_t _count = 0;
-  UpdateNodeAddress();
+  UpdateNodeAddress(NODEID_GATEWAY);
   while(1) {
     if( _count++ == 0 ) {
       if( isNodeIdRequired() ) {
@@ -498,12 +520,12 @@ uint8_t ChangeCurrentDevice(uint8_t _newDev) {
   if( currentDev != _newDev ) {
     SelectDeviceLED(_newDev);
     gConfig.indDevice = _newDev;
-    UpdateNodeAddress();
+    UpdateNodeAddress(NODEID_GATEWAY);
     if( !SayHelloToDevice(FALSE) ) {
       // Switch back to prevoius device
       SelectDeviceLED(currentDev);
       gConfig.indDevice = currentDev;
-      UpdateNodeAddress();
+      UpdateNodeAddress(NODEID_GATEWAY);
     }
   }
   
@@ -647,13 +669,6 @@ int main( void ) {
   LED_Blink(TRUE, FALSE);
   LED_Blink(TRUE, FALSE);
  
-  // Update RF addresses and Setup RF environment
-  //gConfig.nodeID = 0x11; // test
-  //gConfig.nodeID = NODEID_MIN_REMOTE;   // test
-  //gConfig.nodeID = BASESERVICE_ADDRESS;   // test
-  //memcpy(gConfig.NetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH); // test
-  //UpdateNodeAddress();
-
   // NRF_IRQ
   NRF2401_EnableIRQ();
 
@@ -663,14 +678,14 @@ int main( void ) {
   CurrentNodeID = NODEID_MIN_REMOTE;
   CurrentDeviceID = BASESERVICE_ADDRESS;
   memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
-  UpdateNodeAddress();
+  UpdateNodeAddress(NODEID_GATEWAY);
 #else
   if( gConfig.enSDTM ) {
     gConfig.indDevice = 0;
     CurrentNodeID = NODEID_MIN_REMOTE;
     CurrentDeviceID = BASESERVICE_ADDRESS;
     memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
-    UpdateNodeAddress();
+    UpdateNodeAddress(NODEID_GATEWAY);
   } else {
     SayHelloToDevice(TRUE);
   }

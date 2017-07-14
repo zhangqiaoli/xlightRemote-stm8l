@@ -73,7 +73,7 @@ uint8_t ParseProtocol(){
         }
         UpdateNodeID(lv_nodeID);
         memcpy(CurrentNetworkID, rcvMsg.payload.data, sizeof(CurrentNetworkID));
-        UpdateNodeAddress();
+        UpdateNodeAddress(NODEID_GATEWAY);
         gIsChanged = TRUE;
         gDelayedOperation = DELAY_OP_PAIRED;
         Msg_Presentation();
