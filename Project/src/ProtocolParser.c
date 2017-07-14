@@ -235,7 +235,7 @@ void Msg_NodeConfigData(uint8_t _to) {
   build(_to, NCF_QUERY, C_INTERNAL, I_CONFIG, 0, 1);
 
   sndMsg.payload.data[payl_len++] = gConfig.version;
-  sndMsg.payload.data[payl_len++] = gConfig.type + 224;
+  sndMsg.payload.data[payl_len++] = gConfig.type;
   sndMsg.payload.data[payl_len++] = ((gConfig.indDevice << 5) | (gConfig.inPresentation << 4) | gConfig.rptTimes);
   sndMsg.payload.data[payl_len++] = 0;     // Reservered
   sndMsg.payload.data[payl_len++] = 0;     // Reservered

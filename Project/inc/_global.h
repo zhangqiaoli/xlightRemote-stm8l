@@ -98,7 +98,7 @@ typedef enum
 // Remote type
 typedef enum
 {
-  remotetypUnknown = 0,
+  remotetypUnknown = 224,
   remotetypRFSimply,
   remotetypRFStandard,
   remotetypRFEnhanced,
