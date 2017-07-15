@@ -8,7 +8,7 @@
 
 // Simple Direct Test
 // Uncomment this line to work in Simple Direct Test Mode
-#define ENABLE_SDTM
+//#define ENABLE_SDTM
 
 // Button Layout
 // Uncomment this line if PCB has 10 buttons
@@ -56,9 +56,12 @@
 #define NODEID_MIN_REMOTE       64
 #define NODEID_MAX_REMOTE       127
 #define NODEID_PROJECTOR        128
+#define NODEID_KEYSIMULATOR     129
+#define NODEID_SUPERSENSOR      130
 #define NODEID_SMARTPHONE       139
 #define NODEID_MIN_GROUP        192
 #define NODEID_MAX_GROUP        223
+#define NODEID_RF_SCANNER       250
 #define NODEID_DUMMY            255
 #define BASESERVICE_ADDRESS     0xFE
 #define BROADCAST_ADDRESS       0xFF
@@ -83,22 +86,40 @@
 typedef enum
 {
   devtypUnknown = 0,
-  devtypCRing3,     // Color ring - Rainbow
+  // Color ring - Rainbow
+  devtypCRing3,
   devtypCRing2,
-  devtypCRing1,
-  devtypWRing3,     // White ring - Sunny
+  devtypCBar,
+  devtypCFrame,
+  devtypCWave,
+  devtypCRing1 = 31,
+
+  // White ring - Sunny
+  devtypWRing3 = 32,
   devtypWRing2,
-  devtypWRing1,
-  devtypMRing3 = 8, // Color & Motion ring - Mirage
+  devtypWBar,
+  devtypWFrame,
+  devtypWWave,
+  devtypWSquare60,      // 60 * 60
+  devtypWPanel120_30,   // 120 * 30
+  devtypWBlackboard,    // Blackboard lamp
+  devtypWRing1 = 95,
+
+  // Color & Motion ring - Mirage
+  devtypMRing3 = 96,
   devtypMRing2,
-  devtypMRing1,
+  devtypMBar,
+  devtypMFrame,
+  devtypMWave,
+  devtypMRing1 = 127,
+
   devtypDummy = 255
 } devicetype_t;
 
 // Remote type
 typedef enum
 {
-  remotetypUnknown = 0,
+  remotetypUnknown = 224,
   remotetypRFSimply,
   remotetypRFStandard,
   remotetypRFEnhanced,
@@ -194,7 +215,7 @@ typedef struct
   UC present                  :1;           // 0 - not present; 1 - present
   UC inPresentation           :1;           // whether in presentation
   UC inConfigMode             :1;           // whether in config mode
-  UC reserved                 :2;
+  UC rfDataRate               :2;           // RF Data Rate [0..2], 0 for 1Mbps, or 1 for 2Mbps, 2 for 250kbs
   UC type;                                  // Type of Remote
   US token;                                 // Current token
   //char Organization[24];                    // Organization name
@@ -203,6 +224,7 @@ typedef struct
   UC enSDTM                   :1;           // Simple Direct Test Mode Flag
   UC rptTimes                 :2;           // Sending message max repeat times [0..3]
   UC Reserved1                :3;           // Reserved bits
+  UC rfChannel;                             // RF Channel: [0..127]
   DeviceInfo_t devItem[NUM_DEVICES];
   fnScenario_t fnScenario[4];
   RelayKeyInfo_t relayKey;
@@ -268,10 +290,9 @@ extern uint8_t gSendDelayTick;
 
 bool isIdentityEqual(const UC *pId1, const UC *pId2, UC nLen);
 bool WaitMutex(uint32_t _timeout);
-void UpdateNodeAddress(void);
 void RF24L01_IRQ_Handler();
 uint8_t ChangeCurrentDevice(uint8_t _newDev);
-void UpdateNodeAddress();
+void UpdateNodeAddress(uint8_t _tx);
 bool SendMyMessage();
 void EraseCurrentDeviceInfo();
 void ToggleSDTM();
