@@ -495,6 +495,15 @@ void btn_short_button_press(uint8_t _btn)
 #endif    
     break;
     
+  case keylstLASER:
+#ifdef ENABLE_FLASHLIGHT_LASER    
+    // Toggle laser pen
+    ledToggleLaserPen;
+#else
+    Msg_RelayOnOff(DEVICE_SW_TOGGLE);
+#endif    
+    break;
+    
   default:
     break;
   }
@@ -562,6 +571,9 @@ void btn_double_button_press(uint8_t _btn)
   case keylstFLASH:
     break;
     
+  case keylstLASER:
+    break;
+    
   default:
     break;
   }  
@@ -587,7 +599,7 @@ void btn_long_hold_button_press(uint8_t _btn)
     
   case keylstCenter:
     // Turn on the laser
-    ledLaserPen(1);
+    SetLasterBeam(DEVICE_SW_ON);
     break;
     
   case keylstFn1:
@@ -603,6 +615,9 @@ void btn_long_hold_button_press(uint8_t _btn)
     break;
     
   case keylstFLASH:
+    break;
+    
+  case keylstLASER:
     break;
     
   default:
@@ -658,7 +673,7 @@ void btn_long_button_press(uint8_t _btn)
     
   case keylstCenter:
     // Turn off the laser
-    ledLaserPen(0);
+    SetLasterBeam(DEVICE_SW_OFF);
     break;
     
   case keylstFn1:
@@ -676,6 +691,9 @@ void btn_long_button_press(uint8_t _btn)
     break;
     
   case keylstFLASH:
+    break;
+    
+  case keylstLASER:
     break;
     
   default:
@@ -724,6 +742,9 @@ void btn_very_long_hold_button_press(uint8_t _btn)
     // Soft reset
     WWDG->CR = 0x80;
     break;
+  
+  case keylstLASER:
+    break;
     
   default:
     break;
@@ -750,7 +771,7 @@ void btn_very_long_button_press(uint8_t _btn)
     
   case keylstCenter:
     // Turn off the laser
-    ledLaserPen(0);
+    SetLasterBeam(DEVICE_SW_OFF);
     break;
     
   case keylstFn1:
@@ -766,6 +787,9 @@ void btn_very_long_button_press(uint8_t _btn)
     break;
     
   case keylstFLASH:
+    break;
+    
+  case keylstLASER:
     break;
     
   default:
@@ -786,9 +810,9 @@ void btn_double_long_hold_press(uint8_t _btn1, uint8_t _btn2)
   if( _btn1 == keylstFLASH ) {
     if( _btn2 == keylstFn1 ) {
       // Erase current device infomation
-      //EraseCurrentDeviceInfo();      
+      EraseCurrentDeviceInfo();      
     } else if( _btn2 == keylstFn2 ) {
-      // Toggle Simple Direct Test Mode
+      // Switch to Config Mode (no entering low power mode for a while)
       SetConfigMode(TRUE, gConfig.indDevice);
     } else if( _btn2 == keylstFn4 ) {
       // Toggle Simple Direct Test Mode
