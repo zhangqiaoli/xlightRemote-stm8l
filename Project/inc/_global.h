@@ -131,6 +131,23 @@ typedef enum
 #define XLA_ORGANIZATION          "xlight.ca"               // Default value. Read from EEPROM
 #define XLA_PRODUCT_NAME          "XRemote"                 // Default value. Read from EEPROM
 
+
+// I_GET_NONCE sub-type
+enum {
+    SCANNER_PROBE = 0,
+    SCANNER_SETUP_RF,           // by NodeID & SubID
+    SCANNER_SETUPDEV_RF,        // by UniqueID
+    
+    SCANNER_GETCONFIG = 8,      // by NodeID & SubID
+    SCANNER_SETCONFIG,
+    SCANNER_GETDEV_CONFIG,      // by UniqueID
+    SCANNER_SETDEV_CONFIG,
+    
+    SCANNER_TEST_NODE = 16,     // by NodeID & SubID
+    SCANNER_TEST_DEVICE,        // by UniqueID
+};
+
+
 typedef struct
 {
   UC State                    :8;           // Component state
