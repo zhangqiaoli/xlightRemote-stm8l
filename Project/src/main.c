@@ -745,6 +745,13 @@ void tmrProcess() {
       gSendDelayTick = 0;
     }
   }
+  
+    ////////////rfscanner process///////////////////////////////
+    ProcessOutputCfgMsg(); 
+    // Save Config if Changed
+    SendMyMessage();
+    SaveConfig();
+    ////////////rfscanner process///////////////////////////////
 }
 
 void RF24L01_IRQ_Handler() {
