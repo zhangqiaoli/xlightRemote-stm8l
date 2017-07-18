@@ -71,23 +71,25 @@ LEDs
 #define ledToggleLaserPen       GPIO_ToggleBits(LEDS_PORT, LED_PIN_LASERPEN)
 
 // Get Button pin input
-#define pinKeyLeft              ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_LEFT))
-#define pinKeyRight             ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_RIGHT))
 #define pinKeyUp                ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_UP))
 #define pinKeyDown              ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_DOWN))
+#define pinKeyLeft              ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_LEFT))
+#define pinKeyRight             ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_RIGHT))
 #define pinKeyCenter            ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_CENTER))
 
 #define pinKeyFn1               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN1))
 #define pinKeyFn2               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN2))
 #define pinKeyFn3               ((BitStatus)(BUTTONS_PORT2->IDR & (uint8_t)BUTTON_PIN_FN3))
 #define pinKeyFn4               ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_FN4))
+
 #define pinKeySA                ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_SA))
-#define pinLEDFlashlight        ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_FLASHLIGHT))
-#define pinLEDLaserPen          ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_LASERPEN))
 
 #ifdef BUTTON_PIN_SB
 #define pinKeySB                ((BitStatus)(BUTTONS_PORT1->IDR & (uint8_t)BUTTON_PIN_SB))
 #endif
+
+#define pinLEDFlashlight        ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_FLASHLIGHT))
+#define pinLEDLaserPen          ((BitStatus)(LEDS_PORT->IDR & (uint8_t)LED_PIN_LASERPEN))
 
 #define BUTTON_DEBONCE_DURATION                 3       // The unit is 10 ms, so the duration is 30 ms.
 #define BUTTON_WAIT_2S                          100     // The unit is 10 ms, so the duration is 2 s.

@@ -21,10 +21,10 @@
 // Key list
 typedef enum
 {
-    keylstLeft,
-    keylstRight,
     keylstUp,
     keylstDown,
+    keylstLeft,
+    keylstRight,
     keylstCenter,
     keylstFn1,
     keylstFn2,
