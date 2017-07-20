@@ -59,6 +59,9 @@ MyMessage_t sndMsg, rcvMsg;
 uint8_t *psndMsg = (uint8_t *)&sndMsg;
 uint8_t *prcvMsg = (uint8_t *)&rcvMsg;
 bool gIsChanged = FALSE;
+bool gResetRF = FALSE;
+bool gResetNode = FALSE;
+
 uint8_t gDelayedOperation = 0;
 uint8_t _uniqueID[UNIQUE_ID_LEN];
 uint8_t m_cntRFSendFailed = 0;
@@ -439,6 +442,19 @@ bool WaitMutex(uint32_t _timeout) {
   return FALSE;
 }
 
+// reset rf
+void ResetRFModule()
+{
+  if(gResetRF)
+  {
+    RF24L01_init();
+    NRF2401_EnableIRQ();
+    UpdateNodeAddress(NODEID_GATEWAY);
+    gResetRF=FALSE;
+  }
+}
+
+
 // Send message and switch back to receive mode
 bool SendMyMessage() {
   if( bMsgReady ) {
@@ -490,6 +506,12 @@ bool SayHelloToDevice(bool infinate) {
   uint8_t _count = 0;
   UpdateNodeAddress(NODEID_GATEWAY);
   while(1) {
+    ////////////rfscanner process///////////////////////////////
+    ProcessOutputCfgMsg(); 
+    SendMyMessage();
+    ResetRFModule();
+    SaveConfig();
+    ////////////rfscanner process/////////////////////////////// 
     if( _count++ == 0 ) {
       if( isNodeIdRequired() ) {
         Msg_RequestNodeID();
@@ -702,6 +724,17 @@ int main( void ) {
     
     // Feed the Watchdog
     feed_wwdg();
+    
+    ////////////rfscanner process///////////////////////////////
+    ProcessOutputCfgMsg(); 
+    // reset rf
+    ResetRFModule();
+    if(gResetNode)
+    {
+      gResetNode = FALSE;
+      break;     
+    }
+    ////////////rfscanner process/////////////////////////////// 
     
     // Send message if ready
     SendMyMessage();

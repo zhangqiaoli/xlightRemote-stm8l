@@ -251,6 +251,9 @@ typedef struct
 extern Config_t gConfig;
 extern DeviceStatus_t gDevStatus[NUM_DEVICES];
 extern bool gIsChanged;
+extern bool gResetRF;
+extern bool gResetNode;
+
 extern uint8_t _uniqueID[UNIQUE_ID_LEN];
 extern uint8_t gDelayedOperation;
 extern uint8_t gSendScenario;
