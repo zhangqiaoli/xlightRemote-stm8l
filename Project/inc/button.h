@@ -56,7 +56,7 @@ typedef enum button_event_e
     DOUBLE_BTN_TRACK
 } button_event_t;
 
-#define IS_VALID_BUTTON(x)              ((x) >= keylstLeft && (x) < keylstDummy)
+#define IS_VALID_BUTTON(x)              ((x) >= keylstUp && (x) < keylstDummy)
 
 void SelectDeviceLED(uint8_t _dev);
 

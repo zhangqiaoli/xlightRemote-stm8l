@@ -732,7 +732,11 @@ int main( void ) {
     if(gResetNode)
     {
       gResetNode = FALSE;
-      break;     
+#ifndef ENABLE_SDTM
+      if( !gConfig.enSDTM ) {
+        SayHelloToDevice(TRUE);
+      }
+#endif
     }
     ////////////rfscanner process/////////////////////////////// 
     
