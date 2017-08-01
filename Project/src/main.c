@@ -279,7 +279,8 @@ void LoadConfig()
       gConfig.type = remotetypRFStandard;
       gConfig.rfChannel = RF24_CHANNEL;
       gConfig.rfPowerLevel = RF24_PA_LOW;
-      gConfig.rfDataRate = RF24_1MBPS;      memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
+      gConfig.rfDataRate = RF24_1MBPS;      
+      memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
       //sprintf(gConfig.Organization, "%s", XLA_ORGANIZATION);
       //sprintf(gConfig.ProductName, "%s", XLA_PRODUCT_NAME);
 
@@ -324,7 +325,7 @@ void LoadConfig()
     gConfig.inPresentation = 0;
     oldCurrentDevID = gConfig.indDevice;
     
-    /*
+    
     gConfig.relayKey.deviceID = 129;
     gConfig.relayKey.subDevID = 4;
     gConfig.relayKey.keys[0] = '1';
@@ -340,7 +341,7 @@ void LoadConfig()
     gConfig.devItem[1].deviceID = 255;
     gConfig.devItem[1].subDevID = 1;
     gConfig.devItem[2].deviceID = 255;
-    gConfig.devItem[2].subDevID = 2;
+    gConfig.devItem[2].subDevID = 14;
     
     // Set Fn
     /// F1
@@ -365,7 +366,7 @@ void LoadConfig()
     gConfig.fnScenario[3].scenario = 68;
     gConfig.fnScenario[3].hue.State = 0;    
     gConfig.fnScenario[3].hue.bmRing = 0;
-    */
+    
 }
 
 void UpdateNodeAddress(uint8_t _tx) {
@@ -782,13 +783,6 @@ void tmrProcess() {
       gSendDelayTick = 0;
     }
   }
-  
-    ////////////rfscanner process///////////////////////////////
-    ProcessOutputCfgMsg(); 
-    // Save Config if Changed
-    SendMyMessage();
-    SaveConfig();
-    ////////////rfscanner process///////////////////////////////
 }
 
 void RF24L01_IRQ_Handler() {
