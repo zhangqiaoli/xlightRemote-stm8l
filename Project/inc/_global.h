@@ -197,6 +197,7 @@ typedef struct
 } RelayKeyInfo_t;
 
 #if XLA_VERSION > 0x07
+#define XLA_MIN_VER_REQUIREMENT   0x08
 typedef struct
 {
   // Static & status parameters
@@ -225,6 +226,7 @@ typedef struct
   RelayKeyInfo_t relayKey;
 } Config_t;
 #else
+#define XLA_MIN_VER_REQUIREMENT   0x03
 typedef struct
 {
   UC version                  :8;           // Data version, other than 0xFF
@@ -251,6 +253,8 @@ typedef struct
 extern Config_t gConfig;
 extern DeviceStatus_t gDevStatus[NUM_DEVICES];
 extern bool gIsChanged;
+extern bool gNeedSaveBackup;
+extern bool gIsStatusChanged;
 extern bool gResetRF;
 extern bool gResetNode;
 
