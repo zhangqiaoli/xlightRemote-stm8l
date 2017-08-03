@@ -221,7 +221,7 @@ typedef struct
   UC indDevice                :3;           // Current Device Index: [0..3]
   UC reserved2                :5;
   DeviceInfo_t devItem[NUM_DEVICES];
-  fnScenario_t fnScenario[4];
+  fnScenario_t fnScenario[7];
   RelayKeyInfo_t relayKey;
 } Config_t;
 #else
