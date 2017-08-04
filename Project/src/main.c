@@ -31,6 +31,10 @@ Connections:
 
 */
 
+// Starting Flash block number of backup config
+#define BACKUP_CONFIG_BLOCK_NUM         2
+#define BACKUP_CONFIG_ADDRESS           (FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS + BACKUP_CONFIG_BLOCK_NUM * FLASH_BLOCK_SIZE)
+
 // RF channel for the sensor net, 0-127
 #define RF24_CHANNEL	   		71
 #define ADDRESS_WIDTH                   5
@@ -58,6 +62,8 @@ DeviceStatus_t gDevStatus[NUM_DEVICES];
 MyMessage_t sndMsg, rcvMsg;
 uint8_t *psndMsg = (uint8_t *)&sndMsg;
 uint8_t *prcvMsg = (uint8_t *)&rcvMsg;
+bool gNeedSaveBackup = FALSE;
+bool gIsStatusChanged = FALSE;
 bool gIsChanged = FALSE;
 bool gResetRF = FALSE;
 bool gResetNode = FALSE;
@@ -211,22 +217,43 @@ void Flash_WriteBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
   FLASH_Unlock(FLASH_MemType_Data);
   /* Wait until Data EEPROM area unlocked flag is set*/
   while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET);
+  // Write byte by byte
+  bool rc = TRUE;
+  uint8_t bytVerify, bytAttmpts;
+  for( uint16_t i = 0; i < Length; i++ ) {
+    bytAttmpts = 0;
+    while(++bytAttmpts <= 3) {
+      FLASH_ProgramByte(Address+i, Buffer[i]);
+      FLASH_WaitForLastOperation(FLASH_MemType_Data);
+      
+      // Read and verify the byte we just wrote
+      bytVerify = FLASH_ReadByte(Address+i);
+      if( bytVerify == Buffer[i] ) break;
+    }
+    if( bytAttmpts > 3 ) {
+      rc = FALSE;
+      break;
+    }
+  }
+  FLASH_Lock(FLASH_MemType_Data);
+}
+ 
+void Flash_WriteDataBlock(uint16_t nStartBlock, uint8_t *Buffer, uint16_t Length) {
+  // Init Flash Read & Write
+  FLASH_SetProgrammingTime(FLASH_ProgramMode_Standard);
+  FLASH_Unlock(FLASH_MemType_Data);
+  while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET);
   
   uint8_t WriteBuf[FLASH_BLOCK_SIZE];
   uint16_t nBlockNum = (Length - 1) / FLASH_BLOCK_SIZE + 1;
-  uint16_t block;
-  for( block = 0; block < nBlockNum; block++ ) {
+  for( uint16_t block = nStartBlock; block < nStartBlock + nBlockNum; block++ ) {
     memset(WriteBuf, 0x00, FLASH_BLOCK_SIZE);
     for( uint16_t i = 0; i < FLASH_BLOCK_SIZE; i++ ) {
-      WriteBuf[i] = Buffer[block * FLASH_BLOCK_SIZE + i];
+      WriteBuf[i] = Buffer[(block - nStartBlock) * FLASH_BLOCK_SIZE + i];
     }
     FLASH_ProgramBlock(block, FLASH_MemType_Data, FLASH_ProgramMode_Standard, WriteBuf);
     FLASH_WaitForLastOperation(FLASH_MemType_Data);
   }
-  /* Alternative option, write byte by byte
-  for( uint16_t i = 0; i < Length; i++ ) {
-    FLASH_ProgramByte(Address+i, Buffer[i]);
-  }*/
   
   FLASH_Lock(FLASH_MemType_Data);
 }
@@ -237,7 +264,7 @@ uint8_t *Read_UniqueID(uint8_t *UniqueID, uint16_t Length)
   return UniqueID;
 }
 
-// Save config to Flash
+/*// Save config to Flash
 void SaveConfig()
 {
 #ifndef ENABLE_SDTM
@@ -246,6 +273,45 @@ void SaveConfig()
     gIsChanged = FALSE;
   }
 #endif  
+}*/
+
+// Save config to Flash
+void SaveBackupConfig()
+{
+  if( gNeedSaveBackup ) {
+    // Overwrite entire config FLASH
+    Flash_WriteDataBlock(BACKUP_CONFIG_BLOCK_NUM, (uint8_t *)&gConfig, sizeof(gConfig));
+    gNeedSaveBackup = FALSE;
+  }
+}
+
+// Save status to Flash
+void SaveStatusData()
+{
+    // Skip the first byte (version)
+    uint8_t pData[50] = {0};
+    uint16_t nLen = (uint16_t)(&(gConfig.nodeID)) - (uint16_t)(&gConfig);
+    memcpy(pData, (uint8_t *)&gConfig, nLen);
+    Flash_WriteBuf(FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS + 1, pData + 1, nLen - 1);
+    gIsStatusChanged = FALSE;
+}
+
+// Save config to Flash
+void SaveConfig()
+{
+  if( gIsChanged ) {
+    // Overwrite entire config FLASH
+    Flash_WriteDataBlock(0, (uint8_t *)&gConfig, sizeof(gConfig));
+    gIsStatusChanged = FALSE;
+    gIsChanged = FALSE;
+    gNeedSaveBackup = TRUE;
+    return;
+  }
+
+  if( gIsStatusChanged ) {
+    // Overwrite only Static & status parameters (the first part of config FLASH)
+    SaveStatusData();
+  }  
 }
 
 // Init Device Status
@@ -260,63 +326,72 @@ void InitDeviceStatus()
   }
 }
 
+bool IsConfigInvalid() {
+  return( gConfig.version > XLA_VERSION || gConfig.version < XLA_MIN_VER_REQUIREMENT 
+       || !IS_VALID_REMOTE(gConfig.type)  || gConfig.nodeID == 0
+       || gConfig.rfPowerLevel > RF24_PA_MAX || gConfig.rfChannel > 127 || gConfig.rfDataRate > RF24_250KBPS );
+}
+
 // Load config from Flash
 void LoadConfig()
 {
     // Load the most recent settings from FLASH
     Flash_ReadBuf(FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS, (uint8_t *)&gConfig, sizeof(gConfig));
-    if( gConfig.version > XLA_VERSION || gConfig.indDevice >= NUM_DEVICES 
-          || !IS_VALID_REMOTE(gConfig.type) || isNodeIdRequired()
-            || gConfig.rfPowerLevel > RF24_PA_MAX ) {
-          //|| strcmp(gConfig.Organization, XLA_ORGANIZATION) != 0 ) {
-      memset(&gConfig, 0x00, sizeof(gConfig));
-      gConfig.version = XLA_VERSION;
-      gConfig.indDevice = 0;
-      gConfig.present = 0;
-      gConfig.inPresentation = 0;
-      gConfig.enSDTM = 0;
-      gConfig.rptTimes = 1;
-      gConfig.type = remotetypRFStandard;
-      gConfig.rfChannel = RF24_CHANNEL;
-      gConfig.rfPowerLevel = RF24_PA_LOW;
-      gConfig.rfDataRate = RF24_1MBPS;      
-      memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
-      //sprintf(gConfig.Organization, "%s", XLA_ORGANIZATION);
-      //sprintf(gConfig.ProductName, "%s", XLA_PRODUCT_NAME);
+    if( IsConfigInvalid() ) {
+      Flash_ReadBuf(BACKUP_CONFIG_ADDRESS, (uint8_t *)&gConfig, sizeof(gConfig));
+      if( IsConfigInvalid() ) {
+        memset(&gConfig, 0x00, sizeof(gConfig));
+        gConfig.version = XLA_VERSION;
+        gConfig.indDevice = 0;
+        gConfig.present = 0;
+        gConfig.inPresentation = 0;
+        gConfig.enSDTM = 0;
+        gConfig.rptTimes = 1;
+        gConfig.type = remotetypRFStandard;
+        gConfig.rfChannel = RF24_CHANNEL;
+        gConfig.rfPowerLevel = RF24_PA_MAX;
+        gConfig.rfDataRate = RF24_1MBPS;      
+        memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
+        //sprintf(gConfig.Organization, "%s", XLA_ORGANIZATION);
+        //sprintf(gConfig.ProductName, "%s", XLA_PRODUCT_NAME);
 
-      // Set device info
-      NodeID(0) = BASESERVICE_ADDRESS;       // NODEID_MIN_REMOTE; BASESERVICE_ADDRESS; NODEID_DUMMY
-      DeviceID(0) = NODEID_MAINDEVICE;
-      DeviceType(0) = devtypDummy;
-      gConfig.devItem[1] = gConfig.devItem[0];
-      gConfig.devItem[2] = gConfig.devItem[0];
-      gConfig.devItem[3] = gConfig.devItem[0];
-      
-      gConfig.fnScenario[0].hue.State = DEVICE_SW_ON;
-      gConfig.fnScenario[0].hue.bmRing = 0;
-      gConfig.fnScenario[0].hue.BR = BTN_FN1_BR;
-      gConfig.fnScenario[0].hue.CCT = BTN_FN1_CCT;
+        // Set device info
+        NodeID(0) = BASESERVICE_ADDRESS;       // NODEID_MIN_REMOTE; BASESERVICE_ADDRESS; NODEID_DUMMY
+        DeviceID(0) = NODEID_MAINDEVICE;
+        DeviceType(0) = devtypDummy;
+        gConfig.devItem[1] = gConfig.devItem[0];
+        gConfig.devItem[2] = gConfig.devItem[0];
+        gConfig.devItem[3] = gConfig.devItem[0];
+        
+        gConfig.fnScenario[0].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[0].hue.bmRing = 0;
+        gConfig.fnScenario[0].hue.BR = BTN_FN1_BR;
+        gConfig.fnScenario[0].hue.CCT = BTN_FN1_CCT;
 
-      gConfig.fnScenario[1].hue.State = DEVICE_SW_ON;
-      gConfig.fnScenario[1].hue.bmRing = 0;
-      gConfig.fnScenario[1].hue.BR = BTN_FN2_BR;
-      gConfig.fnScenario[1].hue.CCT = BTN_FN2_CCT;
+        gConfig.fnScenario[1].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[1].hue.bmRing = 0;
+        gConfig.fnScenario[1].hue.BR = BTN_FN2_BR;
+        gConfig.fnScenario[1].hue.CCT = BTN_FN2_CCT;
 
-      gConfig.fnScenario[2].hue.State = DEVICE_SW_ON;
-      gConfig.fnScenario[2].hue.bmRing = 0;
-      gConfig.fnScenario[2].hue.BR = BTN_FN3_BR;
-      gConfig.fnScenario[2].hue.CCT = BTN_FN3_W;
-      gConfig.fnScenario[2].hue.R = BTN_FN3_R;
-      gConfig.fnScenario[2].hue.G = BTN_FN3_G;
-      gConfig.fnScenario[2].hue.B = BTN_FN3_B;
+        gConfig.fnScenario[2].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[2].hue.bmRing = 0;
+        gConfig.fnScenario[2].hue.BR = BTN_FN3_BR;
+        gConfig.fnScenario[2].hue.CCT = BTN_FN3_W;
+        gConfig.fnScenario[2].hue.R = BTN_FN3_R;
+        gConfig.fnScenario[2].hue.G = BTN_FN3_G;
+        gConfig.fnScenario[2].hue.B = BTN_FN3_B;
 
-      gConfig.fnScenario[3].hue.State = DEVICE_SW_ON;
-      gConfig.fnScenario[3].hue.bmRing = 0;
-      gConfig.fnScenario[3].hue.BR = BTN_FN4_BR;
-      gConfig.fnScenario[3].hue.CCT = BTN_FN4_CCT;
-      
+        gConfig.fnScenario[3].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[3].hue.bmRing = 0;
+        gConfig.fnScenario[3].hue.BR = BTN_FN4_BR;
+        gConfig.fnScenario[3].hue.CCT = BTN_FN4_CCT;
+      }
       gIsChanged = TRUE;
-      SaveConfig();
+    }
+    else {
+      uint8_t bytVersion;
+      Flash_ReadBuf(BACKUP_CONFIG_ADDRESS, (uint8_t *)&bytVersion, sizeof(bytVersion));
+      if( bytVersion != gConfig.version ) gNeedSaveBackup = TRUE;
     }
     
     // Session time parameters
@@ -338,34 +413,62 @@ void LoadConfig()
     gConfig.devItem[1] = gConfig.devItem[0];
     gConfig.devItem[2] = gConfig.devItem[0];
     gConfig.devItem[3] = gConfig.devItem[0];
+    // blackboard light
     gConfig.devItem[1].deviceID = 255;
     gConfig.devItem[1].subDevID = 1;
+    // classroom light
     gConfig.devItem[2].deviceID = 255;
     gConfig.devItem[2].subDevID = 14;
+    // curtain
+    gConfig.devItem[3].deviceID = 129;
+    gConfig.devItem[3].subDevID = 8;
     
     // Set Fn
-    /// F1
-    gConfig.fnScenario[0].bmDevice = 0x04;
+    /// F1 all light 90,5500
+    gConfig.fnScenario[0].bmDevice = 0x01;
     gConfig.fnScenario[0].scenario = 65;
-    gConfig.fnScenario[0].hue.State = 2;
+    gConfig.fnScenario[0].hue.State = 1;
     gConfig.fnScenario[0].hue.bmRing = 0;
-    /// F2
-    gConfig.fnScenario[1].bmDevice = 0x02;
+    gConfig.fnScenario[0].hue.BR = 90;
+    gConfig.fnScenario[0].hue.CCT = 5500;
+    /// F2 classroomlight 90,3000
+    gConfig.fnScenario[1].bmDevice = 0x04;
     gConfig.fnScenario[1].scenario = 66;
-    gConfig.fnScenario[1].hue.State = 2;
+    gConfig.fnScenario[1].hue.State = 1;
     gConfig.fnScenario[1].hue.bmRing = 0;
-    /// F3
-    gConfig.fnScenario[2].bmDevice = 0x01;
+    gConfig.fnScenario[1].hue.BR = 90;
+    gConfig.fnScenario[1].hue.CCT = 3000;
+    /// F3 blackboard light off
+    gConfig.fnScenario[2].bmDevice = 0x02;
     gConfig.fnScenario[2].scenario = 67;
-    gConfig.fnScenario[2].hue.State = 1;
+    gConfig.fnScenario[2].hue.State = 0;
     gConfig.fnScenario[2].hue.bmRing = 0;
-    gConfig.fnScenario[2].hue.BR = 90;
-    gConfig.fnScenario[2].hue.CCT = 5500;
-    /// F4
-    gConfig.fnScenario[3].bmDevice = 0x01;
+    /// F4 classroomlight 50,5500
+    gConfig.fnScenario[3].bmDevice = 0x04;
     gConfig.fnScenario[3].scenario = 68;
-    gConfig.fnScenario[3].hue.State = 0;    
+    gConfig.fnScenario[3].hue.State = 1;
     gConfig.fnScenario[3].hue.bmRing = 0;
+    gConfig.fnScenario[3].hue.BR = 50;
+    gConfig.fnScenario[3].hue.CCT = 3000;
+    /// F5 classroomlight light off
+    gConfig.fnScenario[4].bmDevice = 0x04;
+    gConfig.fnScenario[4].scenario = 69;
+    gConfig.fnScenario[4].hue.State = 0;
+    gConfig.fnScenario[4].hue.bmRing = 0;
+    /// F6 classroomlight light toggle
+    gConfig.fnScenario[5].bmDevice = 0x04;
+    gConfig.fnScenario[5].scenario = 71;
+    gConfig.fnScenario[5].hue.State = 2;
+    gConfig.fnScenario[5].hue.bmRing = 0;
+    /// F7 blackboard light toggle
+    gConfig.fnScenario[6].bmDevice = 0x02;
+    gConfig.fnScenario[6].scenario = 72;
+    gConfig.fnScenario[6].hue.State = 2;
+    gConfig.fnScenario[6].hue.bmRing = 0;
+    /*/// F8 curtain off
+    gConfig.fnScenario[5].bmDevice = 0x08;
+    gConfig.fnScenario[5].scenario = 70;
+    gConfig.fnScenario[5].hue.State = 0;*/
     
 }
 
@@ -512,6 +615,8 @@ bool SayHelloToDevice(bool infinate) {
     SendMyMessage();
     ResetRFModule();
     SaveConfig();
+    // Save config into backup area
+    SaveBackupConfig();
     ////////////rfscanner process/////////////////////////////// 
     if( _count++ == 0 ) {
       if( isNodeIdRequired() ) {
@@ -746,6 +851,8 @@ int main( void ) {
     
     // Save Config if Changed
     SaveConfig();
+    // Save config into backup area
+    SaveBackupConfig();
     
     // Operation Result Indicator
     if( gDelayedOperation > 0 ) OperationIndicator();
