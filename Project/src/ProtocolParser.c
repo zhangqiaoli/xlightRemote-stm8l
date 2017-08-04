@@ -254,7 +254,7 @@ uint8_t ParseProtocol(){
         if(!IS_NOT_DEVICE_NODEID(_type) || IS_GROUP_NODEID(_type) ) {
           CurrentDeviceID = _type;
         }
-        gIsChanged = TRUE;
+        gIsStatusChanged = TRUE;
         if( gDelayedOperation != DELAY_OP_PAIRED ) gDelayedOperation = DELAY_OP_CONNECTED;
         
         // REQ device status
@@ -271,21 +271,21 @@ uint8_t ParseProtocol(){
         bool _OnOff = rcvMsg.payload.bValue;
         if( _OnOff != CurrentDeviceOnOff ) {
           UpdateCurrentDeviceOnOff(_OnOff);
-          gIsChanged = TRUE;
+          gIsStatusChanged = TRUE;
           // ToDo: change On/Off LED
         }
       } else if( _type == V_PERCENTAGE ) {
         if( rcvMsg.payload.data[1] != CurrentDeviceBright || rcvMsg.payload.data[0] != CurrentDeviceOnOff) {
           CurrentDeviceBright = rcvMsg.payload.data[1];
           UpdateCurrentDeviceOnOff(rcvMsg.payload.data[0]);
-          gIsChanged = TRUE;
+          gIsStatusChanged = TRUE;
           // ToDo: change On/Off LED
         }        
       } else if( _type == V_LEVEL ) { // CCT
         uint16_t _CCTValue = rcvMsg.payload.data[1] * 256 + rcvMsg.payload.data[0];
         if( _CCTValue != CurrentDeviceCCT ) {
           CurrentDeviceCCT = _CCTValue;
-          gIsChanged = TRUE;
+          gIsStatusChanged = TRUE;
         }
       } else if( _type == V_RGBW ) {
         if( rcvMsg.payload.data[0] ) { // Success
@@ -304,7 +304,7 @@ uint8_t ParseProtocol(){
             CurrentDevice_G = rcvMsg.payload.data[8];
             CurrentDevice_B = rcvMsg.payload.data[9];
           }
-          gIsChanged = TRUE;
+          gIsStatusChanged = TRUE;
           // ToDo: change On/Off LED
         }
       }

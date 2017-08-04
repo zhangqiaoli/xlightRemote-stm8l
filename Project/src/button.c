@@ -467,6 +467,7 @@ void btn_short_button_press(uint8_t _btn)
     Msg_DevBR_RGBW(60, 0, 255, 0, 0);
 #else
     FN_Button_Action(1);
+    FN_Button_Action(2);
 #endif
     break;
     
@@ -476,6 +477,7 @@ void btn_short_button_press(uint8_t _btn)
     Msg_DevBR_RGBW(60, 0, 0, 255, 0);
 #else
     FN_Button_Action(2);
+    FN_Button_Action(4);
 #endif    
     break;
     
@@ -484,7 +486,9 @@ void btn_short_button_press(uint8_t _btn)
     // Pure White
     Msg_DevBR_RGBW(60, 0, 0, 0, 255);
 #else
+    FN_Button_Action(2);
     FN_Button_Action(3);
+    //Msg_DevOnOff(DEVICE_SW_TOGGLE);
 #endif    
     break;
 
@@ -493,7 +497,8 @@ void btn_short_button_press(uint8_t _btn)
     // Toggle the flash light
     ledToggleFlashLight;
 #else
-    Msg_RelayOnOff(DEVICE_SW_TOGGLE);
+    //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
+    FN_Button_Action(5);
 #endif    
     break;
     
@@ -502,7 +507,8 @@ void btn_short_button_press(uint8_t _btn)
     // Toggle laser pen
     ledToggleLaserPen;
 #else
-    Msg_RelayOnOff(DEVICE_SW_TOGGLE);
+    //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
+    FN_Button_Action(6);
 #endif    
     break;
     
