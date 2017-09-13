@@ -385,6 +385,16 @@ void Msg_DevOnOff(uint8_t _sw) {
   bMsgReady = 1;
 }
 
+// Set device 1:On; 0:Off; 2:toggle
+void Msg_SpecialDevOnOff(uint8_t nodeid,uint8_t subid,uint8_t _sw) {
+  SendMyMessage();
+  build(nodeid, subid, C_SET, V_STATUS, 1, 0);
+  moSetLength(1);
+  moSetPayloadType(P_BYTE);
+  sndMsg.payload.bValue = _sw;
+  bMsgReady = 1;
+}
+
 // Set relay key (e.g. pot light) 1:On; 0:Off; 2:toggle
 void Msg_RelayOnOff(uint8_t _sw) {
   if( gConfig.relayKey.deviceID > 0 ) {

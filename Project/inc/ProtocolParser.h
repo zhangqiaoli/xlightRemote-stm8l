@@ -13,6 +13,7 @@ void Msg_RequestNodeID();
 void Msg_Presentation();
 void Msg_RequestDeviceStatus();
 void Msg_DevOnOff(uint8_t _sw);
+void Msg_SpecialDevOnOff(uint8_t nodeid,uint8_t subid,uint8_t _sw);
 void Msg_RelayOnOff(uint8_t _sw);
 void Msg_DevBrightness(uint8_t _op, uint8_t _br);
 void Msg_DevCCT(uint8_t _op, uint16_t _cct);

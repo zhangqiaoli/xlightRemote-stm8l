@@ -458,6 +458,7 @@ void btn_short_button_press(uint8_t _btn)
     Msg_DevBR_RGBW(60, 255, 0, 0, 0);
 #else
     FN_Button_Action(0);
+    Msg_SpecialDevOnOff(129,8,1);
 #endif
     break;
     
@@ -468,6 +469,7 @@ void btn_short_button_press(uint8_t _btn)
 #else
     FN_Button_Action(1);
     FN_Button_Action(2);
+    Msg_SpecialDevOnOff(129,8,1);
 #endif
     break;
     
@@ -478,6 +480,7 @@ void btn_short_button_press(uint8_t _btn)
 #else
     FN_Button_Action(2);
     FN_Button_Action(4);
+    Msg_SpecialDevOnOff(129,8,1);
 #endif    
     break;
     
@@ -488,6 +491,7 @@ void btn_short_button_press(uint8_t _btn)
 #else
     FN_Button_Action(2);
     FN_Button_Action(3);
+    Msg_SpecialDevOnOff(129,8,0);
     //Msg_DevOnOff(DEVICE_SW_TOGGLE);
 #endif    
     break;
@@ -702,6 +706,7 @@ void btn_long_button_press(uint8_t _btn)
     break;
     
   case keylstLASER:
+    Msg_SpecialDevOnOff(255,0,0);
     break;
     
   default:
