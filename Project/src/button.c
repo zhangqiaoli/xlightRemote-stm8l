@@ -375,7 +375,13 @@ void FN_Button_Action(uint8_t _fn) {
       Msg_DevOnOff(DEVICE_SW_OFF);
     } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_ON ) {
       Msg_DevOnOff(DEVICE_SW_ON);
-      if( gConfig.fnScenario[_fn].hue.CCT >= CT_MIN_VALUE ) {
+
+      if( gConfig.fnScenario[_fn].hue.CCT ==0 && gConfig.fnScenario[_fn].hue.R == 0 && gConfig.fnScenario[_fn].hue.G == 0 && gConfig.fnScenario[_fn].hue.B==0)
+      {// if only adjust br 
+        uint8_t br = gConfig.fnScenario[_fn].hue.BR>BR_MIN_VALUE ? gConfig.fnScenario[_fn].hue.BR : BR_MIN_VALUE;
+        Msg_DevBrightness(OPERATOR_SET,br);
+      }
+      else if( gConfig.fnScenario[_fn].hue.CCT >= CT_MIN_VALUE ) {
         Msg_DevBR_CCT(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.CCT);
       } else {
         Msg_DevBR_RGBW(gConfig.fnScenario[_fn].hue.BR, gConfig.fnScenario[_fn].hue.R, gConfig.fnScenario[_fn].hue.G, gConfig.fnScenario[_fn].hue.B, (uint8_t)gConfig.fnScenario[_fn].hue.CCT);
@@ -393,6 +399,40 @@ void FN_Button_Action(uint8_t _fn) {
   
   // Restore Device Index
   gConfig.indDevice = lv_curInd;
+}
+
+void FavoriteDevStatus(uint8_t index)
+{
+/*  if(index > NUM_FAVORITE) return;
+  if(gConfig.favoritesDevStat[index].reserved == 0)
+  { // favorite
+    gLastFavoriteIndex = index;
+    Msg_RequestDeviceStatus();  
+  }
+  else
+  { // restore favorite status
+    if( gConfig.favoritesDevStat[index].ring.CCT >= CT_MIN_VALUE ) {
+      Msg_DevBR_CCT(gConfig.favoritesDevStat[index].ring.BR, gConfig.favoritesDevStat[index].ring.CCT);
+    } else {
+      Msg_DevBR_RGBW(gConfig.favoritesDevStat[index].ring.BR, gConfig.favoritesDevStat[index].ring.R, gConfig.favoritesDevStat[index].ring.G, gConfig.favoritesDevStat[index].ring.B, gConfig.favoritesDevStat[index].ring.CCT);
+    }   
+  }*/ 
+  if(index > NUM_FAVORITE) return;
+  SaveFavoriteDevStatus();
+  gLastFavoriteIndex = index;
+  gLastFavoriteTick = 0;
+  Msg_RequestDeviceStatus(); 
+}
+
+void RestoreFavoriteDevStatus(uint8_t index)
+{
+  if(index >= NUM_FAVORITE) return;
+ // restore favorite status
+  if( gConfig.favoritesDevStat[index].ring.CCT >= CT_MIN_VALUE ) {
+    Msg_DevBR_CCT(gConfig.favoritesDevStat[index].ring.BR, gConfig.favoritesDevStat[index].ring.CCT);
+  } else {
+    Msg_DevBR_RGBW(gConfig.favoritesDevStat[index].ring.BR, gConfig.favoritesDevStat[index].ring.R, gConfig.favoritesDevStat[index].ring.G, gConfig.favoritesDevStat[index].ring.B, gConfig.favoritesDevStat[index].ring.CCT);
+  }   
 }
 
 void btn_short_button_press(uint8_t _btn)
@@ -453,6 +493,9 @@ void btn_short_button_press(uint8_t _btn)
     break;
     
   case keylstFn1:
+#ifdef HOME_VERSION
+    FN_Button_Action(0);
+#else
 #ifdef ENABLE_SDTM
     // Pure Red
     Msg_DevBR_RGBW(60, 255, 0, 0, 0);
@@ -460,9 +503,15 @@ void btn_short_button_press(uint8_t _btn)
     FN_Button_Action(0);
     Msg_SpecialDevOnOff(129,8,1);
 #endif
+#endif
+
     break;
     
   case keylstFn2:
+#ifdef HOME_VERSION
+    FN_Button_Action(1);   
+    Msg_DevOnOffDelay(DEVICE_SW_OFF,MINUTE_UNIT,SLEEP_TIME);
+#else
 #ifdef ENABLE_SDTM
     // Pure Green
     Msg_DevBR_RGBW(60, 0, 255, 0, 0);
@@ -471,9 +520,14 @@ void btn_short_button_press(uint8_t _btn)
     FN_Button_Action(2);
     Msg_SpecialDevOnOff(129,8,1);
 #endif
+#endif
+
     break;
     
   case keylstFn3:
+#ifdef HOME_VERSION
+    FN_Button_Action(2);
+#else
 #ifdef ENABLE_SDTM
     // Pure Blue
     Msg_DevBR_RGBW(60, 0, 0, 255, 0);
@@ -481,10 +535,15 @@ void btn_short_button_press(uint8_t _btn)
     FN_Button_Action(2);
     FN_Button_Action(4);
     Msg_SpecialDevOnOff(129,8,1);
-#endif    
+#endif       
+#endif
+ 
     break;
     
   case keylstFn4:
+#ifdef HOME_VERSION
+    FN_Button_Action(3);
+#else
 #ifdef ENABLE_SDTM
     // Pure White
     Msg_DevBR_RGBW(60, 0, 0, 0, 255);
@@ -493,27 +552,40 @@ void btn_short_button_press(uint8_t _btn)
     FN_Button_Action(3);
     Msg_SpecialDevOnOff(129,8,0);
     //Msg_DevOnOff(DEVICE_SW_TOGGLE);
-#endif    
+#endif  
+#endif  
     break;
 
   case keylstFLASH:
+#ifdef HOME_VERSION
+    //Favorites1
+    RestoreFavoriteDevStatus(0);
+#else
 #ifdef ENABLE_FLASHLIGHT_LASER    
     // Toggle the flash light
     ledToggleFlashLight;
 #else
     //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
     FN_Button_Action(5);
-#endif    
+#endif   
+#endif
+ 
     break;
     
   case keylstLASER:
+#ifdef HOME_VERSION
+    //Favorites2
+    RestoreFavoriteDevStatus(1);
+#else
 #ifdef ENABLE_FLASHLIGHT_LASER    
     // Toggle laser pen
     ledToggleLaserPen;
 #else
     //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
     FN_Button_Action(6);
-#endif    
+#endif
+#endif
+    
     break;
     
   default:
@@ -627,9 +699,11 @@ void btn_long_hold_button_press(uint8_t _btn)
     break;
     
   case keylstFLASH:
+    FavoriteDevStatus(0);
     break;
     
   case keylstLASER:
+    FavoriteDevStatus(1);
     break;
     
   default:

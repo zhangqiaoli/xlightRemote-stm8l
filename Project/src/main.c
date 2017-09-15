@@ -56,6 +56,7 @@ Connections:
 
 const UC RF24_BASE_RADIO_ID[ADDRESS_WIDTH] = {0x00,0x54,0x49,0x54,0x44};
 
+
 // Public variables
 Config_t gConfig;
 DeviceStatus_t gDevStatus[NUM_DEVICES];
@@ -73,6 +74,11 @@ uint8_t _uniqueID[UNIQUE_ID_LEN];
 uint8_t m_cntRFSendFailed = 0;
 uint8_t gSendScenario = 0;
 uint8_t gSendDelayTick = 0;
+
+// add favorite function
+int8_t gLastFavoriteIndex = -1;
+uint8_t gLastFavoriteTick = 255;
+
 
 // Moudle variables
 bool bPowerOn = FALSE;
@@ -350,7 +356,7 @@ void LoadConfig()
         gConfig.type = remotetypRFStandard;
         gConfig.rfChannel = RF24_CHANNEL;
         gConfig.rfPowerLevel = RF24_PA_MAX;
-        gConfig.rfDataRate = RF24_1MBPS;      
+        gConfig.rfDataRate = RF24_250KBPS;      
         memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
         //sprintf(gConfig.Organization, "%s", XLA_ORGANIZATION);
         //sprintf(gConfig.ProductName, "%s", XLA_PRODUCT_NAME);
@@ -394,19 +400,53 @@ void LoadConfig()
       if( bytVersion != gConfig.version ) gNeedSaveBackup = TRUE;
     }
     
-    // Session time parameters
+        // Session time parameters
     gConfig.indDevice = 0;
     gConfig.inConfigMode = 0;
     gConfig.inPresentation = 0;
     oldCurrentDevID = gConfig.indDevice;
-    
-    
+    // zql test//
+    gConfig.rfChannel = 0x5f;
+    gConfig.rfDataRate = RF24_250KBPS;  
     gConfig.relayKey.deviceID = 129;
     gConfig.relayKey.subDevID = 4;
     gConfig.relayKey.keys[0] = '1';
     gConfig.relayKey.keys[1] = 0;
     gConfig.relayKey.state = 0;
     
+#ifdef HOME_VERSION   
+     // Set Devices
+    gConfig.devItem[0].deviceID = 254;
+    gConfig.devItem[0].subDevID = 0;
+        // Set Fn
+    /// F1 light 100,5500
+    gConfig.fnScenario[0].bmDevice = 0x01;
+    gConfig.fnScenario[0].scenario = 0;
+    gConfig.fnScenario[0].hue.State = 1;
+    gConfig.fnScenario[0].hue.bmRing = 0;
+    gConfig.fnScenario[0].hue.BR = 100;
+    gConfig.fnScenario[0].hue.CCT = 5500;
+    /// F2 light 20
+    gConfig.fnScenario[1].bmDevice = 0x01;
+    gConfig.fnScenario[1].scenario = 0;
+    gConfig.fnScenario[1].hue.State = 1;
+    gConfig.fnScenario[1].hue.bmRing = 0;
+    gConfig.fnScenario[1].hue.BR = 20;
+    /// F3 light 60£¬4000
+    gConfig.fnScenario[2].bmDevice = 0x01;
+    gConfig.fnScenario[2].scenario = 0;
+    gConfig.fnScenario[2].hue.State = 1;
+    gConfig.fnScenario[2].hue.bmRing = 0;
+    gConfig.fnScenario[2].hue.BR = 60;
+    gConfig.fnScenario[2].hue.CCT = 4000;
+    /// F4 light 10,3000
+    gConfig.fnScenario[3].bmDevice = 0x01;
+    gConfig.fnScenario[3].scenario = 0;
+    gConfig.fnScenario[3].hue.State = 1;
+    gConfig.fnScenario[3].hue.bmRing = 0;
+    gConfig.fnScenario[3].hue.BR = 10;
+    gConfig.fnScenario[3].hue.CCT = 3000;
+#else
      // Set Devices
     gConfig.devItem[0].deviceID = 255;
     gConfig.devItem[0].subDevID = 0;
@@ -468,7 +508,8 @@ void LoadConfig()
     /*/// F8 curtain off
     gConfig.fnScenario[5].bmDevice = 0x08;
     gConfig.fnScenario[5].scenario = 70;
-    gConfig.fnScenario[5].hue.State = 0;*/
+    gConfig.fnScenario[5].hue.State = 0;*/    
+#endif
     
 }
 
@@ -890,6 +931,10 @@ void tmrProcess() {
       gSendDelayTick = 0;
     }
   }
+#ifdef HOME_VERSION
+  if(gLastFavoriteTick != 255 && gLastFavoriteTick < MAXFAVORITE_INTERVAL)
+    gLastFavoriteTick++;
+#endif
 }
 
 void RF24L01_IRQ_Handler() {

@@ -105,6 +105,20 @@ void UpdateSubID(uint8_t nID) {
   }
 }
 
+void SaveFavoriteDevStatus()
+{
+  if(gLastFavoriteIndex >= NUM_FAVORITE) return;
+  if(gLastFavoriteIndex == -1) return;
+    gConfig.favoritesDevStat[gLastFavoriteIndex].reserved = 1;
+    gConfig.favoritesDevStat[gLastFavoriteIndex].ring.BR = CurrentDeviceBright;
+    gConfig.favoritesDevStat[gLastFavoriteIndex].ring.R = CurrentDevice_R;
+    gConfig.favoritesDevStat[gLastFavoriteIndex].ring.G = CurrentDevice_G;
+    gConfig.favoritesDevStat[gLastFavoriteIndex].ring.B = CurrentDevice_B;
+    gConfig.favoritesDevStat[gLastFavoriteIndex].ring.CCT = CurrentDeviceCCT;
+    gLastFavoriteTick = MAXFAVORITE_INTERVAL;
+    gIsChanged = TRUE;
+}
+
 uint8_t ParseProtocol(){
   if( rcvMsg.header.destination != CurrentNodeID && rcvMsg.header.destination != BROADCAST_ADDRESS ) return 0;
   
@@ -306,6 +320,11 @@ uint8_t ParseProtocol(){
           }
           gIsStatusChanged = TRUE;
           // ToDo: change On/Off LED
+          // save favorite device status in MAXFAVORITE_INTERVAL
+          if(gLastFavoriteTick < MAXFAVORITE_INTERVAL)
+          {
+            SaveFavoriteDevStatus();
+          }       
         }
       }
     }    
@@ -382,6 +401,18 @@ void Msg_DevOnOff(uint8_t _sw) {
   moSetLength(1);
   moSetPayloadType(P_BYTE);
   sndMsg.payload.bValue = _sw;
+  bMsgReady = 1;
+}
+
+void Msg_DevOnOffDelay(uint8_t _sw,uint8_t _unit,uint8_t time)
+{
+  SendMyMessage();
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_STATUS, 1, 0);
+  moSetLength(3);
+  moSetPayloadType(P_CUSTOM);
+  sndMsg.payload.data[0] = _sw;      // State: On
+  sndMsg.payload.data[1] = _unit;                
+  sndMsg.payload.data[2] = time;
   bMsgReady = 1;
 }
 

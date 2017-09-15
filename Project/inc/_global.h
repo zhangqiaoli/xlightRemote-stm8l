@@ -21,6 +21,12 @@
 // Uncomment this line if need Presentation Mode
 //#define ENABLE_PRESENTATION_MODE
 
+#define HOME_VERSION
+//#define SCHOOL_VERSION
+#ifdef HOME_VERSION
+#define ENABLE_SDTM
+#endif
+
 /* Exported types ------------------------------------------------------------*/
 // Common Data Type
 #define UC                        uint8_t
@@ -81,6 +87,15 @@
 #define DELAY_OP_CONNECTED      0x30
 #define DELAY_OP_PPTMODE_ON     0x40
 #define DELAY_OP_PPTMODE_OFF    0x50
+
+#ifdef HOME_VERSION
+#define SLEEP_TIME   15
+#define NUM_FAVORITE 2  
+
+#define SECOND_UNIT  1
+#define MINUTE_UNIT  2
+#define HOUR_UNIT    3
+#endif
 
 // Device (lamp) type
 typedef enum
@@ -224,6 +239,9 @@ typedef struct
   DeviceInfo_t devItem[NUM_DEVICES];
   fnScenario_t fnScenario[7];
   RelayKeyInfo_t relayKey;
+#ifdef HOME_VERSION
+  DeviceStatus_t favoritesDevStat[NUM_FAVORITE];
+#endif
 } Config_t;
 #else
 #define XLA_MIN_VER_REQUIREMENT   0x03
@@ -262,6 +280,10 @@ extern uint8_t _uniqueID[UNIQUE_ID_LEN];
 extern uint8_t gDelayedOperation;
 extern uint8_t gSendScenario;
 extern uint8_t gSendDelayTick;
+
+extern int8_t gLastFavoriteIndex;
+extern uint8_t gLastFavoriteTick;
+#define MAXFAVORITE_INTERVAL 100  // unit is 10ms,1s interval
 
 #define RING_ID_ALL             0
 #define RING_ID_1               1
