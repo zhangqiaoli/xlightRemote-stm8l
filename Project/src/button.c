@@ -417,22 +417,26 @@ void FavoriteDevStatus(uint8_t index)
       Msg_DevBR_RGBW(gConfig.favoritesDevStat[index].ring.BR, gConfig.favoritesDevStat[index].ring.R, gConfig.favoritesDevStat[index].ring.G, gConfig.favoritesDevStat[index].ring.B, gConfig.favoritesDevStat[index].ring.CCT);
     }   
   }*/ 
+#ifdef NUM_FAVORITE
   if(index > NUM_FAVORITE) return;
   SaveFavoriteDevStatus();
   gLastFavoriteIndex = index;
   gLastFavoriteTick = 0;
   Msg_RequestDeviceStatus(); 
+#endif
 }
 
 void RestoreFavoriteDevStatus(uint8_t index)
 {
+#ifdef NUM_FAVORITE
   if(index >= NUM_FAVORITE) return;
  // restore favorite status
   if( gConfig.favoritesDevStat[index].ring.CCT >= CT_MIN_VALUE ) {
     Msg_DevBR_CCT(gConfig.favoritesDevStat[index].ring.BR, gConfig.favoritesDevStat[index].ring.CCT);
   } else {
     Msg_DevBR_RGBW(gConfig.favoritesDevStat[index].ring.BR, gConfig.favoritesDevStat[index].ring.R, gConfig.favoritesDevStat[index].ring.G, gConfig.favoritesDevStat[index].ring.B, gConfig.favoritesDevStat[index].ring.CCT);
-  }   
+  }  
+#endif
 }
 
 void btn_short_button_press(uint8_t _btn)

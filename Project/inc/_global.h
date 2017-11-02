@@ -21,11 +21,11 @@
 // Uncomment this line if need Presentation Mode
 //#define ENABLE_PRESENTATION_MODE
 
-#define HOME_VERSION
-//#define SCHOOL_VERSION
-#ifdef HOME_VERSION
-#define ENABLE_SDTM
-#endif
+//#define HOME_VERSION
+#define SCHOOL_VERSION
+//#ifdef HOME_VERSION
+//#define ENABLE_SDTM
+//#endif
 
 /* Exported types ------------------------------------------------------------*/
 // Common Data Type

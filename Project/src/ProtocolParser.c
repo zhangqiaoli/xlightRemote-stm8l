@@ -107,6 +107,7 @@ void UpdateSubID(uint8_t nID) {
 
 void SaveFavoriteDevStatus()
 {
+#ifdef NUM_FAVORITE
   if(gLastFavoriteIndex >= NUM_FAVORITE) return;
   if(gLastFavoriteIndex == -1) return;
     gConfig.favoritesDevStat[gLastFavoriteIndex].reserved = 1;
@@ -117,6 +118,7 @@ void SaveFavoriteDevStatus()
     gConfig.favoritesDevStat[gLastFavoriteIndex].ring.CCT = CurrentDeviceCCT;
     gLastFavoriteTick = MAXFAVORITE_INTERVAL;
     gIsChanged = TRUE;
+#endif
 }
 
 uint8_t ParseProtocol(){
