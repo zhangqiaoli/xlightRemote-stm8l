@@ -36,7 +36,7 @@ Connections:
 #define BACKUP_CONFIG_ADDRESS           (FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS + BACKUP_CONFIG_BLOCK_NUM * FLASH_BLOCK_SIZE)
 
 // RF channel for the sensor net, 0-127
-#define RF24_CHANNEL	   		71
+#define RF24_CHANNEL	   		100
 #define ADDRESS_WIDTH                   5
 #define PLOAD_WIDTH                     32
 
@@ -399,15 +399,12 @@ void LoadConfig()
       Flash_ReadBuf(BACKUP_CONFIG_ADDRESS, (uint8_t *)&bytVersion, sizeof(bytVersion));
       if( bytVersion != gConfig.version ) gNeedSaveBackup = TRUE;
     }
-    
         // Session time parameters
     gConfig.indDevice = 0;
     gConfig.inConfigMode = 0;
     gConfig.inPresentation = 0;
     oldCurrentDevID = gConfig.indDevice;
-    // zql test//
-    gConfig.rfChannel = 0x5f;
-    gConfig.rfDataRate = RF24_250KBPS;  
+
     gConfig.relayKey.deviceID = 129;
     gConfig.relayKey.subDevID = 4;
     gConfig.relayKey.keys[0] = '1';
@@ -521,6 +518,9 @@ void UpdateNodeAddress(uint8_t _tx) {
   if( _tx == NODEID_RF_SCANNER ) {
     tx_addr[0] = NODEID_RF_SCANNER;
   } else {  
+#ifdef BATCH_TEST
+    tx_addr[0] = BROADCAST_ADDRESS;
+#else
 #ifdef ENABLE_SDTM
     tx_addr[0] = CurrentDeviceID;
 #else
@@ -529,6 +529,8 @@ void UpdateNodeAddress(uint8_t _tx) {
     } else {
       tx_addr[0] = (isNodeIdRequired() ? BASESERVICE_ADDRESS : NODEID_GATEWAY);
     }
+#endif
+
 #endif
   }
   RF24L01_setup(gConfig.rfChannel, gConfig.rfDataRate, gConfig.rfPowerLevel, BROADCAST_ADDRESS);     // With openning the boardcast pipe
@@ -840,7 +842,15 @@ int main( void ) {
  
   // NRF_IRQ
   NRF2401_EnableIRQ();
-
+  
+#ifdef BATCH_TEST
+  // batch test mode
+  gConfig.indDevice = 0;
+  CurrentNodeID = NODEID_MIN_REMOTE;
+  CurrentDeviceID = BROADCAST_ADDRESS;
+  memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
+  UpdateNodeAddress(NODEID_GATEWAY);
+#else
   // Must establish connection firstly
 #ifdef ENABLE_SDTM
   gConfig.indDevice = 0;
@@ -859,6 +869,10 @@ int main( void ) {
     SayHelloToDevice(TRUE);
   }
 #endif
+  
+#endif
+
+
 
   // Init Watchdog
   wwdg_init();

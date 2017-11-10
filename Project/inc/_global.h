@@ -21,6 +21,7 @@
 // Uncomment this line if need Presentation Mode
 //#define ENABLE_PRESENTATION_MODE
 
+#define BATCH_TEST
 //#define HOME_VERSION
 #define SCHOOL_VERSION
 //#ifdef HOME_VERSION

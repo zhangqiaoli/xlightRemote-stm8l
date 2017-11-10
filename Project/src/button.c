@@ -99,11 +99,19 @@ LEDs
 
 // Button behavior
 #define BTN_STEP_PAGES          5
+#ifdef BATCH_TEST
+#define BTN_STEP_SHORT_BR       50
+#define BTN_STEP_SHORT_CCT      1900
+#define BTN_STEP_LONG_BR        50
+#define BTN_STEP_LONG_CCT       1900
+#define BTN_BR_LOW              5
+#else
 #define BTN_STEP_SHORT_BR       10
 #define BTN_STEP_SHORT_CCT      300
 #define BTN_STEP_LONG_BR        25
 #define BTN_STEP_LONG_CCT       800
 #define BTN_BR_LOW              10
+#endif
 
 static button_timer_status_t  m_btn_timer_status[keylstDummy] = {BUTTON_STATUS_INIT};
 static bool detect_double_btn_press[keylstDummy] = {FALSE};
