@@ -469,6 +469,16 @@ void Msg_DevScenario(uint8_t _scenario) {
   bMsgReady = 1;
 }
 
+// Change special effect on current device
+void Msg_DevSpecialEffect(uint8_t _effect) {
+  SendMyMessage();
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_VAR1, 1, 0);
+  moSetLength(1);
+  moSetPayloadType(P_BYTE);
+  sndMsg.payload.bValue = _effect;
+  bMsgReady = 1;
+}
+
 // PPT Object Action
 void Msg_PPT_ObjAction(uint8_t _obj, uint8_t _action) {
   SendMyMessage();

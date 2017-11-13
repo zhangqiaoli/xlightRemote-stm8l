@@ -350,7 +350,7 @@ void LoadConfig()
         gConfig.type = remotetypRFStandard;
         gConfig.rfChannel = RF24_CHANNEL;
         gConfig.rfPowerLevel = RF24_PA_MAX;
-        gConfig.rfDataRate = RF24_1MBPS;      
+        gConfig.rfDataRate = RF24_250KBPS;   // RF24_1MBPS   
         memcpy(CurrentNetworkID, RF24_BASE_RADIO_ID, ADDRESS_WIDTH);
         //sprintf(gConfig.Organization, "%s", XLA_ORGANIZATION);
         //sprintf(gConfig.ProductName, "%s", XLA_PRODUCT_NAME);
@@ -363,15 +363,26 @@ void LoadConfig()
         gConfig.devItem[2] = gConfig.devItem[0];
         gConfig.devItem[3] = gConfig.devItem[0];
         
+#ifdef MAIN_LAMP_RGBW
         gConfig.fnScenario[0].hue.State = DEVICE_SW_ON;
         gConfig.fnScenario[0].hue.bmRing = 0;
         gConfig.fnScenario[0].hue.BR = BTN_FN1_BR;
-        gConfig.fnScenario[0].hue.CCT = BTN_FN1_CCT;
+        gConfig.fnScenario[0].hue.CCT = BTN_FN1_W;
+        gConfig.fnScenario[0].hue.R = BTN_FN1_R;
+        gConfig.fnScenario[0].hue.G = BTN_FN1_G;
+        gConfig.fnScenario[0].hue.B = BTN_FN1_B;        
+        gConfig.fnScenario[0].scenario = BTN_FN1_SC;
+        gConfig.fnScenario[0].effect = FILTER_SP_EF_NONE;
 
         gConfig.fnScenario[1].hue.State = DEVICE_SW_ON;
         gConfig.fnScenario[1].hue.bmRing = 0;
         gConfig.fnScenario[1].hue.BR = BTN_FN2_BR;
-        gConfig.fnScenario[1].hue.CCT = BTN_FN2_CCT;
+        gConfig.fnScenario[1].hue.CCT = BTN_FN2_W;
+        gConfig.fnScenario[1].hue.R = BTN_FN2_R;
+        gConfig.fnScenario[1].hue.G = BTN_FN2_G;
+        gConfig.fnScenario[1].hue.B = BTN_FN2_B;        
+        gConfig.fnScenario[1].scenario = BTN_FN2_SC;
+        gConfig.fnScenario[1].effect = FILTER_SP_EF_NONE;
 
         gConfig.fnScenario[2].hue.State = DEVICE_SW_ON;
         gConfig.fnScenario[2].hue.bmRing = 0;
@@ -380,11 +391,98 @@ void LoadConfig()
         gConfig.fnScenario[2].hue.R = BTN_FN3_R;
         gConfig.fnScenario[2].hue.G = BTN_FN3_G;
         gConfig.fnScenario[2].hue.B = BTN_FN3_B;
+        gConfig.fnScenario[2].scenario = BTN_FN3_SC;
+        gConfig.fnScenario[2].effect = FILTER_SP_EF_NONE;
 
         gConfig.fnScenario[3].hue.State = DEVICE_SW_ON;
         gConfig.fnScenario[3].hue.bmRing = 0;
         gConfig.fnScenario[3].hue.BR = BTN_FN4_BR;
+        gConfig.fnScenario[3].hue.CCT = BTN_FN4_W;
+        gConfig.fnScenario[3].hue.R = BTN_FN4_R;
+        gConfig.fnScenario[3].hue.G = BTN_FN4_G;
+        gConfig.fnScenario[3].hue.B = BTN_FN4_B;
+        gConfig.fnScenario[3].scenario = BTN_FN4_SC;
+        gConfig.fnScenario[3].effect = FILTER_SP_EF_NONE;
+
+        gConfig.fnScenario[4].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[4].hue.bmRing = 0;
+        gConfig.fnScenario[4].hue.BR = BTN_FN5_BR;
+        gConfig.fnScenario[4].hue.CCT = BTN_FN5_W;
+        gConfig.fnScenario[4].hue.R = BTN_FN5_R;
+        gConfig.fnScenario[4].hue.G = BTN_FN5_G;
+        gConfig.fnScenario[4].hue.B = BTN_FN5_B;
+        gConfig.fnScenario[4].scenario = BTN_FN5_SC;
+        gConfig.fnScenario[4].effect = FILTER_SP_EF_NONE;
+
+        gConfig.fnScenario[5].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[5].hue.bmRing = 0;
+        gConfig.fnScenario[5].hue.BR = BTN_FN6_BR;
+        gConfig.fnScenario[5].hue.CCT = BTN_FN6_W;
+        gConfig.fnScenario[5].hue.R = BTN_FN6_R;
+        gConfig.fnScenario[5].hue.G = BTN_FN6_G;
+        gConfig.fnScenario[5].hue.B = BTN_FN6_B;
+        gConfig.fnScenario[5].scenario = BTN_FN6_SC;
+        gConfig.fnScenario[5].effect = FILTER_SP_EF_BREATH;
+
+        gConfig.fnScenario[6].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[6].hue.bmRing = 0;
+        gConfig.fnScenario[6].hue.BR = BTN_FN7_BR;
+        gConfig.fnScenario[6].hue.CCT = BTN_FN7_W;
+        gConfig.fnScenario[6].hue.R = BTN_FN7_R;
+        gConfig.fnScenario[6].hue.G = BTN_FN7_G;
+        gConfig.fnScenario[6].hue.B = BTN_FN7_B;
+        gConfig.fnScenario[6].scenario = BTN_FN7_SC;
+        gConfig.fnScenario[6].effect = FILTER_SP_EF_FLORID;
+#else
+        gConfig.fnScenario[0].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[0].hue.bmRing = 0;
+        gConfig.fnScenario[0].hue.BR = BTN_FN1_BR;
+        gConfig.fnScenario[0].hue.CCT = BTN_FN1_CCT;
+        gConfig.fnScenario[0].scenario = BTN_FN1_SC;
+        gConfig.fnScenario[0].effect = FILTER_SP_EF_NONE;
+        
+        gConfig.fnScenario[1].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[1].hue.bmRing = 0;
+        gConfig.fnScenario[1].hue.BR = BTN_FN2_BR;
+        gConfig.fnScenario[1].hue.CCT = BTN_FN2_CCT;
+        gConfig.fnScenario[1].scenario = BTN_FN2_SC;
+        gConfig.fnScenario[1].effect = FILTER_SP_EF_NONE;
+        
+        gConfig.fnScenario[2].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[2].hue.bmRing = 0;
+        gConfig.fnScenario[2].hue.BR = BTN_FN3_BR;
+        gConfig.fnScenario[2].hue.CCT = BTN_FN3_CCT;
+        gConfig.fnScenario[2].scenario = BTN_FN3_SC;
+        gConfig.fnScenario[2].effect = FILTER_SP_EF_NONE;
+        
+        gConfig.fnScenario[3].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[3].hue.bmRing = 0;
+        gConfig.fnScenario[3].hue.BR = BTN_FN4_BR;
         gConfig.fnScenario[3].hue.CCT = BTN_FN4_CCT;
+        gConfig.fnScenario[3].scenario = BTN_FN4_SC;
+        gConfig.fnScenario[3].effect = FILTER_SP_EF_NONE;
+
+        gConfig.fnScenario[4].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[4].hue.bmRing = 0;
+        gConfig.fnScenario[4].hue.BR = BTN_FN5_BR;
+        gConfig.fnScenario[4].hue.CCT = BTN_FN5_CCT;
+        gConfig.fnScenario[4].scenario = BTN_FN5_SC;
+        gConfig.fnScenario[4].effect = FILTER_SP_EF_NONE;
+
+        gConfig.fnScenario[5].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[5].hue.bmRing = 0;
+        gConfig.fnScenario[5].hue.BR = BTN_FN6_BR;
+        gConfig.fnScenario[5].hue.CCT = BTN_FN6_CCT;
+        gConfig.fnScenario[5].scenario = BTN_FN16_SC;
+        gConfig.fnScenario[5].effect = FILTER_SP_EF_BREATH;
+
+        gConfig.fnScenario[6].hue.State = DEVICE_SW_ON;
+        gConfig.fnScenario[6].hue.bmRing = 0;
+        gConfig.fnScenario[6].hue.BR = BTN_FN7_BR;
+        gConfig.fnScenario[6].hue.CCT = BTN_FN7_CCT;
+        gConfig.fnScenario[6].scenario = BTN_FN7_SC;
+        gConfig.fnScenario[6].effect = FILTER_SP_EF_FAST_BREATH;
+#endif
       }
       gIsChanged = TRUE;
     }
@@ -400,6 +498,8 @@ void LoadConfig()
     gConfig.inPresentation = 0;
     oldCurrentDevID = gConfig.indDevice;
     
+    
+#ifdef CLASS_ROOM_TYPE
     
     gConfig.relayKey.deviceID = 129;
     gConfig.relayKey.subDevID = 4;
@@ -469,7 +569,8 @@ void LoadConfig()
     gConfig.fnScenario[5].bmDevice = 0x08;
     gConfig.fnScenario[5].scenario = 70;
     gConfig.fnScenario[5].hue.State = 0;*/
-    
+
+#endif
 }
 
 void UpdateNodeAddress(uint8_t _tx) {

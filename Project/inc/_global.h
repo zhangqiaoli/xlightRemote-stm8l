@@ -21,6 +21,9 @@
 // Uncomment this line if need Presentation Mode
 //#define ENABLE_PRESENTATION_MODE
 
+//#define CLASS_ROOM_TYPE
+#define MAIN_LAMP_RGBW
+
 /* Exported types ------------------------------------------------------------*/
 // Common Data Type
 #define UC                        uint8_t
@@ -40,6 +43,13 @@
 #define OPERATOR_SUB                2
 #define OPERATOR_MUL                3
 #define OPERATOR_DIV                4
+
+// Filter (special effect)
+#define FILTER_SP_EF_NONE           0
+#define FILTER_SP_EF_BREATH         1       // Normal breathing light
+#define FILTER_SP_EF_FAST_BREATH    2       // Fast breathing light
+#define FILTER_SP_EF_FLORID         3       // Randomly altering color
+#define FILTER_SP_EF_FAST_FLORID    4       // Fast randomly altering color
 
 // Node type
 #define NODE_TYP_GW               'g'
@@ -185,6 +195,7 @@ typedef struct
 {
   UC bmDevice                 :4;       // Bitmap of devices, 0 means current device
   UC scenario;                          // ScenarioID or 0 means specific Hue
+  UC effect;                            // special effect id, 0 means normal state
   Hue_t hue;
 } fnScenario_t;
 

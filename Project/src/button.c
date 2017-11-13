@@ -368,7 +368,10 @@ void FN_Button_Action(uint8_t _fn) {
       }
     }
     
-    if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_TOGGLE ) {
+    if( gConfig.fnScenario[_fn].effect > 0 ) {
+      CurrentDeviceOnOff = DEVICE_SW_ON;
+      Msg_DevSpecialEffect(gConfig.fnScenario[_fn].effect);
+    } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_TOGGLE ) {
       CurrentDeviceOnOff = 1 - CurrentDeviceOnOff;
       Msg_DevOnOff(CurrentDeviceOnOff);
     } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_OFF ) {
@@ -467,7 +470,9 @@ void btn_short_button_press(uint8_t _btn)
     Msg_DevBR_RGBW(60, 0, 255, 0, 0);
 #else
     FN_Button_Action(1);
+#ifdef CLASS_ROOM_TYPE    
     FN_Button_Action(2);
+#endif
 #endif
     break;
     
@@ -477,7 +482,9 @@ void btn_short_button_press(uint8_t _btn)
     Msg_DevBR_RGBW(60, 0, 0, 255, 0);
 #else
     FN_Button_Action(2);
+#ifdef CLASS_ROOM_TYPE    
     FN_Button_Action(4);
+#endif
 #endif    
     break;
     
@@ -486,7 +493,9 @@ void btn_short_button_press(uint8_t _btn)
     // Pure White
     Msg_DevBR_RGBW(60, 0, 0, 0, 255);
 #else
+#ifdef CLASS_ROOM_TYPE    
     FN_Button_Action(2);
+#endif
     FN_Button_Action(3);
     //Msg_DevOnOff(DEVICE_SW_TOGGLE);
 #endif    
