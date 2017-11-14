@@ -21,7 +21,7 @@
 // Uncomment this line if need Presentation Mode
 //#define ENABLE_PRESENTATION_MODE
 
-#define BATCH_TEST
+//#define BATCH_TEST
 //#define HOME_VERSION
 #define SCHOOL_VERSION
 //#ifdef HOME_VERSION
@@ -347,5 +347,15 @@ void SetConfigMode(bool _sw, uint8_t _devIndex);
 bool SayHelloToDevice(bool infinate);
 
 #define IS_MINE_SUBID(nSID)        ((nSID) == 0 || ((nSID) & CurrentDevSubID))
+
+//#define TEST
+#ifdef TEST
+#define     PC1_Low                GPIO_ResetBits(GPIOC, GPIO_Pin_1)
+#define     PC3_Low                GPIO_ResetBits(GPIOC, GPIO_Pin_3)
+#define     PC5_Low                GPIO_ResetBits(GPIOC, GPIO_Pin_5)
+#define     PC1_High               GPIO_SetBits(GPIOC, GPIO_Pin_1)
+#define     PC3_High               GPIO_SetBits(GPIOC, GPIO_Pin_3)
+#define     PC5_High               GPIO_SetBits(GPIOC, GPIO_Pin_5)
+#endif
 
 #endif /* __GLOBAL_H */

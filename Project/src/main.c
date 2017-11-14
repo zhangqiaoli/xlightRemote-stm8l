@@ -31,6 +31,15 @@ Connections:
 
 */
 
+#ifdef TEST
+void testio()
+{
+  GPIO_Init(GPIOC , GPIO_Pin_1 , GPIO_Mode_Out_PP_Low_Slow);
+  GPIO_Init(GPIOC , GPIO_Pin_3 , GPIO_Mode_Out_PP_Low_Slow);
+  GPIO_Init(GPIOC , GPIO_Pin_5 , GPIO_Mode_Out_PP_Low_Slow);
+}
+#endif
+
 // Starting Flash block number of backup config
 #define BACKUP_CONFIG_BLOCK_NUM         2
 #define BACKUP_CONFIG_ADDRESS           (FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS + BACKUP_CONFIG_BLOCK_NUM * FLASH_BLOCK_SIZE)
@@ -78,7 +87,8 @@ uint8_t gSendDelayTick = 0;
 // add favorite function
 int8_t gLastFavoriteIndex = -1;
 uint8_t gLastFavoriteTick = 255;
-
+// is flash writting
+uint8_t flashWritting = 0;
 
 // Moudle variables
 bool bPowerOn = FALSE;
@@ -204,6 +214,18 @@ void wakeup_config(void) {
   NRF2401_EnableIRQ();
 }
 
+int8_t wait_flashflag_status(uint8_t flag,uint8_t status)
+{
+    uint16_t timeout = 60000;
+    while( FLASH_GetFlagStatus(flag)== status && timeout--);
+    if(!timeout) 
+    {
+      //printlog("timeout!");
+      return 1;
+    }
+    return 0;
+}
+
 void Flash_ReadBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
   assert_param(IS_FLASH_ADDRESS(Address));
   assert_param(IS_FLASH_ADDRESS(Address+Length));
@@ -213,16 +235,22 @@ void Flash_ReadBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
   }
 }
 
-void Flash_WriteBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
+bool Flash_WriteBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
   assert_param(IS_FLASH_DATA_EEPROM_ADDRESS(Address));
   assert_param(IS_FLASH_DATA_EEPROM_ADDRESS(Address+Length));
-  
+  if(flashWritting == 1)
+  {
+    //printlog("iswriting");
+    return FALSE;
+  }
+  flashWritting = 1;
   // Init Flash Read & Write
   FLASH_SetProgrammingTime(FLASH_ProgramMode_Standard);
 
   FLASH_Unlock(FLASH_MemType_Data);
   /* Wait until Data EEPROM area unlocked flag is set*/
-  while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET);
+  //while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET);
+  if(wait_flashflag_status(FLASH_FLAG_DUL,RESET)) return FALSE;
   // Write byte by byte
   bool rc = TRUE;
   uint8_t bytVerify, bytAttmpts;
@@ -242,14 +270,23 @@ void Flash_WriteBuf(uint32_t Address, uint8_t *Buffer, uint16_t Length) {
     }
   }
   FLASH_Lock(FLASH_MemType_Data);
+  flashWritting = 0;
+  return rc;
 }
  
-void Flash_WriteDataBlock(uint16_t nStartBlock, uint8_t *Buffer, uint16_t Length) {
+bool Flash_WriteDataBlock(uint16_t nStartBlock, uint8_t *Buffer, uint16_t Length) {
   // Init Flash Read & Write
+  if(flashWritting == 1) 
+  {
+    //printlog("iswriting");
+    return FALSE;
+  }
+  flashWritting = 1;
+
   FLASH_SetProgrammingTime(FLASH_ProgramMode_Standard);
   FLASH_Unlock(FLASH_MemType_Data);
-  while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET);
-  
+  //while (FLASH_GetFlagStatus(FLASH_FLAG_DUL) == RESET);
+  if(wait_flashflag_status(FLASH_FLAG_DUL,RESET)) return FALSE;
   uint8_t WriteBuf[FLASH_BLOCK_SIZE];
   uint16_t nBlockNum = (Length - 1) / FLASH_BLOCK_SIZE + 1;
   for( uint16_t block = nStartBlock; block < nStartBlock + nBlockNum; block++ ) {
@@ -257,11 +294,20 @@ void Flash_WriteDataBlock(uint16_t nStartBlock, uint8_t *Buffer, uint16_t Length
     for( uint16_t i = 0; i < FLASH_BLOCK_SIZE; i++ ) {
       WriteBuf[i] = Buffer[(block - nStartBlock) * FLASH_BLOCK_SIZE + i];
     }
+#ifdef TEST
+  PC3_High;
+#endif 
     FLASH_ProgramBlock(block, FLASH_MemType_Data, FLASH_ProgramMode_Standard, WriteBuf);
-    FLASH_WaitForLastOperation(FLASH_MemType_Data);
+    // very important( FLASH_WaitForLastOperation(FLASH_MemType_Data) not usefull,cause program dead)
+    if(wait_flashflag_status(FLASH_FLAG_EOP,RESET)) return FALSE;
+#ifdef TEST
+  PC3_Low;
+#endif   
   }
-  
   FLASH_Lock(FLASH_MemType_Data);
+
+  flashWritting = 0;
+  return TRUE;
 }
 
 uint8_t *Read_UniqueID(uint8_t *UniqueID, uint16_t Length)  
@@ -286,8 +332,10 @@ void SaveBackupConfig()
 {
   if( gNeedSaveBackup ) {
     // Overwrite entire config FLASH
-    Flash_WriteDataBlock(BACKUP_CONFIG_BLOCK_NUM, (uint8_t *)&gConfig, sizeof(gConfig));
-    gNeedSaveBackup = FALSE;
+    if(Flash_WriteDataBlock(BACKUP_CONFIG_BLOCK_NUM, (uint8_t *)&gConfig, sizeof(gConfig)))
+    {
+      gNeedSaveBackup = FALSE;
+    }
   }
 }
 
@@ -307,11 +355,13 @@ void SaveConfig()
 {
   if( gIsChanged ) {
     // Overwrite entire config FLASH
-    Flash_WriteDataBlock(0, (uint8_t *)&gConfig, sizeof(gConfig));
-    gIsStatusChanged = FALSE;
-    gIsChanged = FALSE;
-    gNeedSaveBackup = TRUE;
-    return;
+    if(Flash_WriteDataBlock(0, (uint8_t *)&gConfig, sizeof(gConfig)))
+    {
+      gIsStatusChanged = FALSE;
+      gIsChanged = FALSE;
+      gNeedSaveBackup = TRUE;
+      return;
+    }
   }
 
   if( gIsStatusChanged ) {
@@ -880,7 +930,9 @@ int main( void ) {
   // Set PowerOn flag
   bPowerOn = TRUE;
   TIM4_10ms_handler = tmrProcess;
-  
+#ifdef TEST
+   testio();
+#endif  
   while (1) {
     
     // Feed the Watchdog
@@ -903,12 +955,16 @@ int main( void ) {
     
     // Send message if ready
     SendMyMessage();
-    
     // Save Config if Changed
-    SaveConfig();
+    SaveConfig(); 
     // Save config into backup area
+#ifdef TEST
+  PC5_High;
+#endif  
     SaveBackupConfig();
-    
+#ifdef TEST
+  PC5_Low;
+#endif   
     // Operation Result Indicator
     if( gDelayedOperation > 0 ) OperationIndicator();
     
@@ -965,7 +1021,7 @@ void RF24L01_IRQ_Handler() {
   if (sent_info = RF24L01_was_data_sent()) {
     //Packet was sent or max retries reached
     RF24L01_clear_interrupts();
-    mutex = sent_info;
+    mutex = sent_info; 
     return;
   }
 
