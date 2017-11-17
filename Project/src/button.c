@@ -508,6 +508,9 @@ void btn_short_button_press(uint8_t _btn)
     break;
     
   case keylstFn1:
+#ifdef BATCH_TEST
+    Msg_DevBrightness(OPERATOR_SET,50);
+#else
 #ifdef HOME_VERSION
     FN_Button_Action(0);
 #else
@@ -519,10 +522,14 @@ void btn_short_button_press(uint8_t _btn)
     Msg_SpecialDevOnOff(129,8,1);
 #endif
 #endif
+#endif
 
     break;
     
   case keylstFn2:
+#ifdef BATCH_TEST
+    Msg_DevCCT(OPERATOR_SET,4600);
+#else
 #ifdef HOME_VERSION
     FN_Button_Action(1);   
     Msg_DevOnOffDelay(DEVICE_SW_OFF,MINUTE_UNIT,SLEEP_TIME);
@@ -535,6 +542,7 @@ void btn_short_button_press(uint8_t _btn)
 #ifdef CLASS_ROOM_TYPE    
     FN_Button_Action(2);
     Msg_SpecialDevOnOff(129,8,1);
+#endif
 #endif
 #endif
 #endif
@@ -576,6 +584,9 @@ void btn_short_button_press(uint8_t _btn)
     break;
 
   case keylstFLASH:
+#ifdef BATCH_TEST
+    Msg_DevOnOff(DEVICE_SW_ON);
+#else
 #ifdef HOME_VERSION
     //Favorites1
     RestoreFavoriteDevStatus(0);
@@ -586,12 +597,15 @@ void btn_short_button_press(uint8_t _btn)
 #else
     //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
     FN_Button_Action(5);
-#endif   
+#endif 
 #endif
- 
+#endif
     break;
     
   case keylstLASER:
+#ifdef BATCH_TEST
+    Msg_DevOnOff(DEVICE_SW_OFF);
+#else
 #ifdef HOME_VERSION
     //Favorites2
     RestoreFavoriteDevStatus(1);
@@ -603,8 +617,8 @@ void btn_short_button_press(uint8_t _btn)
     //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
     FN_Button_Action(6);
 #endif
+#endif   
 #endif
-    
     break;
     
   default:

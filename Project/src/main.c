@@ -402,7 +402,11 @@ void LoadConfig()
         gConfig.present = 0;
         gConfig.inPresentation = 0;
         gConfig.enSDTM = 0;
+#ifdef BATCH_TEST
+        gConfig.rptTimes = 3;
+#else
         gConfig.rptTimes = 1;
+#endif
         gConfig.type = remotetypRFStandard;
         gConfig.rfChannel = RF24_CHANNEL;
         gConfig.rfPowerLevel = RF24_PA_MAX;
@@ -529,7 +533,7 @@ void LoadConfig()
         gConfig.fnScenario[5].hue.bmRing = 0;
         gConfig.fnScenario[5].hue.BR = BTN_FN6_BR;
         gConfig.fnScenario[5].hue.CCT = BTN_FN6_CCT;
-        gConfig.fnScenario[5].scenario = BTN_FN16_SC;
+        gConfig.fnScenario[5].scenario = BTN_FN6_SC;
         gConfig.fnScenario[5].effect = FILTER_SP_EF_BREATH;
 
         gConfig.fnScenario[6].hue.State = DEVICE_SW_ON;
