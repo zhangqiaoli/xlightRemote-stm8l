@@ -291,7 +291,12 @@ bool Flash_WriteDataBlock(uint16_t nStartBlock, uint8_t *Buffer, uint16_t Length
   uint16_t nBlockNum = (Length - 1) / FLASH_BLOCK_SIZE + 1;
   for( uint16_t block = nStartBlock; block < nStartBlock + nBlockNum; block++ ) {
     memset(WriteBuf, 0x00, FLASH_BLOCK_SIZE);
-    for( uint16_t i = 0; i < FLASH_BLOCK_SIZE; i++ ) {
+    uint8_t maxLen = FLASH_BLOCK_SIZE;
+    if(block == nStartBlock + nBlockNum -1)
+    {
+      maxLen = Length - (nBlockNum -1)*FLASH_BLOCK_SIZE;
+    }
+    for( uint16_t i = 0; i < maxLen; i++ ) {
       WriteBuf[i] = Buffer[(block - nStartBlock) * FLASH_BLOCK_SIZE + i];
     }
 #ifdef TEST
