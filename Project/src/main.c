@@ -623,11 +623,13 @@ void LoadConfig()
     gConfig.fnScenario[5].scenario = 71;
     gConfig.fnScenario[5].hue.State = 2;
     gConfig.fnScenario[5].hue.bmRing = 0;
+    gConfig.fnScenario[5].effect = FILTER_SP_EF_NONE;
     /// F7 blackboard light toggle
     gConfig.fnScenario[6].bmDevice = 0x02;
     gConfig.fnScenario[6].scenario = 72;
     gConfig.fnScenario[6].hue.State = 2;
     gConfig.fnScenario[6].hue.bmRing = 0;
+    gConfig.fnScenario[6].effect = FILTER_SP_EF_NONE;
     /*/// F8 curtain off
     gConfig.fnScenario[5].bmDevice = 0x08;
     gConfig.fnScenario[5].scenario = 70;

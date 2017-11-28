@@ -23,9 +23,9 @@
 
 //#define BATCH_TEST
 //#define HOME_VERSION
-//#ifdef HOME_VERSION
-//#define ENABLE_SDTM
-//#endif
+#ifdef HOME_VERSION
+#define ENABLE_SDTM
+#endif
 #define CLASS_ROOM_TYPE
 //#define MAIN_LAMP_RGBW
 
