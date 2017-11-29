@@ -113,6 +113,8 @@ LEDs
 #define BTN_BR_LOW              10
 #endif
 
+uint8_t lastswitch = 1;
+
 static button_timer_status_t  m_btn_timer_status[keylstDummy] = {BUTTON_STATUS_INIT};
 static bool detect_double_btn_press[keylstDummy] = {FALSE};
 static bool btn_is_pushed[keylstDummy] = {FALSE};
@@ -502,8 +504,13 @@ void btn_short_button_press(uint8_t _btn)
       Msg_PPT_ObjAction(PPT_OBJ_PAGE, CONTENT_GO_NEXT);
     } else {
       // Toggle lights on/off
+#ifdef ENABLE_SDTM     
       //Msg_DevOnOff(CurrentDeviceOnOff == 0);
+      Msg_DevOnOff(lastswitch == 0);
+      lastswitch = (lastswitch == 0);
+#else
       Msg_DevOnOff(DEVICE_SW_TOGGLE);
+#endif
     }
     break;
     
@@ -670,7 +677,11 @@ void btn_double_button_press(uint8_t _btn)
     
   case keylstCenter:
     // Toggle In-presentation flag
+#ifdef ENABLE_SDTM
+    Msg_DevOnOff(DEVICE_SW_ON);
+#else
     SwitchPPTMode(!gConfig.inPresentation);
+#endif
     break;
     
   case keylstFn1:
@@ -715,8 +726,12 @@ void btn_long_hold_button_press(uint8_t _btn)
     break;
     
   case keylstCenter:
+#ifdef ENABLE_SDTM
+    Msg_DevOnOff(DEVICE_SW_OFF);
+#else
     // Turn on the laser
     SetLasterBeam(DEVICE_SW_ON);
+#endif
     break;
     
   case keylstFn1:
@@ -813,7 +828,9 @@ void btn_long_button_press(uint8_t _btn)
     break;
     
   case keylstLASER:
+#ifdef CLASS_ROOM_TYPE
     Msg_SpecialDevOnOff(255,0,0);
+#endif
     break;
     
   default:

@@ -22,11 +22,11 @@
 //#define ENABLE_PRESENTATION_MODE
 
 //#define BATCH_TEST
-//#define HOME_VERSION
+#define HOME_VERSION
 #ifdef HOME_VERSION
 #define ENABLE_SDTM
 #endif
-#define CLASS_ROOM_TYPE
+//#define CLASS_ROOM_TYPE
 //#define MAIN_LAMP_RGBW
 
 /* Exported types ------------------------------------------------------------*/

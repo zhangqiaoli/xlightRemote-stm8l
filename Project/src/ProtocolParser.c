@@ -399,7 +399,11 @@ void Msg_RequestDeviceStatus() {
 // Set current device 1:On; 0:Off; 2:toggle
 void Msg_DevOnOff(uint8_t _sw) {
   SendMyMessage();
+#ifdef HOME_VERSION
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_STATUS, 0, 0);
+#else
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_STATUS, 1, 0);
+#endif
   moSetLength(1);
   moSetPayloadType(P_BYTE);
   sndMsg.payload.bValue = _sw;
@@ -409,7 +413,11 @@ void Msg_DevOnOff(uint8_t _sw) {
 void Msg_DevOnOffDelay(uint8_t _sw,uint8_t _unit,uint8_t time)
 {
   SendMyMessage();
+#ifdef HOME_VERSION
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_STATUS, 0, 0);
+#else
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_STATUS, 1, 0);
+#endif
   moSetLength(3);
   moSetPayloadType(P_CUSTOM);
   sndMsg.payload.data[0] = _sw;      // State: On
@@ -452,7 +460,11 @@ void Msg_RelayOnOff(uint8_t _sw) {
 // Set current device brightness
 void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
   SendMyMessage();
+#ifdef HOME_VERSION
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_PERCENTAGE, 0, 0);
+#else
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_PERCENTAGE, 1, 0);
+#endif
   moSetLength(2);
   moSetPayloadType(P_BYTE);
   sndMsg.payload.data[0] = _op;
@@ -463,7 +475,11 @@ void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
 // Set current device CCT
 void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
   SendMyMessage();
+#ifdef HOME_VERSION
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_LEVEL, 0, 0);
+#else
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_LEVEL, 1, 0);
+#endif
   moSetLength(3);
   moSetPayloadType(P_UINT16);
   sndMsg.payload.data[0] = _op;
@@ -475,7 +491,12 @@ void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
 // Set current device brightness & CCT
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
   SendMyMessage();
+#ifdef HOME_VERSION
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 0, 0);
+#else
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 1, 0);
+#endif
+  
   moSetLength(5);
   moSetPayloadType(P_CUSTOM);
   sndMsg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings
@@ -489,7 +510,12 @@ void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
 // Set current device brightness & RGBW
 void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w) {
   SendMyMessage();
+#ifdef HOME_VERSION
+  build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 0, 0);
+#else
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 1, 0);
+#endif
+  
   moSetLength(7);
   moSetPayloadType(P_CUSTOM);
   sndMsg.payload.data[0] = RING_ID_ALL;      // Ring ID: 0 means all rings

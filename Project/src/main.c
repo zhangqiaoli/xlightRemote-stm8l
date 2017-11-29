@@ -655,7 +655,7 @@ void LoadConfig()
     gConfig.fnScenario[1].hue.State = 1;
     gConfig.fnScenario[1].hue.bmRing = 0;
     gConfig.fnScenario[1].hue.BR = 20;
-    /// F3 light 60，4000
+    /// F3 light 60,4000
     gConfig.fnScenario[2].bmDevice = 0x01;
     gConfig.fnScenario[2].scenario = 0;
     gConfig.fnScenario[2].hue.State = 1;
