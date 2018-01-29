@@ -504,7 +504,7 @@ void btn_short_button_press(uint8_t _btn)
       Msg_PPT_ObjAction(PPT_OBJ_PAGE, CONTENT_GO_NEXT);
     } else {
       // Toggle lights on/off
-#ifdef ENABLE_SDTM     
+#if defined (ENABLE_SDTM) || defined (BATCH_TEST)
       //Msg_DevOnOff(CurrentDeviceOnOff == 0);
       Msg_DevOnOff(lastswitch == 0);
       lastswitch = (lastswitch == 0);
