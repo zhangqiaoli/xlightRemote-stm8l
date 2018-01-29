@@ -36,7 +36,7 @@ ActionState=1
 Enabled=0
 ShowSource=1
 [DebugChecksum]
-Checksum=-565865066
+Checksum=2010868204
 [CallStack]
 ShowArgs=0
 [Disassembly]
@@ -52,6 +52,28 @@ LogEnabled=0
 GraphEnabled=0
 ShowTimeLog=1
 ShowTimeSum=1
+[Breakpoints]
+Bp0=_ "STD_CODE" "{$PROJ_DIR$\main.c}.230.5" 0 0 0 0 "" 0 ""
+Bp1=_ "STD_CODE" "{$PROJ_DIR$\ProtocolParser.c}.21.3" 0 0 0 0 "" 0 ""
+Bp2=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.193.9" 1 0 0 0 "" 0 ""
+Bp3=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.103.9" 1 0 0 0 "" 0 ""
+Bp4=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.911.5" 1 0 0 0 "" 0 ""
+Bp5=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.911.5" 1 0 0 0 "" 0 ""
+Bp6=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.940.3" 1 0 0 0 "" 0 ""
+Bp7=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.667.8" 1 0 0 0 "" 0 ""
+Bp8=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.440.1" 1 0 0 0 "" 0 ""
+Bp9=_ "STD_CODE" "0x00A9D7" 0 0 0 0 "" 0 ""
+Bp10=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.951.12" 1 0 0 0 "" 0 ""
+Bp11=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.464.7" 1 0 0 0 "" 0 ""
+Bp12=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.467.7" 1 0 0 0 "" 0 ""
+Bp13=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.440.1" 1 0 0 0 "" 0 ""
+Bp14=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.440.1" 1 0 0 0 "" 0 ""
+Bp15=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.563.5" 1 0 0 0 "" 0 ""
+Bp16=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.462.3" 1 0 0 0 "" 0 ""
+Bp17=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.296.11" 1 0 0 0 "" 0 ""
+Bp18=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.477.3" 1 0 0 0 "" 0 ""
+Bp19=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.294.9" 1 0 0 0 "" 0 ""
+Count=20
 [Log file]
 LoggingEnabled=_ 0
 LogFile=_ ""
@@ -59,19 +81,8 @@ Category=_ 0
 [TermIOLog]
 LoggingEnabled=_ 0
 LogFile=_ ""
-[Breakpoints]
-Bp0=_ "STD_CODE" "{$PROJ_DIR$\main.c}.230.5" 0 0 0 0 "" 0 ""
-Bp1=_ "STD_CODE" "{$PROJ_DIR$\ProtocolParser.c}.21.3" 0 0 0 0 "" 0 ""
-Bp2=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.133.9" 1 0 0 0 "" 0 ""
-Bp3=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.871.5" 1 0 0 0 "" 0 ""
-Bp4=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.723.11" 1 0 0 0 "" 0 ""
-Bp5=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.712.3" 1 0 0 0 "" 0 ""
-Bp6=_ "STD_CODE" "{$PROJ_DIR$\..\src\main.c}.340.9" 1 0 0 0 "" 0 ""
-Bp7=_ "STD_CODE" "{$PROJ_DIR$\..\src\button.c}.520.5" 1 0 0 0 "" 0 ""
-Bp8=_ "STD_CODE" "{$PROJ_DIR$\..\src\ProtocolParser.c}.477.3" 1 0 0 0 "" 0 ""
-Count=9
 [Aliases]
 Count=0
 SuppressDialog=0
 [DebuggerSettings]
-DisableInterruptsWhenStepping=0
+DisableInterruptsWhenStepping=1

@@ -482,15 +482,15 @@
         <option>
           <name>OOCOutputFormat</name>
           <version>2</version>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OCOutputOverride</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>OOCOutputFile</name>
-          <state>xlightRemote.srec</state>
+          <state>remoteV1.0.1.0_home.hex</state>
         </option>
         <option>
           <name>OOCCommandLineProducer</name>
@@ -498,7 +498,7 @@
         </option>
         <option>
           <name>OOCObjCopyEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
       </data>
     </settings>
