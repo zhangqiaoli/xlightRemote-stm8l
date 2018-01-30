@@ -191,7 +191,10 @@ void lowpower_config(void) {
   CLK_RTCClockConfig(CLK_RTCCLKSource_Off, CLK_RTCCLKDiv_1);
   
   CLK_LSICmd(DISABLE);
-  while ((CLK->ICKCR & 0x04) != 0x00);
+  while ((CLK->ICKCR & 0x04) != 0x00)
+  {
+    feed_wwdg();
+  }
   
   // Stop peripheral clocks
   CLK_PeripheralClockConfig(CLK_Peripheral_TIM5, DISABLE);
@@ -220,7 +223,10 @@ void wakeup_config(void) {
 int8_t wait_flashflag_status(uint8_t flag,uint8_t status)
 {
     uint16_t timeout = 60000;
-    while( FLASH_GetFlagStatus(flag)== status && timeout--);
+    while( FLASH_GetFlagStatus(flag)== status && timeout--)
+    {
+      feed_wwdg();
+    }
     if(!timeout) 
     {
       //printlog("timeout!");
@@ -750,6 +756,7 @@ void SetConfigMode(bool _sw, uint8_t _devIndex) {
 bool WaitMutex(uint32_t _timeout) {
   while(_timeout--) {
     if( mutex > 0 ) return TRUE;
+    feed_wwdg();
   }
   return FALSE;
 }
