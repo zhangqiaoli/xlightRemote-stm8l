@@ -295,6 +295,8 @@ extern int8_t gLastFavoriteIndex;
 extern uint8_t gLastFavoriteTick;
 #define MAXFAVORITE_INTERVAL 100  // unit is 10ms,1s interval
 
+extern uint8_t lastswitch;
+
 #define RING_ID_ALL             0
 #define RING_ID_1               1
 #define RING_ID_2               2

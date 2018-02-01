@@ -43,6 +43,8 @@ void testio()
 // Starting Flash block number of backup config
 #define BACKUP_CONFIG_BLOCK_NUM         2
 #define BACKUP_CONFIG_ADDRESS           (FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS + BACKUP_CONFIG_BLOCK_NUM * FLASH_BLOCK_SIZE)
+#define STATUS_DATA_NUM                 4
+#define STATUS_DATA_ADDRESS             (FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS + STATUS_DATA_NUM * FLASH_BLOCK_SIZE)
 
 // RF channel for the sensor net, 0-127
 #define RF24_CHANNEL	   		100
@@ -51,7 +53,7 @@ void testio()
 
 // Window Watchdog
 // Uncomment this line if in debug mode
-//#define DEBUG_NO_WWDG
+#define DEBUG_NO_WWDG
 #define WWDG_COUNTER                    0x7f
 #define WWDG_WINDOW                     0x77
 
@@ -89,6 +91,8 @@ int8_t gLastFavoriteIndex = -1;
 uint8_t gLastFavoriteTick = 255;
 // is flash writting
 uint8_t flashWritting = 0;
+
+uint8_t lastswitch = 1;
 
 // Moudle variables
 bool bPowerOn = FALSE;
@@ -360,13 +364,20 @@ void SaveStatusData()
     uint8_t pData[50] = {0};
     uint16_t nLen = (uint16_t)(&(gConfig.nodeID)) - (uint16_t)(&gConfig);
     memcpy(pData, (uint8_t *)&gConfig, nLen);
-    Flash_WriteBuf(FLASH_DATA_EEPROM_START_PHYSICAL_ADDRESS + 1, pData + 1, nLen - 1);
-    gIsStatusChanged = FALSE;
+    if(Flash_WriteDataBlock(STATUS_DATA_NUM, pData, nLen))
+    {
+      gIsStatusChanged = FALSE;
+    }
 }
 
 // Save config to Flash
 void SaveConfig()
 {
+  if( gIsStatusChanged ) {
+    // Overwrite only Static & status parameters (the first part of config FLASH)
+    SaveStatusData();
+    gIsChanged = TRUE;
+  } 
   if( gIsChanged ) {
     // Overwrite entire config FLASH
     if(Flash_WriteDataBlock(0, (uint8_t *)&gConfig, sizeof(gConfig)))
@@ -376,12 +387,7 @@ void SaveConfig()
       gNeedSaveBackup = TRUE;
       return;
     }
-  }
-
-  if( gIsStatusChanged ) {
-    // Overwrite only Static & status parameters (the first part of config FLASH)
-    SaveStatusData();
-  }  
+  } 
 }
 
 // Init Device Status
@@ -565,7 +571,16 @@ void LoadConfig()
       Flash_ReadBuf(BACKUP_CONFIG_ADDRESS, (uint8_t *)&bytVersion, sizeof(bytVersion));
       if( bytVersion != gConfig.version ) gNeedSaveBackup = TRUE;
     }
-        // Session time parameters
+    // Load the most recent status from FLASH
+    uint8_t pData[50] = {0};
+    uint16_t nLen = (uint16_t)(&(gConfig.nodeID)) - (uint16_t)(&gConfig);
+    Flash_ReadBuf(STATUS_DATA_ADDRESS, pData, nLen);
+    if(pData[0] >= XLA_MIN_VER_REQUIREMENT && pData[0] <= XLA_VERSION)
+    {
+      memcpy(&gConfig,pData,nLen);
+    }
+    
+    // Session time parameters
     gConfig.indDevice = 0;
     gConfig.inConfigMode = 0;
     gConfig.inPresentation = 0;
@@ -784,6 +799,7 @@ bool SendMyMessage() {
     uint8_t lv_tried = 0;
     uint16_t delay;
     while (lv_tried++ <= gConfig.rptTimes ) {
+      feed_wwdg();
       mutex = 0;
       RF24L01_set_mode_TX();
       RF24L01_write_payload(psndMsg, PLOAD_WIDTH);

@@ -113,8 +113,6 @@ LEDs
 #define BTN_BR_LOW              10
 #endif
 
-uint8_t lastswitch = 1;
-
 static button_timer_status_t  m_btn_timer_status[keylstDummy] = {BUTTON_STATUS_INIT};
 static bool detect_double_btn_press[keylstDummy] = {FALSE};
 static bool btn_is_pushed[keylstDummy] = {FALSE};
@@ -387,8 +385,10 @@ void FN_Button_Action(uint8_t _fn) {
     } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_OFF ) {
       Msg_DevOnOff(DEVICE_SW_OFF);
     } else if( gConfig.fnScenario[_fn].hue.State == DEVICE_SW_ON ) {
-      Msg_DevOnOff(DEVICE_SW_ON);
-
+      if(gConfig.fnScenario[_fn].hue.BR == 0 )
+      {
+        Msg_DevOnOff(DEVICE_SW_ON);
+      }
       if( gConfig.fnScenario[_fn].hue.CCT ==0 && gConfig.fnScenario[_fn].hue.R == 0 && gConfig.fnScenario[_fn].hue.G == 0 && gConfig.fnScenario[_fn].hue.B==0)
       {// if only adjust br 
         uint8_t br = gConfig.fnScenario[_fn].hue.BR>BR_MIN_VALUE ? gConfig.fnScenario[_fn].hue.BR : BR_MIN_VALUE;
@@ -507,7 +507,6 @@ void btn_short_button_press(uint8_t _btn)
 #if defined (ENABLE_SDTM) || defined (BATCH_TEST)
       //Msg_DevOnOff(CurrentDeviceOnOff == 0);
       Msg_DevOnOff(lastswitch == 0);
-      lastswitch = (lastswitch == 0);
 #else
       Msg_DevOnOff(DEVICE_SW_TOGGLE);
 #endif
@@ -830,6 +829,7 @@ void btn_long_button_press(uint8_t _btn)
   case keylstLASER:
 #ifdef CLASS_ROOM_TYPE
     Msg_SpecialDevOnOff(255,0,0);
+    Msg_SpecialDevOnOff(129,0,0);
 #endif
     break;
     

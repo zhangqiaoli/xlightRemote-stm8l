@@ -399,6 +399,10 @@ void Msg_RequestDeviceStatus() {
 // Set current device 1:On; 0:Off; 2:toggle
 void Msg_DevOnOff(uint8_t _sw) {
   SendMyMessage();
+  if(_sw != DEVICE_SW_TOGGLE)
+  {
+    lastswitch = _sw;
+  } 
 #ifdef HOME_VERSION
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_STATUS, 0, 0);
 #else
@@ -412,7 +416,7 @@ void Msg_DevOnOff(uint8_t _sw) {
 
 void Msg_DevOnOffDelay(uint8_t _sw,uint8_t _unit,uint8_t time)
 {
-  SendMyMessage();
+  SendMyMessage(); 
 #ifdef HOME_VERSION
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_STATUS, 0, 0);
 #else
@@ -460,6 +464,7 @@ void Msg_RelayOnOff(uint8_t _sw) {
 // Set current device brightness
 void Msg_DevBrightness(uint8_t _op, uint8_t _br) {
   SendMyMessage();
+  lastswitch = 1;
 #ifdef HOME_VERSION
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_PERCENTAGE, 0, 0);
 #else
@@ -491,6 +496,7 @@ void Msg_DevCCT(uint8_t _op, uint16_t _cct) {
 // Set current device brightness & CCT
 void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
   SendMyMessage();
+  lastswitch = 1;
 #ifdef HOME_VERSION
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 0, 0);
 #else
@@ -510,6 +516,7 @@ void Msg_DevBR_CCT(uint8_t _br, uint16_t _cct) {
 // Set current device brightness & RGBW
 void Msg_DevBR_RGBW(uint8_t _br, uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _w) {
   SendMyMessage();
+  lastswitch = 1;
 #ifdef HOME_VERSION
   build(CurrentDeviceID, CurrentDevSubID, C_SET, V_RGBW, 0, 0);
 #else
