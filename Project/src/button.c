@@ -543,9 +543,9 @@ void btn_short_button_press(uint8_t _btn)
 #ifdef ENABLE_SDTM
     // Pure Green
     Msg_DevBR_RGBW(60, 0, 255, 0, 0);
-#else
-    FN_Button_Action(1);
+#else    
 #ifdef CLASS_ROOM_TYPE    
+    FN_Button_Action(1);
     FN_Button_Action(2);
     Msg_SpecialDevOnOff(129,8,1);
 #endif
@@ -562,8 +562,8 @@ void btn_short_button_press(uint8_t _btn)
     // Pure Blue
     Msg_DevBR_RGBW(60, 0, 0, 255, 0);
 #else
+#ifdef CLASS_ROOM_TYPE  
     FN_Button_Action(2);
-#ifdef CLASS_ROOM_TYPE    
     FN_Button_Action(4);
     Msg_SpecialDevOnOff(129,8,1);
 #endif       
@@ -581,10 +581,9 @@ void btn_short_button_press(uint8_t _btn)
 #else
 #ifdef CLASS_ROOM_TYPE    
     FN_Button_Action(2);
-#endif
     FN_Button_Action(3);
     Msg_SpecialDevOnOff(129,8,0);
-    //Msg_DevOnOff(DEVICE_SW_TOGGLE);
+#endif
 #endif  
 #endif  
     break;
@@ -602,7 +601,7 @@ void btn_short_button_press(uint8_t _btn)
     ledToggleFlashLight;
 #else
     //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
-    FN_Button_Action(5);
+    FN_Button_Action(4);
 #endif 
 #endif
 #endif
@@ -621,7 +620,7 @@ void btn_short_button_press(uint8_t _btn)
     ledToggleLaserPen;
 #else
     //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
-    FN_Button_Action(6);
+    Msg_SpecialDevOnOff(129,4,0);
 #endif
 #endif   
 #endif

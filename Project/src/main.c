@@ -585,7 +585,6 @@ void LoadConfig()
     gConfig.inConfigMode = 0;
     gConfig.inPresentation = 0;
     oldCurrentDevID = gConfig.indDevice;
-  
 #ifdef CLASS_ROOM_TYPE
     
     gConfig.relayKey.deviceID = 129;
@@ -613,44 +612,44 @@ void LoadConfig()
     // Set Fn
     /// F1 all light 90,5500
     gConfig.fnScenario[0].bmDevice = 0x01;
-    gConfig.fnScenario[0].scenario = 65;
+    gConfig.fnScenario[0].scenario = 0;
     gConfig.fnScenario[0].hue.State = 1;
     gConfig.fnScenario[0].hue.bmRing = 0;
     gConfig.fnScenario[0].hue.BR = 90;
     gConfig.fnScenario[0].hue.CCT = 5500;
     /// F2 classroomlight 90,3000
     gConfig.fnScenario[1].bmDevice = 0x04;
-    gConfig.fnScenario[1].scenario = 66;
+    gConfig.fnScenario[1].scenario = 0;
     gConfig.fnScenario[1].hue.State = 1;
     gConfig.fnScenario[1].hue.bmRing = 0;
     gConfig.fnScenario[1].hue.BR = 90;
     gConfig.fnScenario[1].hue.CCT = 3000;
     /// F3 blackboard light off
     gConfig.fnScenario[2].bmDevice = 0x02;
-    gConfig.fnScenario[2].scenario = 67;
+    gConfig.fnScenario[2].scenario = 0;
     gConfig.fnScenario[2].hue.State = 0;
     gConfig.fnScenario[2].hue.bmRing = 0;
     /// F4 classroomlight 50,5500
     gConfig.fnScenario[3].bmDevice = 0x04;
-    gConfig.fnScenario[3].scenario = 68;
+    gConfig.fnScenario[3].scenario = 0;
     gConfig.fnScenario[3].hue.State = 1;
     gConfig.fnScenario[3].hue.bmRing = 0;
     gConfig.fnScenario[3].hue.BR = 50;
     gConfig.fnScenario[3].hue.CCT = 3000;
     /// F5 classroomlight light off
     gConfig.fnScenario[4].bmDevice = 0x04;
-    gConfig.fnScenario[4].scenario = 69;
+    gConfig.fnScenario[4].scenario = 0;
     gConfig.fnScenario[4].hue.State = 0;
     gConfig.fnScenario[4].hue.bmRing = 0;
     /// F6 classroomlight light toggle
     gConfig.fnScenario[5].bmDevice = 0x04;
-    gConfig.fnScenario[5].scenario = 71;
+    gConfig.fnScenario[5].scenario = 0;
     gConfig.fnScenario[5].hue.State = 2;
     gConfig.fnScenario[5].hue.bmRing = 0;
     gConfig.fnScenario[5].effect = FILTER_SP_EF_NONE;
     /// F7 blackboard light toggle
     gConfig.fnScenario[6].bmDevice = 0x02;
-    gConfig.fnScenario[6].scenario = 72;
+    gConfig.fnScenario[6].scenario = 0;
     gConfig.fnScenario[6].hue.State = 2;
     gConfig.fnScenario[6].hue.bmRing = 0;
     gConfig.fnScenario[6].effect = FILTER_SP_EF_NONE;
