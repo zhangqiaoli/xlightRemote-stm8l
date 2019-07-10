@@ -53,7 +53,7 @@ void testio()
 
 // Window Watchdog
 // Uncomment this line if in debug mode
-#define DEBUG_NO_WWDG
+//#define DEBUG_NO_WWDG
 #define WWDG_COUNTER                    0x7f
 #define WWDG_WINDOW                     0x77
 
