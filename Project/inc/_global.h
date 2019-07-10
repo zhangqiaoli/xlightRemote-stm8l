@@ -8,7 +8,7 @@
 
 // Simple Direct Test
 // Uncomment this line to work in Simple Direct Test Mode
-//#define ENABLE_SDTM
+#define ENABLE_SDTM
 
 // Button Layout
 // Uncomment this line if PCB has 10 buttons
@@ -26,7 +26,7 @@
 //#ifdef HOME_VERSION
 //#define ENABLE_SDTM
 //#endif
-#define CLASS_ROOM_TYPE
+//#define CLASS_ROOM_TYPE
 //#define MAIN_LAMP_RGBW
 
 /* Exported types ------------------------------------------------------------*/

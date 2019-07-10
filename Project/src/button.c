@@ -131,6 +131,18 @@ void app_button_event_handler(uint8_t _btn, button_event_t button_event);
 void button_push(uint8_t _btn);
 void button_release(uint8_t _btn);
 
+uint8_t lastCol_idx = 0;
+
+uint8_t cf_lstColor[9][4] = { { 0, 255, 128, 0 }, // orange
+                               { 0, 255, 255, 0 }, // yellow
+                               { 0, 205, 0, 205 }, // Magenta
+                               { 0, 0, 255, 0 },   // green
+                               { 0, 0, 255, 255 }, // Cyan
+                               { 0, 0, 0, 255 },   // blue
+                               { 0, 0, 191, 255 }, // DeepSkyBlue
+                               { 0, 227, 31, 51 }, // purple
+                               { 0, 255, 0, 0 } }; // red
+
 // Switch PPT mode
 void SwitchPPTMode(bool _sw) {
 #ifdef ENABLE_PRESENTATION_MODE  
@@ -601,7 +613,9 @@ void btn_short_button_press(uint8_t _btn)
     ledToggleFlashLight;
 #else
     //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
-    FN_Button_Action(4);
+    
+    Msg_DevBR_RGBW(60,cf_lstColor[lastCol_idx][1],cf_lstColor[lastCol_idx][2],cf_lstColor[lastCol_idx][3],cf_lstColor[lastCol_idx][0]);
+    lastCol_idx = (lastCol_idx+1)%9;
 #endif 
 #endif
 #endif
@@ -620,7 +634,8 @@ void btn_short_button_press(uint8_t _btn)
     ledToggleLaserPen;
 #else
     //Msg_RelayOnOff(DEVICE_SW_TOGGLE);
-    Msg_SpecialDevOnOff(129,4,0);
+    //Msg_SpecialDevOnOff(129,4,0);
+     Msg_DevSpecialEffect(3);
 #endif
 #endif   
 #endif

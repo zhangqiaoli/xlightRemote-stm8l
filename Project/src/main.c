@@ -422,7 +422,7 @@ void LoadConfig()
         gConfig.present = 0;
         gConfig.inPresentation = 0;
         gConfig.enSDTM = 0;
-#ifdef BATCH_TEST
+#if defined (BATCH_TEST) || defined (ENABLE_SDTM)
         gConfig.rptTimes = 3;
 #else
         gConfig.rptTimes = 1;
